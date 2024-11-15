@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.9.0",
+    "axios": "^1.7.7",
+    "crypto": "^1.0.1",
+    "express": "^4.21.1",
+    "google-auth-library": "^9.14.2",
+    "mongoose": "^8.8.1",
+    "nodemailer": "^6.9.16",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.16"
+  }
+}
