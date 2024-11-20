@@ -2,12 +2,11 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from '../types/authTypes';
 
 const userSchema = new Schema<IUser>({
-    username: { type: String, required: true },
-    password: { type: String, required: true },
+    firstName: { type: String },
+    secondName: { type: String,  },
+    password: { type: String },
     email: { type: String, required: true, unique: true },
-    otp:{type:String,default:null},
-    otpExpiry:{type:Date,default:null},
-    role:'user',
+    role:{type:String,enum:["user","employer"]},
     profile: {
         firstName: { type: String },
         secondName: { type: String },

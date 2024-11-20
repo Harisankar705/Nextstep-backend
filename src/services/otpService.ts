@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { UserRepository } from '../repositories/userRepository'
+const otpStore: { [key: string]: { otp: string, expiry: Date } } = {};
 
 class otpService {
     private userRepository = new UserRepository()
@@ -10,13 +11,8 @@ class otpService {
     }
     async sendOTP(email: string, role: 'user' | 'employer'): Promise<void> {
         const otp = this.generateOtp()
-        const otpExpiry = new Date(Date.now() * 5 * 60 * 1000)
-        if (role === 'user') {
-            await this.userRepository.updateUser(email, { otp, otpExpiry, role })
-        }
-        else {
-
-        }
+        const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+        otpStore[email] = { otp, expiry: otpExpiry }
 
 
         const transporter = nodemailer.createTransport({
@@ -34,30 +30,43 @@ class otpService {
         }
         await transporter.sendMail(mailOption)
     }
+    async resendOTP(email:string,role:'user'|"employer"):Promise<void>{
+        const otpData=otpStore[email]
+        if(otpData && otpData.expiry>new Date())
+        {
+            console.log('OTP is still valid!Sending the same OTP!')
+        }
+        else
+        {
+            console.log("Generating the same otp")
+        }
+        const otp=this.generateOtp()
+        const otpExpiry=new Date(Date.now()+5*60*1000)
+        otpStore[email]={otp,expiry:otpExpiry}
+        await this.sendOTP(email,role)
+    }
     async verifyOtp(email: string, otp: string, role: "user" | "employer"): Promise<boolean> {
-        let userOrEmployer
-        if (role === 'user') {
-            userOrEmployer = await this.userRepository.findByEmail(email)
+        const otpData = otpStore[email];
+        console.log('in here')
+        console.log("VERIFYOTP", otpData)
+        if (!otpData) {
+            return false
         }
-        else {
-            // userOrEmployer=await this.employerRepository.findByEmail(email)
-        }
-        if (!userOrEmployer || !userOrEmployer.otp) {
-            throw new Error('invalid or expired otp')
-        }
-        const isValidOtp = userOrEmployer.otp === otp && userOrEmployer.otpExpiry && userOrEmployer.otpExpiry > new Date()
-        if (isValidOtp) {
-            await this.userRepository.updateUser(email, { otp: null, otpExpiry: null })
-        }
-        else {
 
+        const { otp: storedOtp, expiry } = otpData
+        const isValidOtp = storedOtp === otp && expiry > new Date()
+        if (isValidOtp) {
+            otpStore[email] = { otp: "", expiry: new Date(0) }
         }
-        return userOrEmployer.otp === otp
+        return isValidOtp
+
+
+
 
     }
     async saveUserWithPassword(email: string, password: string, role: "user" | "employer"): Promise<void> {
         if (role === 'user') {
-            const user = await this.userRepository.findByEmail(email)
+            const user = await this.userRepository.findByEmail(email,role)
             if (!user) throw new Error('user not found')
             await this.userRepository.updateUser(email, { password })
         }
