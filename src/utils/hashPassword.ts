@@ -1,10 +1,28 @@
 import bcrypt from 'bcryptjs'
 export const hashPassword=async(password:string):Promise<string>=>{
-    const salt=await bcrypt.genSalt(10)
-    return await bcrypt.hash(password,salt)
+    try {
+        console.log('in hasshhedpassword')
+        const salt=await bcrypt.genSalt(10)
+        const hashed=  await bcrypt.hash(password,salt)
+    
+        console.log("GENERATED HASHED PASSWORD",hashed)
+        return hashed
+    } catch (error) {
+        console.error('Error in hashPassword:', error);
+        throw error
+    }
+    
 }
 
 export const comparePassword=async(enteredPassword:string,storedHash:string):Promise<boolean>=>{
-    const isMatch=await bcrypt.compare(enteredPassword,storedHash)
-    return isMatch
+    try {
+        const isMatch=await bcrypt.compare(enteredPassword,storedHash)
+        console.log("COMPAREPASSWORD",isMatch)
+        return isMatch
+    } catch (error) {
+        console.error('error occured in comparepassword')
+        return false
+    }
+    
+    
 }

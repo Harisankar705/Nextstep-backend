@@ -1,12 +1,12 @@
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 export interface IUser extends Document {
-    _id:string
-    username: string;
-    password: string;
+    _id:string|mongoose.Types.ObjectId,
+    username?:string
+    firstName?: string;
+    secondName?: string;
+    password?: string;
     email: string;
     role:"user",
-    otp:string|null,
-    otpExpiry:Date|null
 
     profile?: {
         firstName?: string;
@@ -32,6 +32,14 @@ export interface IUser extends Document {
     
 }
 
+export interface IEmployer extends Document
+{
+    _id:string|mongoose.Types.ObjectId,
+    email:string
+    password:string
+    role:"employer"
+    companyName:string
+}
 
 
 
@@ -44,11 +52,12 @@ export interface IGoogleAuth {
     tokenId: string
 }
 export interface ILoginResponse {
-    token: string
-    user: IUser
+    accessToken: string
+    refreshToken:string
+    user: IUser|IEmployer
 }
 export interface IPayLoad
 {
     userId:string
-    role:'candidate'|"user"|'admin'
+    role:"user"|'employer'
 }
