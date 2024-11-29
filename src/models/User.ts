@@ -3,21 +3,19 @@ import { IUser } from '../types/authTypes';
 
 const userSchema = new Schema<IUser>({
     firstName: { type: String },
-    secondName: { type: String,  },
+    secondName: { type: String, },
     password: { type: String },
     email: { type: String, required: true, unique: true },
-    role:{type:String,enum:["user","employer"]},
-    profile: {
-        firstName: { type: String },
-        secondName: { type: String },
-        location: { type: String },
-        experience: { type: String },
-        technicalSkills: { type: [String], default: [] },
-        resume: { type: [String], default: [] },
-        profilePicture: { type: String },
-        aboutMe: { type: String },
-        dateOfBirth: { type: Date }
-    },
+    role: { type: String, enum: ["user", "employer"] },
+    isProfileComplete:{type:Boolean,default:false},
+    location: { type: String },
+    experience: { type: String },
+    skills: { type: [String], default: [] },
+    resume: { type: [String], default: [] },
+    profilePicture: { type: String },
+    aboutMe: { type: String },
+    dateOfBirth: { type: Date },
+
     education: [
         {
             degree: { type: String },
@@ -27,8 +25,8 @@ const userSchema = new Schema<IUser>({
     ],
     languages: { type: [String], default: [] },
     isBlocked: { type: Boolean, default: false },
-    connections: [{ type: Schema.Types.ObjectId, ref:'User' }],
-    premium:{type:Boolean , default:false}
+    connections: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    premium: { type: Boolean, default: false }
 });
 
 const UserModel = mongoose.model<IUser>('User', userSchema);

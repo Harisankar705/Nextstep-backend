@@ -1,25 +1,21 @@
 import mongoose, { Document } from "mongoose";
 export interface IUser extends Document {
-    _id:string|mongoose.Types.ObjectId,
-    username?:string
+    _id: string | mongoose.Types.ObjectId;
+    username?: string;
+    isProfileComplete?:boolean,
     firstName?: string;
     secondName?: string;
     password?: string;
     email: string;
-    role:"user",
-
-    profile?: {
-        firstName?: string;
-        secondName?: string;
-        location?: string;
-        experience?: string;
-        technicalSkills?: string[];
-        resume?: string[];
-        profilePicture?: string;
-        aboutMe?: string;
-        dateOfBirth?: Date;
-        
-    };
+    role: "user";
+    location?: string;
+    experience?: string; 
+    skills?: string[]; 
+    resume?: string[]; 
+    profilePicture?: string; 
+    aboutMe?: string; 
+    dateOfBirth?: Date;
+    gender?: string; 
     education?: {
         degree?: string;
         institution?: string;
@@ -27,10 +23,10 @@ export interface IUser extends Document {
     }[];
     languages?: string[];
     isBlocked?: boolean;
-    connections?: string[]; 
+    connections?: string[];
     premium?: boolean;
-    
 }
+
 
 export interface IEmployer extends Document
 {
@@ -39,6 +35,7 @@ export interface IEmployer extends Document
     password:string
     role:"employer"
     companyName:string
+    isProfileComplete:boolean
 }
 
 
@@ -55,6 +52,7 @@ export interface ILoginResponse {
     accessToken: string
     refreshToken:string
     user: IUser|IEmployer
+    isProfileComplete:boolean
 }
 export interface IPayLoad
 {
