@@ -62,7 +62,6 @@ class AuthService {
         }
 
         const isMatch = await comparePassword(password, user.password || "");
-        console.log("ISMATCH", isMatch);
 
         if (!isMatch) {
             throw new Error('Invalid password');
@@ -71,6 +70,7 @@ class AuthService {
         const accessToken:string = generateToken({ userId: (user._id as string).toString(), role: user.role });
         const refreshToken:string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
         const isProfileComplete:boolean=user.isProfileComplete||false
+       
         return { accessToken, refreshToken, user,isProfileComplete };
     }
 

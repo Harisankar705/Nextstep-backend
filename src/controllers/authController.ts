@@ -6,6 +6,7 @@ import UserModel from "../models/User";
 import { generateRefreshToken, generateToken, verifyToken } from "../utils/jwtUtils";
 import { IUser } from "../types/authTypes";
 import { handleFileUpload } from "../utils/formidable";
+import jwt from 'jsonwebtoken';
 const authService = new AuthService()
 const otpServiceInstance = new otpService()
 export const setRefreshToken = (res: Response, refreshToken: string) => {
@@ -75,10 +76,12 @@ export const candidateDetails = async (req: Request, res: Response) => {
 
         const uploadResponse = await handleFileUpload(req);
         console.log("UPLOADRESPONSE", uploadResponse);
+        const userId = req.user?.userId; 
+        console.log("USERID",userId)
+
 
         const { profilePicture, resume } = uploadResponse.fileNames;
         const userData: { userId: string; data: string } = uploadResponse.fields || {};
-        const userId = Array.isArray(userData.userId) ? userData.userId[0] : userData.userId;
 
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
@@ -138,9 +141,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return
         }
         const { accessToken, refreshToken, user } = await authService.login(email, password, role)
-        setRefreshToken(res, refreshToken)
+        res.cookie('accessToken',accessToken,{
+            httpOnly:true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite:'strict',
+            maxAge:15*60*1000
+        })
+        res.cookie('refreshToken',refreshToken,{
+            httpOnly:true,
+            secure:process.env.NODE_ENV==='production',
+            sameSite:'strict',
+            maxAge:7*24*60*60*1000
+        })
+        
 
-        res.status(200).json({ accessToken, user })
+        res.status(200).json({  user })
 
 
 

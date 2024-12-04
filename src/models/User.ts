@@ -15,6 +15,7 @@ const userSchema = new Schema<IUser>({
     profilePicture: { type: String },
     aboutMe: { type: String },
     dateOfBirth: { type: Date },
+    phonenumber:{type:Number},
 
     education: [
         {
