@@ -9,7 +9,6 @@ fs.mkdir(uploadDir, { recursive: true }, (err) => {
     if (err) {
         console.error('Error creating directory:', err);
     } else {
-        console.log('Directory is ready:', uploadDir);
     }
 });
 
@@ -39,7 +38,6 @@ export const handleFileUpload = (
 
             const fileNames: { profilePicture?: string, resume?: string } = {};
 
-            // Handle profile picture
             const profilePictureFile = files.profilePicture as PersistentFile[];
             if (profilePictureFile && profilePictureFile.length > 0) {
                 const file = profilePictureFile[0];

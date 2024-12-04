@@ -25,6 +25,7 @@ export interface IUser extends Document {
     isBlocked?: boolean;
     connections?: string[];
     premium?: boolean;
+    phonenumber?:number
 }
 
 
