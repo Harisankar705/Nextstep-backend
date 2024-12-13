@@ -3,30 +3,36 @@ import path from 'path';
 import fs from 'fs';
 import { Request } from 'express';
 
-const uploadDir = path.join(__dirname, 'uploads', 'profile-pictures');
+const profilePictureUploadDir = path.join(__dirname, 'uploads', 'profile-pictures');
+const companyLogoUploadDir = path.join(__dirname, 'uploads', 'company-logo');
 
-fs.mkdir(uploadDir, { recursive: true }, (err) => {
-    if (err) {
-        console.error('Error creating directory:', err);
-    } else {
-    }
+[profilePictureUploadDir, companyLogoUploadDir].forEach(dir => {
+    fs.mkdir(dir, { recursive: true }, (err) => {
+        if (err) console.error('Error creating directory:', err);
+    });
 });
 
 export const handleFileUpload = (
     req: Request,
     allowedTypes = [
-        'image/jpeg', 'image/png', 'image/gif', 
-        'application/pdf', 
+        'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml',
+        'application/pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ],
-    maxFilesize = 500 * 1024 * 1024 
+    maxFilesize = 500 * 1024 * 1024
 ): Promise<any> => {
     return new Promise((resolve, reject) => {
         const form = new Formidable({
-            uploadDir,
+            uploadDir: req.url.includes('logo') ? companyLogoUploadDir : profilePictureUploadDir,
             maxFileSize: maxFilesize,
             keepExtensions: true,
-            multiples: true, 
+            multiples: true,
+            filter: ({ mimetype }) => {
+                return mimetype ? allowedTypes.includes(mimetype) : false;
+            },
+            filename: (name, ext, part) => {
+                return `${Date.now()}-${part.originalFilename}`; 
+            }
         });
 
         form.parse(req, (err, fields, files) => {
@@ -36,28 +42,40 @@ export const handleFileUpload = (
                 return;
             }
 
-            const fileNames: { profilePicture?: string, resume?: string } = {};
+            let newFields = fields; 
 
-            const profilePictureFile = files.profilePicture as PersistentFile[];
-            if (profilePictureFile && profilePictureFile.length > 0) {
-                const file = profilePictureFile[0];
-                if (file && file.filepath) {
-                    fileNames.profilePicture = file.filepath; 
+            if (fields.logo && Array.isArray(fields.logo) && fields.logo[0] && fields.logo[0].startsWith('data:image')) {
+                const base64Data = fields.logo[0].split(';base64,').pop();
+                if (base64Data) {
+                    const fileName = `logo-${Date.now()}.png`;
+                    const filePath = path.join(companyLogoUploadDir, fileName);
+                    fs.writeFileSync(filePath, base64Data, { encoding: 'base64' });
+                    (files as any).logo = [{
+                        filepath: filePath
+                    }] as PersistentFile[];
                 }
+                newFields = Object.fromEntries(
+                    Object.entries(fields).filter(([key]) => key !== 'logo')
+                );
             }
 
-            const resumeFile = files.resumeFile as PersistentFile[];
-            if (resumeFile && resumeFile.length > 0) {
-                const file = resumeFile[0];
-                if (file && file.filepath) {
-                    fileNames.resume = file.filepath; 
+            const fileNames: { profilePicture?: string, resumeFile?: string, logo?: string } = {};
+
+            const processFile = (fileKey: keyof typeof fileNames) => {
+                const uploadedFiles = files[fileKey] as PersistentFile[];
+                if (uploadedFiles?.[0]?.filepath) {
+                    fileNames[fileKey] = uploadedFiles[0].filepath;
                 }
-            }
+            };
+
+            processFile('profilePicture');
+            processFile('resumeFile');
+            processFile('logo');
 
             resolve({
                 message: 'Files uploaded successfully!',
-                fileNames, 
-                fields
+                fileNames,
+                fields: newFields
             });
         });
     });

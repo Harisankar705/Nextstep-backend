@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import candidateRoutes from "./routes/userRoutes";
 import { dbConnection } from './config/db';
 import path from 'path';
+import { employerRoutes } from "./routes/employerRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 const app = express();
 
@@ -19,7 +21,8 @@ app.use(cors({
 }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'utils/uploads')));
-
+app.use(adminRoutes)
+app.use(employerRoutes)
 app.use(candidateRoutes);
 
 app.listen(4000, () => {
