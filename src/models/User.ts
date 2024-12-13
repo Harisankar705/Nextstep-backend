@@ -16,6 +16,8 @@ const userSchema = new Schema<IUser>({
     aboutMe: { type: String },
     dateOfBirth: { type: Date },
     phonenumber:{type:Number},
+    status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
+
 
     education: [
         {

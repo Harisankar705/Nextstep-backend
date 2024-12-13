@@ -1,9 +1,9 @@
+import { IEmployer, ILoginResponse, IUser } from './../types/authTypes';
 import { UserRepository } from '../repositories/userRepository'
-import { ILoginResponse, IUser, IEmployer } from '../types/authTypes'
 import { comparePassword, hashPassword } from '../utils/hashPassword'
 import { generateRefreshToken, generateToken } from '../utils/jwtUtils'
-import UserModel from '../models/User'
-import EmployerModel from '../models/Employer'
+import UserModel from '../models/user'
+import EmployerModel from '../models/employer'
 import otpService from './otpService'
 
 function isEmployerRole(role: string): role is 'employer' {
@@ -31,7 +31,6 @@ class AuthService {
 
         const hashedPassword = await hashPassword(userData.password || "");
 
-        console.log("HASHEDPASSWORD", hashedPassword);
 
         let newUser;
         if (isEmployerRole(userData.role)) {
@@ -53,12 +52,14 @@ class AuthService {
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
         const userRepository = new UserRepository();
 
-        console.log("IN AUTHSERVICE LOGIN");
         const user = await userRepository.findByEmail(email, role);
-        console.log("USER", user);
 
         if (!user) {
             throw new Error('Invalid user');
+        }
+        if(user.status==='Inactive')
+        {
+            throw new Error("Account is temporarily blocked!")
         }
 
         const isMatch = await comparePassword(password, user.password || "");
@@ -67,36 +68,69 @@ class AuthService {
             throw new Error('Invalid password');
         }
 
-        const accessToken:string = generateToken({ userId: (user._id as string).toString(), role: user.role });
-        const refreshToken:string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
-        const isProfileComplete:boolean=user.isProfileComplete||false
-       
-        return { accessToken, refreshToken, user,isProfileComplete };
+        const accessToken: string = generateToken({ userId: (user._id as string).toString(), role: user.role });
+        const refreshToken: string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
+        const isProfileComplete: boolean = user.isProfileComplete || false
+
+        return { accessToken, refreshToken, user, isProfileComplete };
     }
 
 
-    async updateUser (userId: string, userData: Partial<IUser >, profilePicturePath?: string, resume?: string): Promise<IUser  | null> {
+    async updateUser(userId: string, userData: Partial<IUser>, profilePicturePath?: string, resume?: string): Promise<IUser | null> {
         const userRepository = new UserRepository();
         try {
             if (profilePicturePath) {
-                userData.profilePicture = profilePicturePath; 
+                userData.profilePicture = profilePicturePath;
             }
             if (resume) {
-                userData.resume = [resume] 
+                userData.resume = [resume]
             }
-    
-            
-            const updatedUser  = await userRepository.updateUser (userId, userData);
-            if (!updatedUser ) {
+
+
+            const updatedUser = await userRepository.updateUser(userId, userData);
+            if (!updatedUser) {
                 throw new Error("User  not found");
             }
-    
-            return updatedUser ;
+
+            return updatedUser;
         } catch (error) {
             console.error('Error occurred while updating user:', error);
-            throw new Error(`Error occurred while updating user:`); 
+            throw new Error(`Error occurred while updating user:`);
         }
+    }
+    async getCandidateService(role: string): Promise<(IUser | IEmployer)[]>  {
+        try {
+            if (role !== 'user' && role !== 'employer') {
+                throw new Error("invalid role provided")
+            }
+            let candidates: (IUser | IEmployer)[] = [];
+            if (role === 'user') {
+                candidates = await UserModel.find()
+            }
+            if (role === 'employer') {
+                candidates = await EmployerModel.find()
+            }
+            return candidates
+
+        }
+        catch (error) {
+            console.error('Error occurred in getcandidateservice:', error);
+            throw new Error(`Error occurred getcandidateservice`);
+        }
+    }
+    async toggleUser(id:string,role:string)
+    {
+        const userRepository = new UserRepository();
+
+      if(role!=='user' && role!=='employer')
+        {
+            throw new Error('invalid role provided')
+        }
+        const model=role==='user'?UserModel:EmployerModel
+        const updatedUser=await userRepository.changeUserStatus(model,id)
+        return updatedUser
     }
 }
 
 export default AuthService;
+          

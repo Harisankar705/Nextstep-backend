@@ -1,19 +1,37 @@
-import { Request,Response,NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-export const verifyToken=(req:Request,res:Response,next:NextFunction)=>
+import { UserRepository } from "../repositories/userRepository";
+const userRespository=new UserRepository()
+interface JwtPayload
 {
-    console.log("In verify token")
-    const token=req.cookies.accessToken
-    console.log("TOKEN",token)
-    if(!token)
-    {
-        return res.status(403).json({message:"Token not found"})
+userId:string,
+role:string,
+iat:number,
+exp:number
+}
+export const verifyToken = async(req: Request, res: Response, next: NextFunction) => {
+    const employerToken = req.cookies.employerAccessToken
+    const candidateToken = req.cookies.userAccessToken
+    const token=employerToken||candidateToken
+    const role=employerToken?"employer":"user"
+    if (!token) {
+        res.status(403).json({ message: "Token not found" })
+        return
     }
     try {
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN as string)
-        req.user=decoded
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN as string) as JwtPayload
+        req.user = decoded
+        const userData = await userRespository.findById(decoded.userId,role)
+        if(userData?.status=='Inactive')
+        {
+            res.status(404).json({message:"Authentication restricted!"})        
+            res.clearCookie(employerToken?"employerAccessToken":"userAccessToken")
+            return
+        }
         next()
+        
     } catch (error) {
-        return res.status(400).json({message:"Error occured during verifying token"})
+        res.status(400).json({ message: "Error occured during verifying token" })
+        return
     }
 }

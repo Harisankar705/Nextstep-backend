@@ -1,34 +1,72 @@
-import EmployerModel from '../models/Employer'
-import UserModel from '../models/User'
-import { IEmployer, IUser } from '../types/authTypes'
-import { Model, Document ,Types} from 'mongoose'
+import { IAdmin, IEmployer, IUser } from '../types/authTypes';
+import EmployerModel from '../models/employer'
+import UserModel from '../models/user'
+import { Model, Document, Types } from 'mongoose'
+import AdminModel from '../models/admin';
 export class UserRepository {
-    private getModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> {
+    private getModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> |Model<IAdmin & Document> {
         if (role === 'employer') {
             return EmployerModel as Model<IEmployer & Document>
         }
         if (role === 'user') {
             return UserModel as Model<IUser & Document>
         }
+        if (role === 'admin') {
+            return AdminModel as Model<IAdmin & Document>
+        }
         throw new Error(`invalid role${role}`)
 
     }
-    async findByEmail(email: string, role: string): Promise<IUser | IEmployer | null> {
+    async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = this.getModel(role);
-            console.log(model)
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findOne({ email }).exec();
             }
             if (role === 'user') {
-                console.log("IN USERMODEL")
                 return (model as Model<IUser & Document>).findOne({ email }).exec();
+            }
+            if (role === 'admin') {
+                return (model as Model<IAdmin & Document>).findOne({ email }).exec()
             }
             throw new Error(`Invalid role: ${role}`);
         } catch (error) {
             console.error("Error finding user by email:", error);
             throw new Error('Error occurred while finding by email');
         }
+    }
+    async findById(userId: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
+        try {
+            const model = this.getModel(role);
+            if (role === 'employer') {
+                return (model as Model<IEmployer & Document>).findOne({ userId }).exec();
+            }
+            if (role === 'user') {
+                return (model as Model<IUser & Document>).findOne({ userId }).exec();
+            }
+            
+            throw new Error(`Invalid role: ${role}`);
+        } catch (error) {
+            console.error("Error finding user by email:", error);
+            throw new Error('Error occurred while finding by email');
+        }
+    }
+    
+    async changeUserStatus(model:typeof UserModel| typeof EmployerModel,id:string):Promise<any> {
+        const user=await (model as any).findById(id)
+        if(!user)
+        {
+            throw new Error("user is undefined")
+        }
+        const newStatus=user.status==="Active"?"Inactive":"Active"
+        const updatedUser = await model.updateOne({ _id: id }, { $set: { status: newStatus } }, { new: true });
+
+        if(!updatedUser)
+        {
+            throw new Error("Failed to update user status")
+        }
+        return updatedUser
+        
     }
 
     async createUser(userData: Partial<IUser | IEmployer>, role: string): Promise<IUser | IEmployer> {
@@ -44,7 +82,6 @@ export class UserRepository {
             }
             throw new Error(`Invalid role: ${role}`);
         } catch (error) {
-            console.log("ERROR ", error)
             throw new Error("error occured while creating candidate")
         }
 
@@ -52,48 +89,39 @@ export class UserRepository {
     async updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
         try {
             const objectId = new Types.ObjectId(userId);
-            console.log("Querying with ObjectId:", objectId);
-    
+
             const user = await UserModel.findById(objectId);
             if (!user) {
-                console.log("User not found");
                 throw new Error("User not found");
             }
-    
-            console.log("USER found:", user);
-    
-            // Merge existing user data with the new data
+
+
             const updatePayLoad: Partial<IUser> = {
-                ...user.toObject(), 
+                ...user.toObject(),
                 ...userData,
             };
-    
-            console.log("Update Payload before checking isProfileComplete:", updatePayLoad);
-    
+
+
             updatePayLoad.isProfileComplete =
                 !!(updatePayLoad.profilePicture &&
-                   updatePayLoad.resume &&
-                   updatePayLoad.experience &&
-                   updatePayLoad.skills?.length &&
-                   updatePayLoad.education?.length);
-    
-            console.log("isProfileComplete after check:", updatePayLoad.isProfileComplete);
-    
-            // Update the user
-            const updatedUser = await UserModel.findByIdAndUpdate(objectId,{$set:{...updatePayLoad,isProfileComplete:true}},{new:true});
-    
-            console.log("Updated User:", updatedUser);
-    
+                    updatePayLoad.resume &&
+                    updatePayLoad.experience &&
+                    updatePayLoad.skills?.length &&
+                    updatePayLoad.education?.length);
+
+
+            const updatedUser = await UserModel.findByIdAndUpdate(objectId, { $set: { ...updatePayLoad, isProfileComplete: true } }, { new: true });
+
+
             return updatedUser;
         } catch (error) {
-            console.log("ERROR: ", error);
             throw new Error("Error occurred while updating user");
         }
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 
 }

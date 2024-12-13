@@ -1,5 +1,7 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
+import { Response } from 'express';
+
 import { UserRepository } from '../repositories/userRepository'
 const otpStore: { [key: string]: { otp: string, expiry: Date } } = {};
 
@@ -30,25 +32,23 @@ class otpService {
         }
         await transporter.sendMail(mailOption)
     }
-    async resendOTP(email:string,role:'user'|"employer"):Promise<void>{
+    async resendOTP(email:string,role:'user'|"employer",):Promise<void>{
         const otpData=otpStore[email]
         if(otpData && otpData.expiry>new Date())
         {
-            console.log('OTP is still valid!Sending the same OTP!')
+              console.log('sending otp')
+             
         }
         else
         {
-            console.log("Generating the same otp")
-        }
-        const otp=this.generateOtp()
-        const otpExpiry=new Date(Date.now()+5*60*1000)
-        otpStore[email]={otp,expiry:otpExpiry}
-        await this.sendOTP(email,role)
+            const otp = this.generateOtp()
+            const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+            otpStore[email] = { otp, expiry: otpExpiry }
+            await this.sendOTP(email, role)        }
+       
     }
     async verifyOtp(email: string, otp: string, role: "user" | "employer"): Promise<boolean> {
         const otpData = otpStore[email];
-        console.log('in here')
-        console.log("VERIFYOTP", otpData)
         if (!otpData) {
             return false
         }
