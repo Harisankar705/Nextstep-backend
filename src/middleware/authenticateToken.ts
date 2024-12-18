@@ -15,6 +15,7 @@ export const verifyToken = async(req: Request, res: Response, next: NextFunction
     const token=employerToken||candidateToken
     const role=employerToken?"employer":"user"
     if (!token) {
+        
         res.status(403).json({ message: "Token not found" })
         return
     }

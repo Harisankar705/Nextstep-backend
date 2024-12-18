@@ -1,5 +1,5 @@
 import express from "express";
-import { candidateDetails, emailOrPhoneNumber, login, refreshTokenController, resendOTPcontroller, sendOTPcontroller, signup, verifyOTPController } from "../controllers/authController";
+import { candidateDetails, createPost, emailOrPhoneNumber, login, refreshTokenController, resendOTPcontroller, sendOTPcontroller, signup, verifyOTPController } from "../controllers/authController";
 import { verifyToken } from "../middleware/authenticateToken";
 
 const candidateRoutes = express.Router()
@@ -11,6 +11,7 @@ candidateRoutes.post('/verify-otp', verifyOTPController)
 candidateRoutes.post('/resend-otp', resendOTPcontroller)
 candidateRoutes.post('/check-email-phone', emailOrPhoneNumber)
 candidateRoutes.post('/refresh-token', refreshTokenController)
+candidateRoutes.post('/createpost',verifyToken, createPost)
 
 candidateRoutes.post('/candidate-details', verifyToken, candidateDetails)
 export default candidateRoutes  

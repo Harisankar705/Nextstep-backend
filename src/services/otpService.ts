@@ -15,6 +15,7 @@ class otpService {
         const otp = this.generateOtp()
         const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
         otpStore[email] = { otp, expiry: otpExpiry }
+        console.log(otpStore[email])
 
 
         const transporter = nodemailer.createTransport({
@@ -48,16 +49,20 @@ class otpService {
        
     }
     async verifyOtp(email: string, otp: string, role: "user" | "employer"): Promise<boolean> {
+        console.log('in otpserivee',{email,role,otp})
         const otpData = otpStore[email];
         if (!otpData) {
+            console.log("no otp found ")
             return false
         }
 
         const { otp: storedOtp, expiry } = otpData
+        console.log('stored otp',{storedOtp,expiry})
         const isValidOtp = storedOtp === otp && expiry > new Date()
         if (isValidOtp) {
             otpStore[email] = { otp: "", expiry: new Date(0) }
         }
+        console.log(isValidOtp)
         return isValidOtp
 
 

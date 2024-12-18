@@ -3,6 +3,7 @@ import EmployerModel from '../models/employer'
 import UserModel from '../models/user'
 import { Model, Document, Types } from 'mongoose'
 import AdminModel from '../models/admin';
+import { Post } from '../models/post';
 export class UserRepository {
     private getModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> |Model<IAdmin & Document> {
         if (role === 'employer') {
@@ -17,6 +18,18 @@ export class UserRepository {
         throw new Error(`invalid role${role}`)
 
     }
+    private getPostModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> {
+        if (role === 'employer') {
+            return EmployerModel as Model<IEmployer & Document>
+        }
+        if (role === 'user') {
+            return UserModel as Model<IUser & Document>
+        }
+       
+        throw new Error(`invalid role${role}`)
+
+    }
+
     async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = this.getModel(role);
@@ -52,22 +65,7 @@ export class UserRepository {
         }
     }
     
-    async changeUserStatus(model:typeof UserModel| typeof EmployerModel,id:string):Promise<any> {
-        const user=await (model as any).findById(id)
-        if(!user)
-        {
-            throw new Error("user is undefined")
-        }
-        const newStatus=user.status==="Active"?"Inactive":"Active"
-        const updatedUser = await model.updateOne({ _id: id }, { $set: { status: newStatus } }, { new: true });
-
-        if(!updatedUser)
-        {
-            throw new Error("Failed to update user status")
-        }
-        return updatedUser
-        
-    }
+   
 
     async createUser(userData: Partial<IUser | IEmployer>, role: string): Promise<IUser | IEmployer> {
         try {
@@ -77,7 +75,7 @@ export class UserRepository {
                 return await employer.save()
             }
             if (role === 'user') {
-                const user = new (model as Model<IEmployer & Document>)(userData)
+                const user = new (model as Model<IUser & Document>)(userData)
                 return await user.save()
             }
             throw new Error(`Invalid role: ${role}`);
@@ -85,6 +83,31 @@ export class UserRepository {
             throw new Error("error occured while creating candidate")
         }
 
+    }
+    async createPost (postData:object,role:string,userId:string):Promise<Document>{
+        try {
+            console.log('in createpost',postData)
+            console.log('in createpostrole',role)
+            console.log('in createpostrole',userId)
+            const model=this.getModel(role)as Model<IUser |IEmployer>
+            const user=await model.findById(userId)
+            if(!user)
+            {
+                throw new Error("user not found in createpost")
+            }
+            const newPost={...postData,userId:userId,createdAt:new Date(),userType:role==='employer'?'employer':'user'}
+            const postModel=Post 
+            const savedPost=await postModel.create(newPost)
+            if(savedPost)
+            {
+                console.log("post saved")
+            }
+            
+            return savedPost
+        } catch (error) {
+            console.error(error)
+            throw new Error("Error creating post")
+        }
     }
     async updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
         try {

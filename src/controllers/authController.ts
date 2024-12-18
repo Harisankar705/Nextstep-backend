@@ -8,6 +8,7 @@ import { handleFileUpload } from "../utils/formidable";
 import jwt from 'jsonwebtoken';
 import { validateRole } from "../utils/roleValidate";
 import getCandidateService from '../services/authService';
+import { validate } from "uuid";
 
 const authService = new AuthService()
 const otpServiceInstance = new otpService()
@@ -25,6 +26,7 @@ export const setRefreshToken = (res: Response, refreshToken: string) => {
 export const signup = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userData } = req.body
+        console.log('in signup',userData)
         const roleValidation = validateRole(userData.role)
         if (!roleValidation.valid) {
             res.status(400).json({ message: roleValidation.message })
@@ -60,7 +62,7 @@ export const candidateDetails = async (req: Request, res: Response) => {
 
 
         const { profilePicture, resumeFile } = uploadResponse.fileNames;
-        const userData: { userId: string; data: string } = uploadResponse.fields || {};
+        const userData: { userId?: string; data?: string } = uploadResponse.fields || {};
 
         if (!userId) {
             res.status(400).json({ message: "User ID is required" });
@@ -119,6 +121,61 @@ export const candidateDetails = async (req: Request, res: Response) => {
 };
 
 
+export const createPost = async (req: Request, res: Response) => {
+    try {
+        const uploadResponse = await handleFileUpload(req);
+        console.log("UPLOADRESPONSE", uploadResponse);
+
+        const { text, background, role,postImage } = uploadResponse.fields || {};
+
+        // Early validation with single return
+        if (!text?.[0] || !role?.[0]) {
+            return res.status(400).json({
+                message: "Missing required fields",
+                received: { text: text?.[0], role: role?.[0] }
+            });
+        }
+
+        const roleValidation = validateRole(role[0]);
+        if (!roleValidation.valid) {
+            return res.status(400).json({ message: "Role not valid" });
+        }
+
+        const tokenPrefix = role[0].toLowerCase();
+        console.log(tokenPrefix)
+        const accessToken = req.cookies[`${tokenPrefix}AccessToken`];
+        console.log('Access Token:', accessToken);
+        const userId = req.user?.userId;
+        console.log('User ID:', userId);
+
+        if (!accessToken || !userId) {
+             res.status(401).json({ message: "Authentication required" });
+             return
+        }
+
+        const postData = {
+            text: text[0],
+            background: background?.[0] || '',
+            image:uploadResponse.fileNames?.postImage,
+            files: uploadResponse.fileNames || {}
+        };
+
+        const response = await authService.createPostService(
+            userId,
+            postData,
+            role[0]
+        );
+
+        res.status(201).json(response);
+        return
+
+    } catch (error) {
+        console.error('Create Post Error:', error);
+        res.status(500).json({
+            message: error instanceof Error ? error.message : "Internal server error"
+        });
+    }
+};
 
 
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -231,6 +288,7 @@ export const resendOTPcontroller = async (req: Request, res: Response): Promise<
 }
 export const verifyOTPController = async (req: Request, res: Response): Promise<void> => {
     try {
+        console.log('in verify otp',req.body)
         const { email, role, otp } = req.body
         if (!email || !role || !otp) {
             res.status(400).json({ message: "OTP,EMAIL,ROLE is required" })
@@ -280,7 +338,8 @@ export const emailOrPhoneNumber = async (req: Request, res: Response): Promise<v
 }
 export const refreshTokenController = async (req: Request, res: Response) => {
     try {
-        const refreshToken = req.cookies['refresh-token']
+        const tokenPrefix=req.body.role.toLowerCase()
+        const refreshToken = req.cookies[`${tokenPrefix}RefreshToken`]
         if (!refreshToken) {
             res.status(401).send({ message: "Refresh token is missing" })
             return
@@ -293,7 +352,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
         const { userId, role } = decoded
         const newAccessToken = generateToken({ userId, role })
         const newRefreshToken = generateRefreshToken({ userId, role })
-        setRefreshToken(res, refreshToken)
+        setRefreshToken(res, newRefreshToken)
 
         res.status(200).json({ accessToken: newAccessToken })
     } catch (error) {
