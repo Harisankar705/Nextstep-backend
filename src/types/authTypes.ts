@@ -35,8 +35,10 @@ export interface IEmployer extends Document {
     email: string
     password: string
     role: "employer"
-    gstNumber: string,
-    panNumber: string,
+    document:string,
+    documentType:"GST"|"PAN"|"INCORPORATION"|"OTHER",
+    isVerified:  "PENDING"|'APPROVED'|'REJECTED',
+    documentNumber:string,
     logo: string,
     website: string,
     location: string,
@@ -59,10 +61,6 @@ export interface IAdmin extends Document {
 }
 
 
-export interface IOTP {
-    otp: string,
-    email: string
-}
 
 export interface IGoogleAuth {
     tokenId: string
@@ -76,4 +74,14 @@ export interface ILoginResponse {
 export interface IPayLoad {
     userId: string
     role: "user" | 'employer' | 'admin'
+}
+export interface IPosts extends Document
+{
+    userId:mongoose.Types.ObjectId,
+    userType:'user'|'employer',
+    text:string,
+    image:string[],
+    background?:string,
+    location:string,
+    createdAt:Date
 }

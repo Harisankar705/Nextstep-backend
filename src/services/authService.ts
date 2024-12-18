@@ -1,5 +1,6 @@
+import { UserRepository } from './../repositories/userRepository';
+import { EmployerRepository } from './../repositories/employerRepository';
 import { IEmployer, ILoginResponse, IUser } from './../types/authTypes';
-import { UserRepository } from '../repositories/userRepository'
 import { comparePassword, hashPassword } from '../utils/hashPassword'
 import { generateRefreshToken, generateToken } from '../utils/jwtUtils'
 import UserModel from '../models/user'
@@ -16,37 +17,65 @@ class AuthService {
     private validateRole(role: string): boolean {
         return ['user', 'employer'].includes(role);
     }
+    async createPostService(userId: string, postData: object, role: string) {
+        
+
+        const userRepository = new UserRepository()
+        const response = await userRepository.createPost(postData, role,userId)
+        return response
+    }
 
     async register(userData: IUser | IEmployer): Promise<IUser | IEmployer> {
-        const userRepository = new UserRepository();
+        console.log("Registering user with data:", JSON.stringify(userData, null, 2));
 
-        if (!this.validateRole(userData.role)) {
-            throw new Error('Invalid role. Must be "user" or "employer".');
+        try {
+            const userRepository = new UserRepository();
+            console.log('User Repository initialized');
+
+            console.log('Validating role:', userData.role);
+            if (!this.validateRole(userData.role)) {
+                console.error('Invalid role detected:', userData.role);
+                throw new Error('Invalid role. Must be "user" or "employer".');
+            }
+
+            console.log('Checking for existing user with email:', userData.email);
+            const existingUser = await userRepository.findByEmail(userData.email, userData.role);
+
+            if (existingUser) {
+                console.warn('User already exists:', existingUser);
+                throw new Error('User already exists!');
+            }
+
+            console.log('Hashing password');
+            const hashedPassword = await hashPassword(userData.password || "");
+            console.log('Password hashed successfully');
+
+            let newUser;
+            console.log('Determining user type based on role:', userData.role);
+
+            if (isEmployerRole(userData.role)) {
+                console.log('Creating Employer Model');
+                newUser = new EmployerModel({
+                    ...userData,
+                    password: hashedPassword
+                });
+            } else {
+                console.log('Creating User Model');
+                newUser = new UserModel({
+                    ...userData,
+                    password: hashedPassword
+                });
+            }
+
+            console.log('Attempting to save user');
+            await newUser.save();
+            console.log('User saved successfully:', newUser._id);
+
+            return newUser;
+        } catch (error) {
+            console.error('Registration Error:', error);
+            throw error;
         }
-
-        const existingUser = await userRepository.findByEmail(userData.email, userData.role);
-        if (existingUser) {
-            throw new Error('User already exists!');
-        }
-
-        const hashedPassword = await hashPassword(userData.password || "");
-
-
-        let newUser;
-        if (isEmployerRole(userData.role)) {
-            newUser = new EmployerModel({
-                ...userData,
-                password: hashedPassword
-            });
-        } else {
-            newUser = new UserModel({
-                ...userData,
-                password: hashedPassword
-            });
-        }
-
-        await newUser.save();
-        return newUser;
     }
 
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
@@ -57,8 +86,7 @@ class AuthService {
         if (!user) {
             throw new Error('Invalid user');
         }
-        if(user.status==='Inactive')
-        {
+        if (user.status === 'Inactive') {
             throw new Error("Account is temporarily blocked!")
         }
 
@@ -98,7 +126,7 @@ class AuthService {
             throw new Error(`Error occurred while updating user:`);
         }
     }
-    async getCandidateService(role: string): Promise<(IUser | IEmployer)[]>  {
+    async getCandidateService(role: string): Promise<(IUser | IEmployer)[]> {
         try {
             if (role !== 'user' && role !== 'employer') {
                 throw new Error("invalid role provided")
@@ -118,19 +146,9 @@ class AuthService {
             throw new Error(`Error occurred getcandidateservice`);
         }
     }
-    async toggleUser(id:string,role:string)
-    {
-        const userRepository = new UserRepository();
 
-      if(role!=='user' && role!=='employer')
-        {
-            throw new Error('invalid role provided')
-        }
-        const model=role==='user'?UserModel:EmployerModel
-        const updatedUser=await userRepository.changeUserStatus(model,id)
-        return updatedUser
-    }
+
+
 }
 
 export default AuthService;
-          

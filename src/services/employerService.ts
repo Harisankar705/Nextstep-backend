@@ -1,3 +1,4 @@
+import EmployerModel from "../models/employer"
 import { EmployerRepository } from "../repositories/employerRepository"
 import { IEmployer } from "../types/authTypes"
 
@@ -21,5 +22,7 @@ class EmployerService
             throw new Error("Error occured while updatingEmployer")
         }
     }
+    
+    
 }
 export default EmployerService

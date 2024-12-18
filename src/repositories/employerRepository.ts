@@ -1,3 +1,4 @@
+import { verificationStatus } from "../controllers/adminController";
 import EmployerModel from "../models/employer";
 import { IEmployer } from "../types/authTypes";
 import {Types} from 'mongoose'
@@ -21,4 +22,5 @@ export class EmployerRepository{
             throw new Error("error occured while updating employer in repository")
         }
     }
-}
+     
+    }
