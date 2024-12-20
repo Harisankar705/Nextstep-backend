@@ -48,6 +48,54 @@ export class UserRepository {
             throw new Error('Error occurred while finding by email');
         }
     }
+    async search(query:string) {
+        try
+        {
+            if(!query)
+            {
+                throw new Error("query not found")
+            }
+            const [users,posts,employers]=await Promise.all([
+                UserModel.find({
+                    $or:[
+                        {firstName:{$regex:query,$options:'i'}},
+                        {secondName:{$regex:query,$options:'i'}}
+                    ]
+                }).select('-password'),
+                Post.find({
+                    $or:[
+                        {location:{$regex:query,$options:'i'}},
+                        {text:{$regex:query,$options:'i'}}
+                    ]
+                }),
+                EmployerModel.find({
+                    $or:[
+                        {companyName:{$regex:query,$options:'i'}},
+                    ]
+                })
+            ])
+            return {users,posts,employers}
+        }
+        catch(error)
+        {
+            console.error("Error occured searching", error)
+        }
+        
+    }   
+    async findUserPosts(userId:string)
+    {
+        try {
+            const posts = await Post.find({ userId }).sort({ createdAt: -1 })
+                // .populate('comments.userId', 'username.profilePicture')
+                .lean()
+                console.log(posts)
+                return posts
+        } catch (error) {
+            console.error("Error occured while finding userposts",error)
+            throw new Error("Error occured in findUserPosts")
+        }
+        
+    }
     async findById(userId: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = this.getModel(role);
@@ -90,6 +138,7 @@ export class UserRepository {
             console.log('in createpostrole',role)
             console.log('in createpostrole',userId)
             const model=this.getModel(role)as Model<IUser |IEmployer>
+            console.log(model)
             const user=await model.findById(userId)
             if(!user)
             {

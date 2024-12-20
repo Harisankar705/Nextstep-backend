@@ -31,7 +31,7 @@ export const individualDetails=async(req:Request,res:Response):Promise<void>=>{
         console.log(id)
         
         
-        if(typeof id!=='string')
+        if(!id||typeof id!=='string')
         {
              res.status(400).json({message:"Id not a string"})
              return

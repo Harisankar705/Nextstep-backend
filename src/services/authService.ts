@@ -10,10 +10,10 @@ import otpService from './otpService'
 function isEmployerRole(role: string): role is 'employer' {
     return role === 'employer';
 }
+const userRepository = new UserRepository()
 
 class AuthService {
     private OtpInstance = new otpService()
-
     private validateRole(role: string): boolean {
         return ['user', 'employer'].includes(role);
     }
@@ -23,6 +23,20 @@ class AuthService {
         const userRepository = new UserRepository()
         const response = await userRepository.createPost(postData, role,userId)
         return response
+    }
+    async searchService(query:string)
+    {
+        try {
+            if(!query.trim())
+            {
+                throw new Error("Query not given for search")
+            }
+            const results=await userRepository.search(query)
+            return results
+            
+        } catch (error) {
+            
+        }
     }
 
     async register(userData: IUser | IEmployer): Promise<IUser | IEmployer> {
@@ -77,30 +91,51 @@ class AuthService {
             throw error;
         }
     }
+    async getUsersPosts(userId:string){
+        try
+        {
+            const posts = await userRepository.findUserPosts(userId)
+            return posts
+        }
+        catch(error)
+        {
+            console.error("Error occured in getUserposts",error)
+            throw error
+        }
+    }
 
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
-        const userRepository = new UserRepository();
+        try {
+            const userRepository = new UserRepository();
+            console.log(email)
+            console.log(password)
+            console.log(role)
+            const user = await userRepository.findByEmail(email, role);
+            console.log(user)
 
-        const user = await userRepository.findByEmail(email, role);
+            if (!user) {
+                throw new Error('Invalid user');
+            }
+            if (user.status === 'Inactive') {
+                throw new Error("Account is temporarily blocked!")
+            }
 
-        if (!user) {
-            throw new Error('Invalid user');
+            const isMatch = await comparePassword(password, user.password || "");
+            console.log(isMatch)
+            if (!isMatch) {
+                throw new Error("invalid email or password")
+            }
+
+            const accessToken: string = generateToken({ userId: (user._id as string).toString(), role: user.role });
+            const refreshToken: string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
+            const isProfileComplete: boolean = user.isProfileComplete || false
+
+            return { accessToken, refreshToken, user, isProfileComplete };
+        } 
+            catch (error:any) {
+                throw new Error(error);
         }
-        if (user.status === 'Inactive') {
-            throw new Error("Account is temporarily blocked!")
-        }
-
-        const isMatch = await comparePassword(password, user.password || "");
-
-        if (!isMatch) {
-            throw new Error('Invalid password');
-        }
-
-        const accessToken: string = generateToken({ userId: (user._id as string).toString(), role: user.role });
-        const refreshToken: string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
-        const isProfileComplete: boolean = user.isProfileComplete || false
-
-        return { accessToken, refreshToken, user, isProfileComplete };
+        
     }
 
 

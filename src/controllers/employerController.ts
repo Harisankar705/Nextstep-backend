@@ -13,6 +13,11 @@ export const employerDetails = async (req: Request, res: Response, next: NextFun
         }
         const isEdit=req.query.isEdit==='true'
         const uploadResponse=await handleFileUpload(req)
+        if(!uploadResponse ||!uploadResponse.fields)
+        {
+            res.status(400).json({message:"Invalid form data"})
+            return
+        }
         console.log(uploadResponse)
         const {logo}=uploadResponse.fileNames
         const data={
