@@ -13,6 +13,7 @@ import jwt from "jsonwebtoken";
 import { validateRole } from "../utils/roleValidate";
 import getCandidateService from "../services/authService";
 import { validate } from "uuid";
+import { ObjectId } from "mongoose";
 
 const authService = new AuthService();
 const otpServiceInstance = new otpService();
@@ -403,10 +404,21 @@ export const getUserPost = async (req: Request, res: Response) => {
     const posts = await authService.getUsersPosts(userIdToFetch);
     console.log('getuserpost',posts)
     const postsWithLikeStatus = posts.map(post => {
-      const likedByUser = post.likes.includes(authenticatedUserId); 
+      const likedByUser = post.likes.some((like: any) => {
+        const likeUserId = like.userId
+          ? like.userId.toString()
+          : like.toString();
+
+        const authUserId = authenticatedUserId
+          ? authenticatedUserId.toString()
+          : String(authenticatedUserId);
+
+        return likeUserId === authUserId;
+      });
+
       return {
-        ...post, 
-        likedByUser 
+        ...post,
+        likedByUser
       };
     });
     console.log('like status',postsWithLikeStatus)

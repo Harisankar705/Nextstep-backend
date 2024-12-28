@@ -1,4 +1,4 @@
-import mongoose, { Document, mongo } from "mongoose";
+import mongoose, { Document, mongo, ObjectId } from "mongoose";
 export interface IUser extends Document {
     _id: string | mongoose.Types.ObjectId;
     username?: string;
@@ -95,6 +95,12 @@ export interface    IPosts extends Document
     createdAt:Date,
     comments:mongoose.Types.ObjectId[],
     likes:mongoose.Types.ObjectId[]
+}
+export interface Like {
+    _id: ObjectId;
+    postId: ObjectId;
+    userId: ObjectId;
+    createdAt: Date;
 }
 export enum ConnectionStatus
 {
