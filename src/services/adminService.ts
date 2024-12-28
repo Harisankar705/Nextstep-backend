@@ -1,6 +1,6 @@
 import EmployerModel from '../models/employer';
 import UserModel from '../models/user';
-import { IEmployer } from '../types/authTypes';
+import { IEmployer, IUser } from '../types/authTypes';
 import { AdminRepository } from './../repositories/adminRepository';
 export class AdminService
 {
@@ -18,17 +18,29 @@ export class AdminService
         const updatedUser = await this.adminRepository.changeUserStatus(model, id)
         return updatedUser
     }
-    async getIndividualDetails(id: string): Promise<(IEmployer)[]> {
+    async getIndividualDetails(id: string,role:string): Promise<(IEmployer|IUser)[]> {
         try {
 
-            let details: (IEmployer)[] = []
+            let details: (IEmployer|IUser)[] = []
 
-
-            const employer = await EmployerModel.findById(id)
-            if (!employer) {
-                throw new Error("user not found")
+            if(role==='employer')
+            {
+                const employer = await EmployerModel.findById(id)
+                if (!employer) {
+                    throw new Error("user not found")
+                }
+                details.push(employer)
             }
-            details.push(employer)
+            else
+            {
+                const user=await UserModel.findById(id)
+                if(!user)
+                {
+                    throw new Error("user not found")  
+                }
+                details.push(user)
+            }
+            
 
             return details
 

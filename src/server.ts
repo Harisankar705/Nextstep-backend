@@ -6,6 +6,8 @@ import { dbConnection } from './config/db';
 import path from 'path';
 import { employerRoutes } from "./routes/employerRoutes";
 import adminRoutes from "./routes/adminRoutes";
+import { commonRoutes } from "./routes/commonRoutes";
+import { interactionRoutes } from "./routes/interactionRoutes";
 
 const app = express();
 
@@ -22,8 +24,10 @@ app.use(cors({
 
 app.use('/uploads', express.static(path.join(__dirname, 'utils/uploads')));
 app.use(adminRoutes)
+app.use(commonRoutes)
 app.use(employerRoutes)
 app.use(candidateRoutes);
+app.use(interactionRoutes)
 
 app.listen(4000, () => {
     console.log('Server is running on http://localhost:4000');

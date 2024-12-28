@@ -3,7 +3,7 @@ import EmployerModel from '../models/employer'
 import UserModel from '../models/user'
 import { Model, Document, Types } from 'mongoose'
 import AdminModel from '../models/admin';
-import { Post } from '../models/post';
+import { postModel } from '../models/post';
 export class UserRepository {
     private getModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> |Model<IAdmin & Document> {
         if (role === 'employer') {
@@ -62,7 +62,7 @@ export class UserRepository {
                         {secondName:{$regex:query,$options:'i'}}
                     ]
                 }).select('-password'),
-                Post.find({
+                postModel.find({
                     $or:[
                         {location:{$regex:query,$options:'i'}},
                         {text:{$regex:query,$options:'i'}}
@@ -85,10 +85,10 @@ export class UserRepository {
     async findUserPosts(userId:string)
     {
         try {
-            const posts = await Post.find({ userId }).sort({ createdAt: -1 })
-                // .populate('comments.userId', 'username.profilePicture')
+            const posts = await postModel.find({ userId }).sort({ createdAt: -1 })
                 .lean()
-                console.log(posts)
+                .populate('likes')
+                .populate('comments')
                 return posts
         } catch (error) {
             console.error("Error occured while finding userposts",error)
@@ -145,7 +145,7 @@ export class UserRepository {
                 throw new Error("user not found in createpost")
             }
             const newPost={...postData,userId:userId,createdAt:new Date(),userType:role==='employer'?'employer':'user'}
-            const postModel=Post 
+           
             const savedPost=await postModel.create(newPost)
             if(savedPost)
             {

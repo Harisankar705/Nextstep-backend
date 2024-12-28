@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, mongo } from "mongoose";
 export interface IUser extends Document {
     _id: string | mongoose.Types.ObjectId;
     username?: string;
@@ -29,6 +29,15 @@ export interface IUser extends Document {
     status: "Active" | "Inactive"
 }
 
+export interface IConnection extends Document
+{
+    followerId:mongoose.Schema.Types.ObjectId|string;
+    followingId:mongoose.Schema.Types.ObjectId|string;
+    isFollowBack:boolean;
+    createdAt:Date
+    updatedAt:Date
+    status:ConnectionStatus
+}
 
 export interface IEmployer extends Document {
     _id: string | mongoose.Types.ObjectId,
@@ -75,7 +84,7 @@ export interface IPayLoad {
     userId: string
     role: "user" | 'employer' | 'admin'
 }
-export interface IPosts extends Document
+export interface    IPosts extends Document
 {
     userId:mongoose.Types.ObjectId,
     userType:'user'|'employer',
@@ -83,5 +92,14 @@ export interface IPosts extends Document
     image:string[],
     background?:string,
     location:string,
-    createdAt:Date
+    createdAt:Date,
+    comments:mongoose.Types.ObjectId[],
+    likes:mongoose.Types.ObjectId[]
+}
+export enum ConnectionStatus
+{
+    FOLLOWBACK='followback',
+    REJECTED='rejected',
+    NOTFOLLOWINGBACK='notfollowingback'
+
 }

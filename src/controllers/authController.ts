@@ -390,17 +390,30 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 
 export const getUserPost = async (req: Request, res: Response) => {
   try {
-    console.log("in getuserpost");
-    const userId = req.user?.userId;
-    console.log("USERID", userId);
-    if (!userId) {
+    const authenticatedUserId = req.user?.userId;
+    const targetUserId = req.query.userId
+    
+    
+    if (!authenticatedUserId) {
       res.status(401).json({ message: "authorization required" });
       return;
     }
-    const posts = await authService.getUsersPosts(userId);
-    res.status(200).json(posts);
+    const userIdToFetch=targetUserId?targetUserId:authenticatedUserId
+    console.log(userIdToFetch)
+    const posts = await authService.getUsersPosts(userIdToFetch);
+    console.log('getuserpost',posts)
+    const postsWithLikeStatus = posts.map(post => {
+      const likedByUser = post.likes.includes(authenticatedUserId); 
+      return {
+        ...post, 
+        likedByUser 
+      };
+    });
+    console.log('like status',postsWithLikeStatus)
+    res.status(200).json( postsWithLikeStatus);
   } catch (error) {
     const err = error as Error;
+    console.log("Error in getUserPost",err)
     res.status(400).json({ message: err.message });
   }
 };

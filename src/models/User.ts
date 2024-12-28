@@ -29,6 +29,7 @@ const userSchema = new Schema<IUser>({
     languages: { type: [String], default: [] },
     isBlocked: { type: Boolean, default: false },
     connections: [{ type: Schema.Types.ObjectId, ref: 'Connection' }],
+    
     premium: { type: Boolean, default: false }
 });
 

@@ -28,6 +28,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 export const individualDetails=async(req:Request,res:Response):Promise<void>=>{
     try {
         const {id}=req.params
+        const role=req.body
         console.log(id)
         
         
@@ -36,8 +37,7 @@ export const individualDetails=async(req:Request,res:Response):Promise<void>=>{
              res.status(400).json({message:"Id not a string"})
              return
         }
-        const response=await adminService.getIndividualDetails(id)
-        console.log(response)
+        const response=await adminService.getIndividualDetails(id,role)
         res.status(200).json(response)
 
     }
