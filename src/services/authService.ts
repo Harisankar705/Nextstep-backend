@@ -95,6 +95,7 @@ class AuthService {
         try
         {
             const posts = await userRepository.findUserPosts(userId)
+            console.log("POSTS",posts)
             return posts
         }
         catch(error)
