@@ -16,7 +16,6 @@ export class ConnectionRepository extends BaseRepository<IConnection> {
                 { followerId: followingId, followingId: followerId },
             ]
         });
-        console.log("CONNECTION",connection)
         return connection
     }
 
