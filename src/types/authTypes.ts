@@ -1,4 +1,4 @@
-import mongoose, { Document, mongo, ObjectId } from "mongoose";
+import mongoose, { Document, mongo, ObjectId, Types } from "mongoose";
 export interface IUser extends Document {
     _id: string | mongoose.Types.ObjectId;
     username?: string;
@@ -107,5 +107,26 @@ export enum ConnectionStatus
     FOLLOWBACK='followback',
     REJECTED='rejected',
     NOTFOLLOWINGBACK='notfollowingback'
+
+}
+export interface JobData
+{
+    employerId:Types.ObjectId|string,
+
+    jobTitle:string
+    description:string,
+    employmentTypes:string[],
+    salaryRange: {
+        min: number,
+        max: number
+    },
+    categories: string[],
+    requiredSkills: string[],
+    responsibilities:string,
+    whoYouAre: string,
+    niceToHave?: string,
+    benefits: string[]
+    createdAt: Date, 
+    isActive: boolean
 
 }
