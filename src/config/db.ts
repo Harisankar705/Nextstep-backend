@@ -8,6 +8,7 @@ export const dbConnection = async (): Promise<void> => {
         }
         await mongoose.connect(mongoUri)
     } catch (error) {
+        console.log("failed to connect to db",error)
         throw new Error("Failed to connect to db!")
     }
 }
