@@ -99,6 +99,7 @@ export class UserRepository {
     async findById(userId: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = this.getModel(role);
+            console.log("MODEL",model)
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findOne({ userId }).exec();
             }

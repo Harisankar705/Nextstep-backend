@@ -1,14 +1,19 @@
-import mongoose from 'mongoose'
-require('dotenv').config()
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 export const dbConnection = async (): Promise<void> => {
-    try {
-        const mongoUri = process.env.MONGO_DB as string
-        if (!mongoUri) {
-            throw new Error('mongouri not found')
-        }
-        await mongoose.connect(mongoUri)
-    } catch (error) {
-        console.log("failed to connect to db",error)
-        throw new Error("Failed to connect to db!")
+  try {
+    const mongoUri = process.env.MONGO_DB;
+    if (!mongoUri) {
+      throw new Error('MONGO_DB environment variable not found');
     }
-}
+
+    await mongoose.connect(mongoUri);
+    console.log('Connected to MongoDB successfully!'); 
+  } catch (error) {
+    console.error('Failed to connect to MongoDB:', error);
+    throw new Error('Failed to connect to MongoDB!');
+  }
+};

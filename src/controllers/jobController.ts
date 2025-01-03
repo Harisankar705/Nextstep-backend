@@ -7,14 +7,18 @@ export const createJob=async(req:Request,res:Response)=>
 {
     try {
         const jobData:JobData=req.body
-        const employerId=req.user.userId 
+        console.log('jobdata',jobData)
+        const employerId = req.user?.userId;
+        console.log("EMPloyerid",req.user)
         if(!employerId)
         {
             res.status(401).json({message:"Employer id is required"})
+            return
         }
         if(!jobData)
         {
             res.status(400).json({message:"Job details required!"})
+            return
         }
         const job=await jobService.createJob(employerId,jobData)
         res.status(201).json({message:"Job posted!"})

@@ -111,22 +111,25 @@ export enum ConnectionStatus
 }
 export interface JobData
 {
-    employerId:Types.ObjectId|string,
-
-    jobTitle:string
-    description:string,
-    employmentTypes:string[],
-    salaryRange: {
-        min: number,
-        max: number
-    },
-    categories: string[],
-    requiredSkills: string[],
-    responsibilities:string,
-    whoYouAre: string,
-    niceToHave?: string,
-    benefits: string[]
-    createdAt: Date, 
-    isActive: boolean
+    formData:{
+        employerId:Types.ObjectId|string,
+    
+        jobTitle:string
+        description:string,
+        employmentTypes:string[],
+        salaryRange: {
+            min: number,
+            max: number
+        },
+        categories: string[],
+        requiredSkills: string[],
+        responsibilities:string,
+        whoYouAre: string,
+        niceToHave?: string,
+        benefits: string[]
+        createdAt: Date, 
+        isActive: boolean
+    }
+    
 
 }

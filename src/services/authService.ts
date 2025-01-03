@@ -128,6 +128,7 @@ class AuthService {
             }
 
             const accessToken: string = generateToken({ userId: (user._id as string).toString(), role: user.role });
+            console.log(accessToken)
             const refreshToken: string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
             const isProfileComplete: boolean = user.isProfileComplete || false
 

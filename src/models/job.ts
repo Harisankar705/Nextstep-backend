@@ -15,7 +15,12 @@ const jobSchema = new Schema({
     responsibilities: { type: String, required: true },
     whoYouAre: { type: String, required: true },
     niceToHave: { type: String, required: true },
-    benefits: { type: [String], required: true },
+    benefits:[{
+        id:String,
+        icon:String,
+        title:String,
+        description:String
+    }],
     createdAt: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true }
 });
