@@ -8,6 +8,7 @@ import { employerRoutes } from "./routes/employerRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import { commonRoutes } from "./routes/commonRoutes";
 import { interactionRoutes } from "./routes/interactionRoutes";
+import { jobRoutes } from "./routes/jobRoutes";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(commonRoutes)
 app.use(employerRoutes)
 app.use(candidateRoutes);
 app.use(interactionRoutes)
+app.use(jobRoutes)
 
 app.listen(4000, () => {
     console.log('Server is running on http://localhost:4000');
