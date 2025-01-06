@@ -3,8 +3,8 @@ import { EmployerRepository } from './../repositories/employerRepository';
 import { IEmployer, ILoginResponse, IUser } from './../types/authTypes';
 import { comparePassword, hashPassword } from '../utils/hashPassword'
 import { generateRefreshToken, generateToken } from '../utils/jwtUtils'
-import UserModel from '../models/user'
-import EmployerModel from '../models/employer'
+import UserModel from '../models/User'
+import EmployerModel from '../models/Employer'
 import otpService from './otpService'
 
 function isEmployerRole(role: string): role is 'employer' {
@@ -115,11 +115,9 @@ class AuthService {
             console.log(user)
 
             if (!user) {
-                throw new Error('Invalid user');
+                throw new Error('User not found! Try Signup!');
             }
-            if (user.status === 'Inactive') {
-                throw new Error("Account is temporarily blocked!")
-            }
+            
 
             const isMatch = await comparePassword(password, user.password || "");
             console.log(isMatch)
@@ -135,7 +133,7 @@ class AuthService {
             return { accessToken, refreshToken, user, isProfileComplete };
         } 
             catch (error:any) {
-                throw new Error(error);
+                throw error
         }
         
     }

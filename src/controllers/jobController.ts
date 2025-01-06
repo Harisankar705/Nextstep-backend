@@ -62,6 +62,7 @@ export const getJobById=async(req:Request,res:Response)=>{
 export const updateJob=async(req:Request,res:Response):Promise<void>=>
 {
     try {
+        console.log('in updatejob')
         const jobId=req.params.jobId 
         if (!jobId) {
             res.status(500).json({ message: "Job id is required!" })
@@ -76,7 +77,7 @@ export const updateJob=async(req:Request,res:Response):Promise<void>=>
         const updatedJob=await jobRepository.updateJob(jobId,jobData)
         if(updatedJob)
         {
-            res.status(200).json(updatedJob)
+            res.status(200).json({message:"Job updated!"})
         }
         else
         {
@@ -96,7 +97,7 @@ export const deleteJob=async(req:Request,res:Response)=>{
         const deletedJob=await jobService.deleteJob(jobId)
         if(deletedJob)
         {
-            res.status(204).send()
+            res.status(204).json({message:"Job deleted successfully!"})
         }
         else
         {

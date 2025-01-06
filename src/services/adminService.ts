@@ -1,5 +1,5 @@
-import EmployerModel from '../models/employer';
-import UserModel from '../models/user';
+import EmployerModel from '../models/Employer';
+import UserModel from '../models/User';
 import { IEmployer, IUser } from '../types/authTypes';
 import { AdminRepository } from './../repositories/adminRepository';
 export class AdminService
@@ -15,6 +15,7 @@ export class AdminService
             throw new Error('invalid role provided')
         }
         const model = role === 'user' ? UserModel : EmployerModel
+        console.log('model',model)
         const updatedUser = await this.adminRepository.changeUserStatus(model, id)
         return updatedUser
     }

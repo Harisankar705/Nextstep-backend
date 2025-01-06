@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import AuthService from "../services/authService";
 import otpService from "../services/otpService";
-import UserModel from "../models/user";
+import UserModel from "../models/User";
 import {
   generateRefreshToken,
   generateToken,
@@ -199,13 +199,12 @@ export const createPost = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, role } = req.body;
-    console.log(email)
-    console.log(password)
-    console.log(role)
-    if (!email || !password || !role) {
-      res.status(404).json({ message: "Data not present" });
-      return;
+    if(!email || !password || !role)
+    {
+      res.status(400).json({message:"Data not present!"})
+      return
     }
+    
     const roleValidation = validateRole(role);
     if (!roleValidation.valid) {
       res.status(400).json({ message: roleValidation.message });

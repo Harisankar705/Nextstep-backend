@@ -27,9 +27,12 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 };
 export const individualDetails=async(req:Request,res:Response):Promise<void>=>{
     try {
+        
         const {id}=req.params
-        const role=req.body
+        const role=req.query.role as string
         console.log(id)
+        console.log(id)
+        console.log(role)
         
         
         if(!id||typeof id!=='string')
@@ -50,6 +53,7 @@ export const toggleuser = async (req: Request, res: Response): Promise<void> => 
     try {
         const { id } = req.params
         const { role } = req.body
+        console.log('in toggle user',role)
 
         if (!id || !role) {
             res.status(404).json({ message: "id or role is undefined" })
@@ -61,6 +65,7 @@ export const toggleuser = async (req: Request, res: Response): Promise<void> => 
             return;
         }
         const response = await adminService.toggleUser(id, role)
+        console.log(response)
         res.status(200).json({ success: true, message: "User status toogled successfully", data: response })
 
 

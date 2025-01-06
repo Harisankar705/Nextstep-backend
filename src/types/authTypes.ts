@@ -102,6 +102,12 @@ export interface Like {
     userId: ObjectId;
     createdAt: Date;
 }
+export interface ISavedPost
+{
+    user:ObjectId,
+    post:ObjectId,
+    createdAt:Date
+}
 export enum ConnectionStatus
 {
     FOLLOWBACK='followback',
@@ -122,7 +128,7 @@ export interface JobData
             max: number
         },
         categories: string[],
-        requiredSkills: string[],
+        skills: string[],
         responsibilities:string,
         whoYouAre: string,
         niceToHave?: string,

@@ -1,9 +1,9 @@
 import { IAdmin, IEmployer, IUser } from '../types/authTypes';
-import EmployerModel from '../models/employer'
-import UserModel from '../models/user'
 import { Model, Document, Types } from 'mongoose'
 import AdminModel from '../models/admin';
 import { postModel } from '../models/post';
+import EmployerModel from "../models/Employer";
+import UserModel from "../models/User";
 export class UserRepository {
     private getModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> |Model<IAdmin & Document> {
         if (role === 'employer') {
@@ -101,10 +101,10 @@ export class UserRepository {
             const model = this.getModel(role);
             console.log("MODEL",model)
             if (role === 'employer') {
-                return (model as Model<IEmployer & Document>).findOne({ userId }).exec();
+                return (model as Model<IEmployer & Document>).findById(userId ).exec();
             }
             if (role === 'user') {
-                return (model as Model<IUser & Document>).findOne({ userId }).exec();
+                return (model as Model<IUser & Document>).findById( userId ).exec();
             }
             
             throw new Error(`Invalid role: ${role}`);
