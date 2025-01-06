@@ -11,7 +11,7 @@ candidateRoutes.post('/verify-otp', verifyOTPController)
 candidateRoutes.post('/resend-otp', resendOTPcontroller)
 candidateRoutes.post('/check-email-phone', emailOrPhoneNumber)
 candidateRoutes.post('/refreshtoken', refreshTokenController)
-candidateRoutes.post('/createpost',verifyToken, createPost)
+candidateRoutes.post('/createpost',verifyToken, createPost) 
 candidateRoutes.get('/userposts',verifyToken,getUserPost)
 candidateRoutes.post('/search',verifyToken,search)
 

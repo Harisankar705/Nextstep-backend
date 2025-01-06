@@ -6,15 +6,16 @@ const jobSchema = new Schema({
     jobTitle: { type: String, required: true },
     description: { type: String, required: true },
     employmentTypes: { type: [String], required: true },
+    industry: { type: [String], required: true },
     salaryRange: {
         min: { type: Number, required: true },
         max: { type: Number, required: true }
     },
     categories: { type: [String], required: true },
-    requiredSkills: { type: [String], required: true },
+    skills: { type: [String], required: true },
     responsibilities: { type: String, required: true },
     whoYouAre: { type: String, required: true },
-    niceToHave: { type: String, required: true },
+    niceToHave: { type: String },
     benefits:[{
         id:String,
         icon:String,
@@ -22,7 +23,9 @@ const jobSchema = new Schema({
         description:String
     }],
     createdAt: { type: Date, default: Date.now },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    applicationDeadline:{type:Date},
+    applicants:{type:[String]}
 });
 
 const JobModel = mongoose.model("Job", jobSchema);

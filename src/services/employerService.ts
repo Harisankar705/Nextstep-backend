@@ -1,4 +1,4 @@
-import EmployerModel from "../models/employer"
+import EmployerModel from "../models/Employer"
 import { EmployerRepository } from "../repositories/employerRepository"
 import { IEmployer } from "../types/authTypes"
 

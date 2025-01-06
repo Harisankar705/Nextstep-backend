@@ -1,5 +1,5 @@
 import { verificationStatus } from "../controllers/adminController";
-import EmployerModel from "../models/employer";
+import EmployerModel from "../models/Employer";
 import { IEmployer } from "../types/authTypes";
 import {Types} from 'mongoose'
 

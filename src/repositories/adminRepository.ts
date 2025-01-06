@@ -1,5 +1,5 @@
-import EmployerModel from "../models/employer";
-import UserModel from "../models/user";
+import EmployerModel from "../models/Employer";
+import UserModel from "../models/User";
 
 export class AdminRepository{
  async changeUserStatus(model:typeof UserModel| typeof EmployerModel,id:string):Promise<any> {
@@ -15,6 +15,7 @@ export class AdminRepository{
         {
             throw new Error("Failed to update user status")
         }
+        console.log('updateuser',updatedUser)
         return updatedUser
         
     }
