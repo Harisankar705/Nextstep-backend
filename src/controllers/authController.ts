@@ -33,7 +33,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ message: "Userdata is required for signup" });
       return;
     }
-    console.log("in signup", userData);
+    
     const roleValidation = validateRole(userData.role);
     if (!roleValidation.valid) {
       res.status(400).json({ message: roleValidation.message });
@@ -132,7 +132,7 @@ export const candidateDetails = async (req: Request, res: Response) => {
 };
 export const search=async(req:Request,res:Response)=>{
   const {query}=req.body
-  console.log(query)
+  
   try {
     const result=await authService.searchService(query as string)
     res.json({success:true,data:result})
@@ -143,7 +143,7 @@ export const search=async(req:Request,res:Response)=>{
 export const createPost = async (req: Request, res: Response) => {
   try {
     const uploadResponse = await handleFileUpload(req);
-    console.log("UPLOADRESPONSE", uploadResponse);
+    
 
     const { text, background, role, postImage } = uploadResponse.fields || {};
 
@@ -160,18 +160,18 @@ export const createPost = async (req: Request, res: Response) => {
       res.status(400).json({ message: "Role not valid" });
       return;
     }
-
-    const tokenPrefix = role[0].toLowerCase();
-    console.log(tokenPrefix);
-    const accessToken = req.cookies[`${tokenPrefix}AccessToken`];
-    console.log("Access Token:", accessToken);
     const userId = req.user?.userId;
-    console.log("User ID:", userId);
 
-    if (!accessToken || !userId) {
-      res.status(401).json({ message: "Authentication required" });
-      return;
-    }
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
 
     const postData = {
       text: text[0],
@@ -237,31 +237,31 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ user });
   } catch (error) {
     const err = error as Error;
-    console.log(err.message)
+    
     res.status(400).json({ message: err.message });
   }
 };
 
-// export const googleAuthController = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const { tokenId, role } = req.body
-//         const roleValidation = validateRole(role)
-//         if (!roleValidation.valid) {
-//             res.status(400).json({ message: roleValidation.message })
-//             return
-//         }
-//         const { accessToken, user } = await googleAuth(tokenId, role)
-//         if (accessToken && user) {
 
-//             res.status(200).json({ success: true, accessToken, user })
-//             return
-//         }
 
-//     } catch (error) {
-//         const err = error as Error
-//         res.status(400).json({ message: err.message })
-//     }
-// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const sendOTPcontroller = async (
   req: Request,
   res: Response
@@ -310,7 +310,7 @@ export const verifyOTPController = async (
   res: Response
 ): Promise<void> => {
   try {
-    console.log("in verify otp", req.body);
+    
     const { email, role, otp } = req.body;
     if (!email || !role || !otp) {
       res.status(400).json({ message: "OTP,EMAIL,ROLE is required" });
@@ -360,10 +360,10 @@ export const emailOrPhoneNumber = async (
 };
 export const refreshTokenController = async (req: Request, res: Response) => {
   try {
-    console.log("reques", req);
+    
     const tokenPrefix = req.body.role.toLowerCase();
 
-    console.log("TOKENPREFIX", tokenPrefix);
+    
     const refreshToken = req.cookies[`${tokenPrefix}RefreshToken`];
     if (!refreshToken) {
       res.status(401).send({ message: "Refresh token is missing" });
@@ -375,7 +375,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
       return;
     }
     const { userId, role } = decoded;
-    console.log("ROLE", role);
+    
     const newAccessToken = generateToken({ userId, role });
     const newRefreshToken = generateRefreshToken({ userId, role });
     setRefreshToken(res, newRefreshToken);
@@ -383,7 +383,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
     res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
     const err = error as Error;
-    console.log(err);
+    
     res.status(400).json({ message: err.message });
   }
 };
@@ -399,9 +399,9 @@ export const getUserPost = async (req: Request, res: Response) => {
       return;
     }
     const userIdToFetch=targetUserId?targetUserId:authenticatedUserId
-    console.log(userIdToFetch)
+    
     const posts = await authService.getUsersPosts(userIdToFetch);
-    console.log('getuserpost',posts)
+    
     const postsWithLikeStatus = posts.map(post => {
       const likedByUser = post.likes.some((like: any) => {
         const likeUserId = like.userId
@@ -420,11 +420,11 @@ export const getUserPost = async (req: Request, res: Response) => {
         likedByUser
       };
     });
-    console.log('like status',postsWithLikeStatus)
+    
     res.status(200).json( postsWithLikeStatus);
   } catch (error) {
     const err = error as Error;
-    console.log("Error in getUserPost",err)
+    
     res.status(400).json({ message: err.message });
   }
 };

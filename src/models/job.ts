@@ -16,6 +16,8 @@ const jobSchema = new Schema({
     responsibilities: { type: String, required: true },
     whoYouAre: { type: String, required: true },
     niceToHave: { type: String },
+    applicantsCount: { type: Number, default: 0 },  
+
     benefits:[{
         id:String,
         icon:String,
@@ -25,7 +27,7 @@ const jobSchema = new Schema({
     createdAt: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
     applicationDeadline:{type:Date},
-    applicants:{type:[String]}
+    applicants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Applicant' }], 
 });
 
 const JobModel = mongoose.model("Job", jobSchema);

@@ -54,6 +54,21 @@ class InteractionService{
         const comments=await interactionRepository.getComments(postId)
         return comments
     }
+    async savePost(userId:string,postId:string)
+    {
+        const savedPost=await interactionRepository.savePost(userId,postId)
+        return savedPost
+    }
+    async getSavedPost(userId:string)
+    {
+        const savedPost=await interactionRepository.getSavedPost(userId)
+        return savedPost
+    } 
+     async checkPostSaved (userId:string,postId:string)
+     {
+        return await interactionRepository.checkSavedPostStatus(userId,postId)
+
+     }
 
     
     async getPostInteractions(postId:string)

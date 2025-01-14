@@ -104,8 +104,8 @@ export interface Like {
 }
 export interface ISavedPost
 {
-    user:ObjectId,
-    post:ObjectId,
+    userId:string,
+    postIds:string,
     createdAt:Date
 }
 export enum ConnectionStatus
@@ -139,3 +139,8 @@ export interface JobData
     
 
 }
+export interface Filters {
+    search?: string; 
+    jobTypes?: string[]; 
+    experienceLevels?: string[]; 
+};

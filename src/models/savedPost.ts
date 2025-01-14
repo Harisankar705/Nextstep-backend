@@ -1,17 +1,15 @@
 import mongoose from "mongoose";
 import { ISavedPost } from "../types/authTypes";
 const savedPostModal=new mongoose.Schema<ISavedPost>({
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
+    userId:{
+        type:String,
         required:true,
-        ref:"User"
     },
-    post:
-    {
-        type:mongoose.Schema.Types.ObjectId,
+    postIds:
+    [{
+        type:String,
         required:true,
-        ref:"Post"
-    },
+    }],
     createdAt: {
         type: Date,
         default: Date.now
