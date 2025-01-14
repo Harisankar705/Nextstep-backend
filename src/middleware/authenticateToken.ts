@@ -21,10 +21,10 @@ export const verifyToken = async(req: Request, res: Response, next: NextFunction
     }
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN as string) as JwtPayload
-        console.log('decoded',decoded)
+        
         req.user = decoded
         const userData = await userRespository.findById(decoded.userId,role)
-        console.log('userData',userData)
+        
         if(!userData ||userData?.status=='Inactive')
         { res.clearCookie(employerToken?"employerAccessToken":"userAccessToken")    
             res.status(404).json({message:"Authentication restricted!"})        

@@ -15,7 +15,7 @@ export class AdminService
             throw new Error('invalid role provided')
         }
         const model = role === 'user' ? UserModel : EmployerModel
-        console.log('model',model)
+        
         const updatedUser = await this.adminRepository.changeUserStatus(model, id)
         return updatedUser
     }

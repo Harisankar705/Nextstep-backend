@@ -15,7 +15,7 @@ export class AdminRepository{
         {
             throw new Error("Failed to update user status")
         }
-        console.log('updateuser',updatedUser)
+        
         return updatedUser
         
     }

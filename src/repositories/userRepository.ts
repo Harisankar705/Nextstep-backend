@@ -99,7 +99,7 @@ export class UserRepository {
     async findById(userId: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = this.getModel(role);
-            console.log("MODEL",model)
+            
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findById(userId ).exec();
             }
@@ -135,11 +135,11 @@ export class UserRepository {
     }
     async createPost (postData:object,role:string,userId:string):Promise<Document>{
         try {
-            console.log('in createpost',postData)
-            console.log('in createpostrole',role)
-            console.log('in createpostrole',userId)
+            
+            
+            
             const model=this.getModel(role)as Model<IUser |IEmployer>
-            console.log(model)
+            
             const user=await model.findById(userId)
             if(!user)
             {
@@ -150,7 +150,7 @@ export class UserRepository {
             const savedPost=await postModel.create(newPost)
             if(savedPost)
             {
-                console.log("post saved")
+                
             }
             
             return savedPost

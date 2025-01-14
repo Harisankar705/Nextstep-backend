@@ -18,7 +18,7 @@ export const employerDetails = async (req: Request, res: Response, next: NextFun
             res.status(400).json({message:"Invalid form data"})
             return
         }
-        console.log(uploadResponse)
+        
         const {logo}=uploadResponse.fileNames
         const data={
             companyName:uploadResponse.fields.companyName?.[0],

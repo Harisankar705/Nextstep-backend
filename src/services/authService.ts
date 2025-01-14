@@ -40,19 +40,19 @@ class AuthService {
     }
 
     async register(userData: IUser | IEmployer): Promise<IUser | IEmployer> {
-        console.log("Registering user with data:", JSON.stringify(userData, null, 2));
+        );
 
         try {
             const userRepository = new UserRepository();
-            console.log('User Repository initialized');
+            
 
-            console.log('Validating role:', userData.role);
+            
             if (!this.validateRole(userData.role)) {
                 console.error('Invalid role detected:', userData.role);
                 throw new Error('Invalid role. Must be "user" or "employer".');
             }
 
-            console.log('Checking for existing user with email:', userData.email);
+            
             const existingUser = await userRepository.findByEmail(userData.email, userData.role);
 
             if (existingUser) {
@@ -60,30 +60,30 @@ class AuthService {
                 throw new Error('User already exists!');
             }
 
-            console.log('Hashing password');
+            
             const hashedPassword = await hashPassword(userData.password || "");
-            console.log('Password hashed successfully');
+            
 
             let newUser;
-            console.log('Determining user type based on role:', userData.role);
+            
 
             if (isEmployerRole(userData.role)) {
-                console.log('Creating Employer Model');
+                
                 newUser = new EmployerModel({
                     ...userData,
                     password: hashedPassword
                 });
             } else {
-                console.log('Creating User Model');
+                
                 newUser = new UserModel({
                     ...userData,
                     password: hashedPassword
                 });
             }
 
-            console.log('Attempting to save user');
+            
             await newUser.save();
-            console.log('User saved successfully:', newUser._id);
+            
 
             return newUser;
         } catch (error) {
@@ -95,7 +95,7 @@ class AuthService {
         try
         {
             const posts = await userRepository.findUserPosts(userId)
-            console.log("POSTS",posts)
+            
             return posts
         }
         catch(error)
@@ -108,11 +108,11 @@ class AuthService {
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
         try {
             const userRepository = new UserRepository();
-            console.log(email)
-            console.log(password)
-            console.log(role)
+            
+            
+            
             const user = await userRepository.findByEmail(email, role);
-            console.log(user)
+            
 
             if (!user) {
                 throw new Error('User not found! Try Signup!');
@@ -120,13 +120,13 @@ class AuthService {
             
 
             const isMatch = await comparePassword(password, user.password || "");
-            console.log(isMatch)
+            
             if (!isMatch) {
                 throw new Error("invalid email or password")
             }
 
             const accessToken: string = generateToken({ userId: (user._id as string).toString(), role: user.role });
-            console.log(accessToken)
+            
             const refreshToken: string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
             const isProfileComplete: boolean = user.isProfileComplete || false
 

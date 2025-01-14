@@ -18,10 +18,10 @@ export class ConnectionService
             throw new Error("cannot send connection request to yourself!")
         }
         const existingConnection =await this.connectionRepository.findExisitingConnection(followerId,followingId)
-        console.log('exisiting connection', existingConnection)
+        
         if (existingConnection) {
             await ConnectionModel.findByIdAndDelete(existingConnection._id);
-            console.log('user unfollowed successfully!')
+            
             return false;
         }
 
@@ -36,7 +36,7 @@ export class ConnectionService
             message:`${followerId} has followed you!`
         })
         await notificaton.save( )
-        console.log('followed successfully')
+        
         return true
 
         

@@ -9,7 +9,9 @@ import adminRoutes from "./routes/adminRoutes";
 import { commonRoutes } from "./routes/commonRoutes";
 import { interactionRoutes } from "./routes/interactionRoutes";
 import { jobRoutes } from "./routes/jobRoutes";
-
+import http from 'http'
+import { Server } from "socket.io";
+import { chatRoutes } from "./routes/chatRoutes";
 const app = express();
 
 dbConnection();
@@ -30,7 +32,27 @@ app.use(employerRoutes)
 app.use(candidateRoutes);
 app.use(interactionRoutes)
 app.use(jobRoutes)
+app.use(chatRoutes)
+const server=http.createServer(app)
+const io=new Server(server,{
+    cors:{
+          origin: 'http://localhost:5173',
+          methods:['GET',"POST"]
 
-app.listen(4000, () => {
+
+    },
+})
+io.on('connection',(socket)=>{
+    console.log("A user connected",socket.id)
+    socket.on('sendMessage',(data)=>{
+        io.emit('receiveMesssage',data)
+    })
+    socket.on('disconnect',()=>{
+        console.log('User disconnected',socket.id)
+    })
+})
+
+
+server.listen(4000, () => {
     console.log('Server is running on http://localhost:4000');
 });
