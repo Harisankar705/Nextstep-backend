@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import e, { NextFunction, Request, Response } from "express";
 import AuthService from "../services/authService";
 import otpService from "../services/otpService";
 import UserModel from "../models/User";
@@ -63,6 +63,7 @@ interface CandidateData {
 
 export const candidateDetails = async (req: Request, res: Response) => {
   try {
+    console.log('in candidatedetails')
     const uploadResponse = await handleFileUpload(req);
     const userId = req.user?.userId;
     if (!userId) {
@@ -92,6 +93,7 @@ export const candidateDetails = async (req: Request, res: Response) => {
       return;
     }
     const user = await UserModel.findById(userId);
+    console.log("user",user)
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -125,9 +127,7 @@ export const candidateDetails = async (req: Request, res: Response) => {
       profilePicture,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "An error occurred while processing your request." });
+    console.log('error',error)
   }
 };
 export const search=async(req:Request,res:Response)=>{

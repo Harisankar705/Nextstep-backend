@@ -27,9 +27,11 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 };
 export const individualDetails=async(req:Request,res:Response):Promise<void>=>{
     try {
-        
+        console.log('in individualdetails')
         const {id}=req.params
         const role=req.query.role as string
+        console.log('id',id)
+        console.log('role',role)
         
         
         

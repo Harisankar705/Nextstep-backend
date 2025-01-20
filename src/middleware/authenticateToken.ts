@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { UserRepository } from "../repositories/userRepository";
 const userRespository=new UserRepository()
-interface JwtPayload
+export interface JwtPayload
 {
 userId:string,
 role:string,

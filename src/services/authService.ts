@@ -40,7 +40,7 @@ class AuthService {
     }
 
     async register(userData: IUser | IEmployer): Promise<IUser | IEmployer> {
-        );
+        
 
         try {
             const userRepository = new UserRepository();

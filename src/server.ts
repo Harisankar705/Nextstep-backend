@@ -12,6 +12,7 @@ import { jobRoutes } from "./routes/jobRoutes";
 import http from 'http'
 import { Server } from "socket.io";
 import { chatRoutes } from "./routes/chatRoutes";
+import { socketConfig } from "./utils/socketConfig";
 const app = express();
 
 dbConnection();
@@ -37,20 +38,13 @@ const server=http.createServer(app)
 const io=new Server(server,{
     cors:{
           origin: 'http://localhost:5173',
+          credentials:true,
           methods:['GET',"POST"]
 
 
     },
 })
-io.on('connection',(socket)=>{
-    console.log("A user connected",socket.id)
-    socket.on('sendMessage',(data)=>{
-        io.emit('receiveMesssage',data)
-    })
-    socket.on('disconnect',()=>{
-        console.log('User disconnected',socket.id)
-    })
-})
+socketConfig(io)
 
 
 server.listen(4000, () => {

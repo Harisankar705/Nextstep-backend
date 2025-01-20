@@ -5,12 +5,20 @@ interface ChatMessage{
     receiverId:Types.ObjectId,
     content:string,
     type:'text'|'image'|'document',
-    timeStamp:Date,
-    status:"sent"|"delivered"|'read',
-    fileUrl?:string,
+    timestamp:Date,
+    file?:{
+        
+            name:string
+            type:string
+            url:string
+        
+    }|null
     senderRole:"User"|'Employer';
     receiverRole:"User"|'Employer'
-    isDeleted:boolean
+    isDeleted:boolean,
+    status:'sent'|'delivered'|'read',
+    seenAt?:Date,
+    deliveredAt?:Date
 }
 const ChatSchema=new Schema<ChatMessage>({
     senderId:{type:Schema.Types.ObjectId,ref:"User",required:true},
@@ -21,14 +29,22 @@ const ChatSchema=new Schema<ChatMessage>({
         enum:['text','image','document'],
         default:'text'
     },
-    timeStamp:{type:Date,default:Date.now},
+    timestamp:{type:Date,default:Date.now},
     status:{type:String,enum:['sent','delivered','read'],
         default:'sent'
 
     },
-    fileUrl:{type:String},
-    senderRole:{type:String,enum:["User","Employer"],required:true},
-    receiverRole:{type:String,enum:["User","Employer"],required:true},
+    seenAt:{type:Date,default:null},
+    deliveredAt:{type:Date,default:null},
+    file:{
+       
+            name:{type:String},
+            type:{type:String},
+            url:{type:String}
+        
+    },   
+     senderRole:{type:String,enum:["User","Employer"]},
+    receiverRole:{type:String,enum:["User","Employer"]},
     isDeleted:{type:Boolean,default:false}
 })
 export const chatModel = mongoose.model("Chat", ChatSchema)

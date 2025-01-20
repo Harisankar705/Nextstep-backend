@@ -7,14 +7,24 @@ export class ChatRepository
     {
         return await chatModel.create(data)
     }
-    async getMessages(userId:string,contactId:string)
+    async getMessages(id:string,userId:string)
     {
         return await chatModel.find({
             $or:[
-                {senderId:userId,receiverId:contactId},
-                {senderId:contactId,receiverId:userId}
+                {senderId:id,receiverId:userId},
+                {senderId:userId,receiverId:id}
             ],
         }).sort({timeStamp:1})
+    }
+    async updateMessageStatus(messageId:string,status:'sent'|'delivered'|'seen')
+    {
+        return await chatModel.findByIdAndUpdate(messageId,{
+            status,
+            ...(status==='delivered' && {deliveredAt:new Date()}),
+            ...(status==='seen' && {seenAt:new Date()})
+        },
+        {new:true}
+    )
     }
     async getMessagesForUser(userId:string)
     {
