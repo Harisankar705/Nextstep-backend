@@ -161,19 +161,8 @@ export const createPost = async (req: Request, res: Response) => {
       return;
     }
     const userId = req.user?.userId;
-
-    
-    
-    
-    
-    
-
-    
-    
-    
-    
-
-    const postData = {
+    console.log('userid',userId)
+const postData = {
       text: text[0],
       background: background?.[0] || "",
       image: uploadResponse.fileNames?.postImage,

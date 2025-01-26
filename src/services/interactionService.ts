@@ -1,10 +1,22 @@
 import {  postModel } from "../models/post";
 import { interactionRepository } from "../repositories/interactionRepository";
+import { notificationService } from "./notificationService";
 
 class InteractionService{
     async likePost(userId: string, postId: string): Promise<boolean> {
         try {
             const existingLike = await interactionRepository.checkUserLiked(userId, postId);
+            const post=await interactionRepository.getPostById(postId)
+            if(post?.userId.toString()!==userId.toString())
+            {
+                await notificationService.createNotification({
+                    recipient:post?.userId,
+                    sender:userId,
+                    type:'post_like',
+                    content:'liked your post',
+                    link:`/posts/${userId}`
+                })
+            }
 
             if (existingLike) {
                 await interactionRepository.removeLike(userId, postId);
@@ -14,7 +26,6 @@ class InteractionService{
                 });
                 return false;
             } else {
-                // Like the post
                 const like = await interactionRepository.createLike(userId, postId);
                 await postModel.findByIdAndUpdate(postId, {
                     $inc: { likeCount: 1 },

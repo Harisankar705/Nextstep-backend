@@ -2,6 +2,7 @@
   "dependencies": {
     "@auth/express": "^0.8.4",
     "@aws-sdk/client-s3": "^3.731.1",
+    "@aws-sdk/s3-request-presigner": "^3.731.1",
     "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.7",
     "axios": "^1.7.7",
@@ -43,5 +44,21 @@
     "@typescript-eslint/parser": "^8.18.0",
     "globals": "^15.13.0",
     "typescript-eslint": "^8.18.0"
-  }
+  },
+  "name": "nextstep-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harisankar705/Nextstep-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Harisankar705/Nextstep-backend/issues"
+  },
+  "homepage": "https://github.com/Harisankar705/Nextstep-backend#readme",
+  "description": ""
 }

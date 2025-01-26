@@ -139,6 +139,7 @@ export class UserRepository {
             
             
             const model=this.getModel(role)as Model<IUser |IEmployer>
+            console.log('model',model)
             
             const user=await model.findById(userId)
             if(!user)

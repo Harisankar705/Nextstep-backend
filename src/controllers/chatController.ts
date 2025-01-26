@@ -1,5 +1,7 @@
 import { Request, Response } from "express"
 import { ChatService } from "../services/chatService"
+import { S3Client, GetObjectCommand, GetObjectCommandInput } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 const chatService = new ChatService();
 
 
@@ -40,3 +42,41 @@ export const getMessages=async(req:Request,res:Response)=>{
         res.status(500).json(error)
     }
 }
+
+export const getURL = async (req: Request, res: Response) => {
+    const s3Client = new S3Client({
+      region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    });
+  
+    try {
+      const { url } = req.body;
+      if (!url) {
+        return res.status(400).json({ error: 'Missing URL' });
+      }
+  
+      const urlParts = new URL(url);
+      const bucket = urlParts.hostname.split('.')[0];
+      const key = decodeURIComponent(urlParts.pathname.substring(1));
+  
+      // Prepare the input for the GetObjectCommand
+      const getObjectParams: GetObjectCommandInput = {
+        Bucket: bucket,
+        Key: key,
+      };
+  
+      // Create a GetObjectCommand
+      const command = new GetObjectCommand(getObjectParams);
+  
+      // Generate the signed URL
+      const signedURL = await getSignedUrl(s3Client, command, { expiresIn: 3600 }); // 1 hour expiry
+  
+      return res.status(200).json({ secureURL: signedURL });
+    } catch (error) {
+      console.error('Error generating signed URL:', error);
+      return res.status(500).json({ error: 'Failed to generate signed URL' });
+    }
+  };

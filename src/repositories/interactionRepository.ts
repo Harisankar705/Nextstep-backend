@@ -1,5 +1,6 @@
 import { commentModel } from "../models/comment"
 import { likeModel } from "../models/like"
+import { postModel } from "../models/post"
 import savedPostSchema from "../models/savedPost"
 
 class InteractionRepository
@@ -62,6 +63,10 @@ class InteractionRepository
     async createShare(userId:string,postId:string)
     {
         return likeModel.create({userId,postId})
+    }
+    async getPostById(postId:string)
+    {
+        return postModel.findById(postId)
     }
     
 

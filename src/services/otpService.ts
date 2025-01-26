@@ -1,6 +1,5 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
-import { Response } from 'express';
 
 import { UserRepository } from '../repositories/userRepository'
 const otpStore: { [key: string]: { otp: string, expiry: Date } } = {};
