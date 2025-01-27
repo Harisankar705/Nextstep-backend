@@ -1,9 +1,10 @@
-const notification=require('../models/notification')
+import Notification from "../models/notification"
+
 export class NotificationRepository{
     async createNotification(notificationData:any)
     {
         try {
-            const newNotification=new notification(notificationData)
+            const newNotification=new Notification(notificationData)
             return await newNotification.save()
         } catch (error:any) {
             throw new Error(`Error creating notification:${error.message}`,)
@@ -13,9 +14,10 @@ export class NotificationRepository{
     {
         try {
         
-            return await notification.find({receipient:userId})
+            const notifications= await Notification.find({receipient:userId})
             .populate('sender','firstName secondName companyName logo profilePicture')
             .sort({createdAt:-1})
+            return notifications
         } catch (error:any) {
             throw new Error(`Error getting notification ${error.message}`)
         }
@@ -23,7 +25,7 @@ export class NotificationRepository{
     async markNotificationAsRead(notificationId:string)
     {
         try {
-            return await notification.findByIdAndUpdate(notificationId,{read:true},{new:true})
+            return await Notification.findByIdAndUpdate(notificationId,{read:true},{new:true})
         } catch (error:any) {
             throw new Error(`Error getting notification ${error.message}`)
 

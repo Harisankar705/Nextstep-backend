@@ -11,6 +11,7 @@
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
+    "dunder-proto": "^1.0.1",
     "express": "^4.21.1",
     "express-validator": "^7.2.0",
     "formidable": "^3.5.2",
