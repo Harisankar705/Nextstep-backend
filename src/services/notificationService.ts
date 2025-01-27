@@ -11,7 +11,7 @@ const io=require('socket.io')
     {
         return await notificationRepository.markNotificationAsRead(notificationId)
     }
-    async createNotification(notificationData)
+    async createNotification(notificationData:any)
     {
         try {
             if(!notificationData)
@@ -22,7 +22,7 @@ const io=require('socket.io')
             io.to(notificationData.receipient.toString()).emit('newNotification',newNotification)
             return newNotification
         } catch (error) {
-            throw new Error("Failed to create notification")
+            console.log(error)
         }
     }
 }

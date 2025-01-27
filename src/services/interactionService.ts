@@ -9,13 +9,14 @@ class InteractionService{
             const post=await interactionRepository.getPostById(postId)
             if(post?.userId.toString()!==userId.toString())
             {
-                await notificationService.createNotification({
+                const notificationData={
                     recipient:post?.userId,
                     sender:userId,
                     type:'post_like',
                     content:'liked your post',
                     link:`/posts/${userId}`
-                })
+                }
+                await notificationService.createNotification(notificationData)
             }
 
             if (existingLike) {

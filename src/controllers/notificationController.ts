@@ -1,16 +1,15 @@
 import { Request, Response } from "express"
-import { NotificationService } from "../services/notificationService"
-const notificationService=new NotificationService()
+import { notificationService } from "../services/notificationService"
 export const getNotification=async(req:Request,res:Response)=>{
     try {
         const userId=req.user?.userId
         if (!userId) {
             res.status(401).json({ message: "Employer id is required" })
         }
-        const notification=await notificationService.getNotification(userId)
-        res.status(200).json({notification})
+        const notifications=await notificationService.getNotification(userId)
+        res.status(200).json(notifications)
     } catch (error) {
-        console.error("Error occurred in getJobById:", error);
+        console.error("Error occurred in getNotification:", error);
         res.status(500).json({ message: "An error occurred while fetching the notifications." });
     }
 }
