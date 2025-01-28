@@ -1,8 +1,12 @@
+import EmployerModel from "../models/Employer"
 import Notification from "../models/notification"
+import UserModel from "../models/User"
 
 export class NotificationRepository{
     async createNotification(notificationData:any)
     {
+        
+        console.log('notificationdata',notificationData)
         try {
             const newNotification=new Notification(notificationData)
             return await newNotification.save()
@@ -13,11 +17,23 @@ export class NotificationRepository{
     async getNotificationForUser(userId:string)
     {
         try {
-        
-            const notifications= await Notification.find({receipient:userId})
-            .populate('sender','firstName secondName companyName logo profilePicture')
+            console.log('notificationuserId',userId)
+            const notifications= await Notification.find({recipientId:userId})
+
             .sort({createdAt:-1})
-            return notifications
+            const populatedNotifications=await Promise.all(notifications.map(async(notification)=>{
+                if(notification.senderModel==='Employer')
+                {
+                    const sender=await EmployerModel.findById(notification.sender).select('companyName logo')
+                    return {...notification.toObject(),sender}
+                }
+                else
+                {
+                    const sender=await UserModel.findById(notification.sender).select('profilePicture firstName secondName')
+                    return {...notification.toObject(),sender}
+                }
+            }))
+            return populatedNotifications
         } catch (error:any) {
             throw new Error(`Error getting notification ${error.message}`)
         }

@@ -144,3 +144,15 @@ export interface Filters {
     jobTypes?: string[]; 
     experienceLevels?: string[]; 
 };
+export interface NotificationData{
+    senderId:string,
+    recipientId?:string,
+    type:string,
+    content:string,
+    link:string
+}
+export const notificationTypes={
+    LIKE_POST:'like_post',
+    COMMENT_POST:'comment_post',
+    FOLLOW_USER:'follow_user',
+}

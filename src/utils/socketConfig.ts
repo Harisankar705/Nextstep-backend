@@ -3,6 +3,7 @@ import { ChatService } from "../services/chatService";
 import cookie from "cookie";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { UserRepository } from "../repositories/userRepository";
+import { interactionService } from "../services/interactionService";
 
 const chatService = new ChatService();
 const connectedUsers: { [userId: string]: string } = {};
@@ -301,7 +302,33 @@ export const socketConfig = (io: Server) => {
       }
     });
 
+    socket.on('likePost',async({userId,recipient,postId,content,link})=>{
+      try {
+        console.log('in likepostsocket',postId)
+        const updatedPost=await interactionService.likePost(userId,postId)
+        io.to(recipient).emit('newNotification',{
+          content,
+          link,
+          postId,
+          userId
+        })
 
+      } catch (error) {
+        console.error('error occured while likePost',error)
+      }
+    })
+    socket.on('commentPost',async({userId,postId,comment})=>{
+      try {
+        console.log('comment',comment)
+        const newComment=await interactionService.commentOnPost(userId,postId,comment)
+        const userIdString = newComment.userId.toString();
+
+        io.to(userIdString).emit('postCommented',{postId,userId,newComment})
+
+      } catch (error) {
+        console.error('error occured while commenting',error)
+      }
+    })
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.id}`);
       delete connectedUsers[userId]

@@ -1,24 +1,18 @@
 import mongoose, { mongo } from "mongoose";
 const notificationSchema=new mongoose.Schema({
-    receipient:{
+    recipientId:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
-        ref:'receipientModel'
     },
-    receipientModel: {
-        type: String,
-        required: true,
-        enum: ['user', 'employer']
-    },
+    
     sender:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
-        ref:"senderModel"
     },
     senderModel:{
         type:String,
         required:true,
-        enum: ['user', 'employer']
+        enum: ['User', 'Employer']
 
 
     },
@@ -26,6 +20,8 @@ const notificationSchema=new mongoose.Schema({
         type:String,
         required:true,
         enum:[
+            'post_like',
+            'post_comment',
             'friend_request',
             'friend_request_accepted',
             'new_message',

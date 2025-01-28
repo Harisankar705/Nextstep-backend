@@ -1,20 +1,32 @@
+import { Server } from "socket.io";
 import {  postModel } from "../models/post";
 import { interactionRepository } from "../repositories/interactionRepository";
 import { notificationService } from "./notificationService";
+import { getSenderData } from "../utils/modelUtil";
+import ConnectionModel from "../models/connection";
+import UserModel from "../models/User";
 
 class InteractionService{
-    async likePost(userId: string, postId: string): Promise<boolean> {
+    private io:Server
+    constructor(io:Server)
+    {
+        this.io=io
+    }
+    async likePost(userId: string, postId: string): Promise<boolean|any> {
         try {
             const existingLike = await interactionRepository.checkUserLiked(userId, postId);
             const post=await interactionRepository.getPostById(postId)
+            console.log("POSTservice",post)
             if(post?.userId.toString()!==userId.toString())
             {
+                const recipientId=post?.userId.toString()
+
                 const notificationData={
-                    recipient:post?.userId,
-                    sender:userId,
+                    recipientId,
+                    senderId:userId,
                     type:'post_like',
                     content:'liked your post',
-                    link:`/posts/${userId}`
+                    link:`/posts/${postId}`
                 }
                 await notificationService.createNotification(notificationData)
             }
@@ -32,6 +44,7 @@ class InteractionService{
                     $inc: { likeCount: 1 },
                     $push: { likes: like._id }  
                 });
+                this.io.to(postId).emit('likePost',{postId,userId,like})
                 return true;
             }
         } catch (error) {
@@ -46,11 +59,32 @@ class InteractionService{
         {
             throw new Error("Comment cannot be empty!")
         }
-        const comments = await interactionRepository.createComment(userId, postId, comment)
+        const sender=await getSenderData(userId)
+                    const commentorModel = sender?.role === 'employer' ? 'Employer' : 'User';
+        const comments = await interactionRepository.createComment(userId, postId,comment, commentorModel)
+         
         const updatedPost=await postModel.findByIdAndUpdate(postId,{
             $inc:{commentCount:1},
             $push:{comments:comments._id}
         },{new:true})
+        const post=await postModel.findById(postId)
+        if(post?.userId.toString()!==userId.toString())
+        {
+            const recipientId=post?.userId.toString()
+                const notificationData={
+                    recipientId,
+                    senderId:userId,
+                    comment:comment,
+                    type:'post_comment',
+                    content:'commented on your post',
+                    link:`/posts/${postId}`
+                }
+                await notificationService.createNotification(notificationData)
+
+
+            
+        }
+        this.io.to(postId).emit('newComment',{postId,comment:comments})
         return comments
     }
     async sharePost(userId:string,postId:string)
@@ -60,6 +94,17 @@ class InteractionService{
             $inc:{shareCount:1}
         })
         return share
+    }
+    async getPosts(userId:string)
+    {
+        const connections=await ConnectionModel.find({followerId:userId})
+        const followingIds=connections.map(connection=>connection.followingId)
+        console.log('connections',followingIds)
+
+        const posts=await postModel.find({userId:{$in:followingIds}})
+        .populate('userId', 'firstName secondName profilePicture') 
+        .sort({createdAt:1})
+        return posts
     }
     async getComments(postId:string)
     {
@@ -97,4 +142,5 @@ class InteractionService{
         }
     }
 }
-export const interactionService=new InteractionService()
+const io=new Server
+export const interactionService=new InteractionService(io)

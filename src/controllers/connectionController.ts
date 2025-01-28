@@ -7,7 +7,9 @@ export const followUser = async (req: Request, res: Response) => {
     try {
         
         const { followingId } = req.body
+        console.log('followingID',followingId)
         const followerId = req.user?.userId
+        console.log('fllo',followerId)
         if (!followerId || !followingId) {
             res.status(401).json({ message: "Authentication required!" })
             return

@@ -10,7 +10,7 @@ const postSchema: Schema<IPosts> = new mongoose.Schema({
     userType: {
         type: String,
         required: true,
-        enum: ['user', 'employer']
+        enum: ['User', 'Employer']
     },
     text: {
         type: String,

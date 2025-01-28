@@ -1,7 +1,9 @@
 import { commentModel } from "../models/comment"
+import EmployerModel from "../models/Employer"
 import { likeModel } from "../models/like"
 import { postModel } from "../models/post"
 import savedPostSchema from "../models/savedPost"
+import UserModel from "../models/User"
 
 class InteractionRepository
 {
@@ -46,9 +48,9 @@ class InteractionRepository
         const savedPost=await savedPostSchema.findOne({userId})
         return savedPost ?savedPost.postIds.includes(postId):false
     }
-    async createComment(userId: string, postId: string, comment:string)
+    async createComment(userId: string, postId: string, comment:string,commentorModel:string)
     {
-        return commentModel.create({ userId, postId, comment })
+        return commentModel.create({ userId, postId, comment,commentorModel })
     }
     // async getShareCount(postId:string)
     // {
@@ -56,9 +58,21 @@ class InteractionRepository
     // }
     async getComments(postId:string)
     {
-        return commentModel.find({postId})
-        .populate('userId','firstName secondName profilePicture')
+        const comments=await commentModel.find({postId})
         .sort({createdAt:-1})
+        const populatedComments=await Promise.all(comments.map(async(comment)=>{
+            if(comment.commentorModel==='Employer')
+            {
+                const commentor=await EmployerModel.findById(comment.userId).select('companyName logo')
+                return {...comment.toObject(),commentor}
+            }
+            else
+            {
+                const commentor=await UserModel.findById(comment.userId).select('firstName secondName profilePicture')
+                return {...comment.toObject(),commentor} 
+            }
+        }))
+        return populatedComments
     }
     async createShare(userId:string,postId:string)
     {

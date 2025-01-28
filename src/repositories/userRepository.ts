@@ -4,20 +4,9 @@ import AdminModel from '../models/admin';
 import { postModel } from '../models/post';
 import EmployerModel from "../models/Employer";
 import UserModel from "../models/User";
+import { getModel } from '../utils/modelUtil';
 export class UserRepository {
-    private getModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> |Model<IAdmin & Document> {
-        if (role === 'employer') {
-            return EmployerModel as Model<IEmployer & Document>
-        }
-        if (role === 'user') {
-            return UserModel as Model<IUser & Document>
-        }
-        if (role === 'admin') {
-            return AdminModel as Model<IAdmin & Document>
-        }
-        throw new Error(`invalid role${role}`)
-
-    }
+    
     private getPostModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> {
         if (role === 'employer') {
             return EmployerModel as Model<IEmployer & Document>
@@ -29,10 +18,11 @@ export class UserRepository {
         throw new Error(`invalid role${role}`)
 
     }
+    
 
     async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
-            const model = this.getModel(role);
+            const model = getModel(role);
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findOne({ email }).exec();
             }
@@ -98,7 +88,7 @@ export class UserRepository {
     }
     async findById(userId: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
-            const model = this.getModel(role);
+            const model = getModel(role);
             
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findById(userId ).exec();
@@ -118,7 +108,7 @@ export class UserRepository {
 
     async createUser(userData: Partial<IUser | IEmployer>, role: string): Promise<IUser | IEmployer> {
         try {
-            const model = this.getModel(role)
+            const model = getModel(role)
             if (role === 'employer') {
                 const employer = new (model as Model<IEmployer & Document>)(userData)
                 return await employer.save()
@@ -138,7 +128,7 @@ export class UserRepository {
             
             
             
-            const model=this.getModel(role)as Model<IUser |IEmployer>
+            const model=getModel(role)as Model<IUser |IEmployer>
             console.log('model',model)
             
             const user=await model.findById(userId)
