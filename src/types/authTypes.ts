@@ -24,9 +24,18 @@ export interface IUser extends Document {
     languages?: string[];
     isBlocked?: boolean;
     connections?: string[];
-    premium?: boolean;
+    isPremium?: boolean;
     phonenumber?: number,
+    jobApplicantionCount:number,
+    premiumExpiry:Date,
     status: "Active" | "Inactive"
+}
+export interface JwtPayload
+{
+userId:string,
+role:string,
+iat:number,
+exp:number
 }
 
 export interface IConnection extends Document
@@ -144,6 +153,13 @@ export interface Filters {
     jobTypes?: string[]; 
     experienceLevels?: string[]; 
 };
+export interface InterviewScheduleData {
+    date: string;
+    time: string;
+    interviewer: string;
+    platform: string;
+    meetingLink?: string;
+  }
 export interface NotificationData{
     senderId:string,
     recipientId?:string,
@@ -155,4 +171,62 @@ export const notificationTypes={
     LIKE_POST:'like_post',
     COMMENT_POST:'comment_post',
     FOLLOW_USER:'follow_user',
+}
+export interface IApplicant extends Document {
+    jobId: mongoose.Types.ObjectId;
+    userId: mongoose.Types.ObjectId;
+    applicationStatus: 'pending' | 'accepted' | 'rejected' | 'interviewScheduled' | 'interviewCompleted';
+    appliedAt: Date;
+    resume?: string; 
+    coverLetter?: string;
+    interviewSchedule?: {
+      date: string;
+      time: string;
+      interviewer: string;
+      platform: 'video' | 'phone' | 'in-person';
+      meetingLink?: string;
+    };
+    notes?: string;
+  }
+export interface CandidateData {
+    experience: string;
+    languages: string[];
+    location: string;
+    aboutMe: string;
+    education: {
+      degree?: string;
+      year?: number;
+      institution?: string;
+    }[];
+    dateofbirth: Date;
+    gender: string;
+    skills: string[];
+  }
+  export interface JwtPayload
+{
+userId:string,
+role:string,
+iat:number,
+exp:number
+}
+export interface ChatMessage{
+    _id:Types.ObjectId;
+    senderId:Types.ObjectId,
+    receiverId:Types.ObjectId,
+    content:string,
+    type:'text'|'image'|'document',
+    timestamp:Date,
+    file?:{
+        
+            name:string
+            type:string
+            url:string
+        
+    }|null
+    senderRole:"User"|'Employer';
+    receiverRole:"User"|'Employer'
+    isDeleted:boolean,
+    status:'sent'|'delivered'|'read',
+    seenAt?:Date,
+    deliveredAt?:Date
 }

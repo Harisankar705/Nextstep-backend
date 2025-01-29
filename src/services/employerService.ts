@@ -1,11 +1,10 @@
 import EmployerModel from "../models/Employer"
 import { EmployerRepository } from "../repositories/employerRepository"
 import { IEmployer } from "../types/authTypes"
-
+const employerRepository=new EmployerRepository()
 class EmployerService
 {
     async updateUser(userId:string,userData:Partial<IEmployer>,logoPath?:string){
-        const employerRepository=new EmployerRepository()
         try {
             if(logoPath)
             {
@@ -22,7 +21,9 @@ class EmployerService
             throw new Error("Error occured while updatingEmployer")
         }
     }
-    
-    
+    async isVerified(employerId:string):Promise<boolean>
+    {
+        return await employerRepository.isVerified(employerId)
+    }
 }
 export default EmployerService

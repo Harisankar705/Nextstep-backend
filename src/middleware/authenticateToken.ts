@@ -1,19 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { UserRepository } from "../repositories/userRepository";
+import { JwtPayload } from "../types/authTypes";
 const userRespository=new UserRepository()
-export interface JwtPayload
-{
-userId:string,
-role:string,
-iat:number,
-exp:number
-}
+
 export const verifyToken = async(req: Request, res: Response, next: NextFunction) => {
     const employerToken = req.cookies.employerAccessToken
     const candidateToken = req.cookies.userAccessToken
     const token=employerToken||candidateToken
-    const role=employerToken?"employer":"user"
+    const role=candidateToken?"user":"employer"
     if (!token) {
         
         res.status(403).json({ message: "Token not found" })

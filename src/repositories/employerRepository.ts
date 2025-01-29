@@ -2,7 +2,6 @@ import { verificationStatus } from "../controllers/adminController";
 import EmployerModel from "../models/Employer";
 import { IEmployer } from "../types/authTypes";
 import {Types} from 'mongoose'
-
 export class EmployerRepository{
     async updateUser(userId:string,userData:Partial<IEmployer>):Promise<IEmployer|null>{
         try {
@@ -22,5 +21,10 @@ export class EmployerRepository{
             throw new Error("error occured while updating employer in repository")
         }
     }
-     
+    async isVerified(employerId: string): Promise<boolean> {
+    
+            const employer = await EmployerModel.findById(employerId);
+            return employer?.isVerified === 'APPROVED';
+        } 
     }
+    

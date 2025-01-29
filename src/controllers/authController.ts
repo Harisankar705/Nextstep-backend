@@ -7,14 +7,9 @@ import {
   generateToken,
   verifyToken,
 } from "../utils/jwtUtils";
-import { IUser } from "../types/authTypes";
+import { CandidateData, IUser } from "../types/authTypes";
 import { handleFileUpload } from "../utils/formidable";
-import jwt from "jsonwebtoken";
 import { validateRole } from "../utils/roleValidate";
-import getCandidateService from "../services/authService";
-import { validate } from "uuid";
-import { ObjectId } from "mongoose";
-
 const authService = new AuthService();
 const otpServiceInstance = new otpService();
 export const setRefreshToken = (res: Response, refreshToken: string) => {
@@ -25,7 +20,6 @@ export const setRefreshToken = (res: Response, refreshToken: string) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
-
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userData } = req.body;
@@ -33,7 +27,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ message: "Userdata is required for signup" });
       return;
     }
-    
     const roleValidation = validateRole(userData.role);
     if (!roleValidation.valid) {
       res.status(400).json({ message: roleValidation.message });
@@ -46,21 +39,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ message: err.message });
   }
 };
-interface CandidateData {
-  experience: string;
-  languages: string[];
-  location: string;
-  aboutMe: string;
-  education: {
-    degree?: string;
-    year?: number;
-    institution?: string;
-  }[];
-  dateofbirth: Date;
-  gender: string;
-  skills: string[];
-}
-
 export const candidateDetails = async (req: Request, res: Response) => {
   try {
     console.log('in candidatedetails')
@@ -70,21 +48,17 @@ export const candidateDetails = async (req: Request, res: Response) => {
       res.status(401).json({ message: "Authentication required" });
       return;
     }
-
     const { profilePicture, resumeFile } = uploadResponse.fileNames;
     const userData: { userId?: string; data?: string } =
       uploadResponse.fields || {};
-
     if (!userId) {
       res.status(400).json({ message: "User ID is required" });
       return;
     }
-
     if (!userData.data) {
       res.status(400).json({ message: "No data provided for update" });
       return;
     }
-
     let parsedData: CandidateData;
     try {
       parsedData = JSON.parse(userData.data) as CandidateData;
@@ -105,7 +79,6 @@ export const candidateDetails = async (req: Request, res: Response) => {
     const mergedResumes = [
       ...new Set([...mergedResume, ...newResumeArray]),
     ].filter(Boolean);
-
     const updatePayload: Partial<IUser> = {
       profilePicture,
       resume: mergedResumes,
@@ -118,9 +91,7 @@ export const candidateDetails = async (req: Request, res: Response) => {
       gender: parsedData.gender,
       skills: parsedData.skills,
     };
-
     const updatedUser = await authService.updateUser(userId, updatePayload);
-
     res.status(200).json({
       message: "User updated successfully!",
       updatedUser,
@@ -132,7 +103,6 @@ export const candidateDetails = async (req: Request, res: Response) => {
 };
 export const search=async(req:Request,res:Response)=>{
   const {query}=req.body
-  
   try {
     const result=await authService.searchService(query as string)
     res.json({success:true,data:result})
@@ -143,10 +113,7 @@ export const search=async(req:Request,res:Response)=>{
 export const createPost = async (req: Request, res: Response) => {
   try {
     const uploadResponse = await handleFileUpload(req);
-    
-
     const { text, background, role, postImage } = uploadResponse.fields || {};
-
     if (!text?.[0] || !role?.[0]) {
       res.status(400).json({
         message: "Missing required fields",
@@ -154,7 +121,6 @@ export const createPost = async (req: Request, res: Response) => {
       });
       return;
     }
-
     const roleValidation = validateRole(role[0]);
     if (!roleValidation.valid) {
       res.status(400).json({ message: "Role not valid" });
@@ -168,13 +134,11 @@ const postData = {
       image: uploadResponse.fileNames?.postImage,
       files: uploadResponse.fileNames || {},
     };
-
     const response = await authService.createPostService(
       userId,
       postData,
       role[0]
     );
-
     res.status(201).json(response);
     return;
   } catch (error) {
@@ -184,7 +148,6 @@ const postData = {
     });
   }
 };
-
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, role } = req.body;
@@ -193,7 +156,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({message:"Data not present!"})
       return
     }
-    
     const roleValidation = validateRole(role);
     if (!roleValidation.valid) {
       res.status(400).json({ message: roleValidation.message });
@@ -204,7 +166,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       password,
       role
     );
-
     if (user.status === "Inactive") {
       res.status(403).json({ message: "Your account it currently blocked" });
       return;
@@ -222,35 +183,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
     res.status(200).json({ user });
   } catch (error) {
     const err = error as Error;
-    
     res.status(400).json({ message: err.message });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const sendOTPcontroller = async (
   req: Request,
   res: Response
@@ -299,7 +237,6 @@ export const verifyOTPController = async (
   res: Response
 ): Promise<void> => {
   try {
-    
     const { email, role, otp } = req.body;
     if (!email || !role || !otp) {
       res.status(400).json({ message: "OTP,EMAIL,ROLE is required" });
@@ -339,7 +276,6 @@ export const emailOrPhoneNumber = async (
         .json({ isTaken: true, message: "Phonenumber already exists" });
       return;
     }
-
     res.json({ isTaken: false });
     return;
   } catch (error) {
@@ -349,10 +285,7 @@ export const emailOrPhoneNumber = async (
 };
 export const refreshTokenController = async (req: Request, res: Response) => {
   try {
-    
     const tokenPrefix = req.body.role.toLowerCase();
-
-    
     const refreshToken = req.cookies[`${tokenPrefix}RefreshToken`];
     if (!refreshToken) {
       res.status(401).send({ message: "Refresh token is missing" });
@@ -364,56 +297,43 @@ export const refreshTokenController = async (req: Request, res: Response) => {
       return;
     }
     const { userId, role } = decoded;
-    
     const newAccessToken = generateToken({ userId, role });
     const newRefreshToken = generateRefreshToken({ userId, role });
     setRefreshToken(res, newRefreshToken);
-
     res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
     const err = error as Error;
-    
     res.status(400).json({ message: err.message });
   }
 };
-
 export const getUserPost = async (req: Request, res: Response) => {
   try {
     const authenticatedUserId = req.user?.userId;
     const targetUserId = req.query.userId
-    
-    
     if (!authenticatedUserId) {
       res.status(401).json({ message: "authorization required" });
       return;
     }
     const userIdToFetch=targetUserId?targetUserId:authenticatedUserId
-    
     const posts = await authService.getUsersPosts(userIdToFetch);
-    
     const postsWithLikeStatus = posts.map(post => {
       const likedByUser = post.likes.some((like: any) => {
         const likeUserId = like.userId
           ? like.userId.toString()
           : like.toString();
-
         const authUserId = authenticatedUserId
           ? authenticatedUserId.toString()
           : String(authenticatedUserId);
-
         return likeUserId === authUserId;
       });
-
       return {
         ...post,
         likedByUser
       };
     });
-    
     res.status(200).json( postsWithLikeStatus);
   } catch (error) {
     const err = error as Error;
-    
     res.status(400).json({ message: err.message });
   }
 };

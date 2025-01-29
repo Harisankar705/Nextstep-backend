@@ -1,5 +1,5 @@
 import express from 'express'
-import { applicantStatus, applyJob, changeApplicationStatus, createJob, deleteJob, fetchJobs, getAllJobs, getApplicantsForJob, getJobById, scheduleInterview, updateJob } from '../controllers/jobController'
+import { applicantStatus, applyJob, changeApplicationStatus, changePremiumStatus, createJob, deleteJob, fetchJobs, getAllJobs, getApplicantsForJob, getJobById, paymentStripe, scheduleInterview, updateJob } from '../controllers/jobController'
 import { verifyToken } from "../middleware/authenticateToken";
 
 export const jobRoutes=express.Router()
@@ -10,6 +10,8 @@ jobRoutes.put('/updatejob/:jobId',verifyToken,updateJob)
 jobRoutes.delete('/deletejob/:jobId',deleteJob)
 jobRoutes.post('/fetch-jobs',verifyToken,fetchJobs)
 jobRoutes.post("/apply-job",verifyToken,applyJob);
+jobRoutes.put('/changetopremium',verifyToken,changePremiumStatus)
+jobRoutes.post('/create-payment',verifyToken,paymentStripe)
 jobRoutes.post("/schedule-interview",verifyToken,scheduleInterview);
 jobRoutes.post("/change-applicationstatus",verifyToken,changeApplicationStatus);
 jobRoutes.get('/get-applicants/:jobId', verifyToken, getApplicantsForJob);

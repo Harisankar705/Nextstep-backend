@@ -2,7 +2,6 @@ import { Response,Request,NextFunction } from 'express';
 import { handleFileUpload } from "../utils/formidable"
 import EmployerService from '../services/employerService';
 const employerService =new EmployerService()
-
 export const employerDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = req.user?.userId;
@@ -18,7 +17,6 @@ export const employerDetails = async (req: Request, res: Response, next: NextFun
             res.status(400).json({message:"Invalid form data"})
             return
         }
-        
         const {logo}=uploadResponse.fileNames
         const data={
             companyName:uploadResponse.fields.companyName?.[0],
@@ -47,8 +45,31 @@ export const employerDetails = async (req: Request, res: Response, next: NextFun
         res.status(200).json({updatedUser,success:true,isEdit:isEdit,message:isEdit?"Company details updated!":"Company details added",
             redirectTo: isEdit ? '/employerhome' :"/employerhome"
         })
-        
     } catch (error) {
         res.status(500).json({message:"an error occured during employerDetails"})
+    }
+}
+export const isEmployerVerified=async(req:Request,res:Response)=>{
+    try {
+        const employerId=req.user?.userId
+        if(!employerId)
+        {
+            res.status(400).json({message:"employer id is required"})
+            return
+        }
+        const isVerified=await employerService.isVerified(employerId)
+        if(isVerified)
+        {
+            res.status(200).json({message:"isVerified"})
+            return
+        }
+        else
+        {
+            res.status(200).json({message:"!isVerified"})
+            return
+        }
+    } catch (error) {
+        res.status(500).json({message:"an error occured during checking isemployerverified"})
+
     }
 }

@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from '../types/authTypes';
-
 const userSchema = new Schema<IUser>({
     firstName: { type: String },
     secondName: { type: String, },
@@ -17,8 +16,6 @@ const userSchema = new Schema<IUser>({
     dateOfBirth: { type: Date },
     phonenumber:{type:Number},
     status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
-
-
     education: [
         {
             degree: { type: String },
@@ -29,9 +26,9 @@ const userSchema = new Schema<IUser>({
     languages: { type: [String], default: [] },
     isBlocked: { type: Boolean, default: false },
     connections: [{ type: Schema.Types.ObjectId, ref: 'Connection' }],
-    
-    premium: { type: Boolean, default: false }
+    jobApplicantionCount:{type:Number,default:0},
+    isPremium: { type: Boolean, default: false },
+    premiumExpiry:{type:Date}
 });
-
 const UserModel = mongoose.model<IUser>('User', userSchema);
 export default UserModel;
