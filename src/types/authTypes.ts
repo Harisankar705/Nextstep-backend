@@ -30,6 +30,10 @@ export interface IUser extends Document {
     premiumExpiry:Date,
     status: "Active" | "Inactive"
 }
+export interface CustomError extends Error
+{
+    status?:number
+}
 export interface JwtPayload
 {
 userId:string,
@@ -37,7 +41,7 @@ role:string,
 iat:number,
 exp:number
 }
-
+export type ApplicationStatus = 'pending' | 'accepted' |'in-review'|'shortlisted'| 'rejected' |'interview'| 'interviewScheduled' | 'interviewCompleted';
 export interface IConnection extends Document
 {
     followerId:mongoose.Schema.Types.ObjectId|string;
@@ -47,7 +51,6 @@ export interface IConnection extends Document
     updatedAt:Date
     status:ConnectionStatus
 }
-
 export interface IEmployer extends Document {
     _id: string | mongoose.Types.ObjectId,
     email: string
@@ -75,11 +78,7 @@ export interface IAdmin extends Document {
     role: "admin"
     isProfileComplete: boolean,
     status: "Active" | "Inactive"
-
 }
-
-
-
 export interface IGoogleAuth {
     tokenId: string
 }
@@ -122,13 +121,11 @@ export enum ConnectionStatus
     FOLLOWBACK='followback',
     REJECTED='rejected',
     NOTFOLLOWINGBACK='notfollowingback'
-
 }
 export interface JobData
 {
     formData:{
         employerId:Types.ObjectId|string,
-    
         jobTitle:string
         description:string,
         employmentTypes:string[],
@@ -145,8 +142,6 @@ export interface JobData
         createdAt: Date, 
         isActive: boolean
     }
-    
-
 }
 export interface Filters {
     search?: string; 
@@ -217,11 +212,9 @@ export interface ChatMessage{
     type:'text'|'image'|'document',
     timestamp:Date,
     file?:{
-        
             name:string
             type:string
             url:string
-        
     }|null
     senderRole:"User"|'Employer';
     receiverRole:"User"|'Employer'

@@ -4,8 +4,6 @@ import { interactionRepository } from "../repositories/interactionRepository";
 import { notificationService } from "./notificationService";
 import { getSenderData } from "../utils/modelUtil";
 import ConnectionModel from "../models/connection";
-import UserModel from "../models/User";
-
 class InteractionService{
     private io:Server
     constructor(io:Server)
@@ -16,11 +14,9 @@ class InteractionService{
         try {
             const existingLike = await interactionRepository.checkUserLiked(userId, postId);
             const post=await interactionRepository.getPostById(postId)
-            console.log("POSTservice",post)
             if(post?.userId.toString()!==userId.toString())
             {
                 const recipientId=post?.userId.toString()
-
                 const notificationData={
                     recipientId,
                     senderId:userId,
@@ -30,7 +26,6 @@ class InteractionService{
                 }
                 await notificationService.createNotification(notificationData)
             }
-
             if (existingLike) {
                 await interactionRepository.removeLike(userId, postId);
                 await postModel.findByIdAndUpdate(postId, {
@@ -48,11 +43,9 @@ class InteractionService{
                 return true;
             }
         } catch (error) {
-            console.error('Error in likePost:', error);
             throw error;
         }
     }
-
     async commentOnPost(userId: string, postId: string, comment:string)
     {
         if (!comment.trim())
@@ -62,7 +55,6 @@ class InteractionService{
         const sender=await getSenderData(userId)
                     const commentorModel = sender?.role === 'employer' ? 'Employer' : 'User';
         const comments = await interactionRepository.createComment(userId, postId,comment, commentorModel)
-         
         const updatedPost=await postModel.findByIdAndUpdate(postId,{
             $inc:{commentCount:1},
             $push:{comments:comments._id}
@@ -80,9 +72,6 @@ class InteractionService{
                     link:`/posts/${postId}`
                 }
                 await notificationService.createNotification(notificationData)
-
-
-            
         }
         this.io.to(postId).emit('newComment',{postId,comment:comments})
         return comments
@@ -99,8 +88,6 @@ class InteractionService{
     {
         const connections=await ConnectionModel.find({followerId:userId})
         const followingIds=connections.map(connection=>connection.followingId)
-        console.log('connections',followingIds)
-
         const posts=await postModel.find({userId:{$in:followingIds}})
         .populate('userId', 'firstName secondName profilePicture') 
         .sort({createdAt:1})
@@ -124,21 +111,16 @@ class InteractionService{
      async checkPostSaved (userId:string,postId:string)
      {
         return await interactionRepository.checkSavedPostStatus(userId,postId)
-
      }
-
-    
     async getPostInteractions(postId:string)
     {
         const [likeCount,commentCount]=await Promise.all([
             interactionRepository.getLikeCount(postId),
             interactionRepository.getCommentCount(postId)
-            
         ])
         return {
             likeCount,
             commentCount,
-            
         }
     }
 }

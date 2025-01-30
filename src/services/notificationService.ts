@@ -1,11 +1,8 @@
 import { getSenderData } from './../utils/modelUtil';
-import EmployerModel from "../models/Employer";
-import UserModel from "../models/User";
 import { NotificationRepository } from "../repositories/notificationRepository";
 const notificationRepository=new NotificationRepository()
 import { Server } from "socket.io";
 import { NotificationData } from "../types/authTypes";
-
  class NotificationService
 {
     private io:Server 
@@ -43,7 +40,6 @@ import { NotificationData } from "../types/authTypes";
             {
                 senderDetails={
                     profilePicture:sender?.profilePicture,
-                    
                     secondName:sender?.secondName
                 }
             }
@@ -57,7 +53,6 @@ import { NotificationData } from "../types/authTypes";
                 senderDetails,
                 senderModel
             }
-
             const newNotification=await notificationRepository.createNotification(notification)
             if(!notificationData.recipientId)
             {
@@ -66,10 +61,9 @@ import { NotificationData } from "../types/authTypes";
             this.io.to(notificationData?.recipientId.toString()).emit('newNotification',newNotification)
             return newNotification
         } catch (error) {
-            console.log(error)
+            throw error
         }
     }
-    
 }
 const io=new Server()
 export const notificationService=new NotificationService(io)

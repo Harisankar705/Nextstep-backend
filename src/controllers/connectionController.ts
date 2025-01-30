@@ -1,151 +1,119 @@
 import { ConnectionService } from './../services/connectionService';
-import { Response } from 'express';
+import { NextFunction, Response } from 'express';
 import { Request } from 'express';
 import { ConnectionStatus } from '../types/authTypes';
+import { STATUS_CODES } from '../utils/statusCode';
 const connectionService = new ConnectionService()
-export const followUser = async (req: Request, res: Response) => {
+export const followUser = async (req: Request, res: Response,next:NextFunction) => {
     try {
-        
         const { followingId } = req.body
-        console.log('followingID',followingId)
         const followerId = req.user?.userId
-        console.log('fllo',followerId)
         if (!followerId || !followingId) {
-            res.status(401).json({ message: "Authentication required!" })
+            res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required!" })
             return
         }
         const connection = await connectionService.followUser(
             followerId, followingId
         )
-        
-        res.status(200).json({ success: true, data: connection })
+        res.status(STATUS_CODES.OK).json({ success: true, data: connection })
         return
     } catch (error) {
-        const err = error as Error;
-        
-        res.status(400).json({ message: err.message });
-        return
+        next(error)
     }
 }
-export const followBack=async(req:Request,res:Response)=>{
+export const followBack=async(req:Request,res:Response,next:NextFunction)=>{
     try {
         const {connectionId}=req.body
-        
-        
         const userId=req.user?.userId 
-        
-        
-
         if (!userId || !connectionId)
         {
-            res.status(401).json({message:"authentication required"})
+            res.status(STATUS_CODES.UNAUTHORIZED).json({message:"authentication required"})
             return
         }
         const connection = await connectionService.respondToRequest(userId, connectionId,ConnectionStatus.FOLLOWBACK)
-        
         if(!connection)
         {
-            res.status(404).json({message:"Connection request not found"})
+            res.status(STATUS_CODES.NOT_FOUND).json({message:"Connection request not found"})
             return
         }
-        res.status(200).json({success:true,data:connection})
+        res.status(STATUS_CODES.OK).json({success:true,data:connection})
     } catch (error) {
-        const err = error as Error;
-        
-        res.status(400).json({ message: err.message });
-        return
+        next(error)
     }
 }
-export const respontToRequest = async (req: Request, res: Response) => {
+export const respontToRequest = async (req: Request, res: Response,next:NextFunction) => {
     try {
         const { connectionId, status } = req.body
         const userId = req.user?.userId
         if (!userId) {
-            res.status(401).json({ message: "Authentication required" })
+            res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required" })
             return 
         }
         if (!connectionId) {
-             res.status(400).json({ message: "Invalid connection Id" })
+             res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Invalid connection Id" })
             return 
         }
         const connection = await connectionService.respondToRequest(
             connectionId, userId, status
         )
     } catch (error) {
-        const err = error as Error;
-        
-        res.status(400).json({ message: err.message });
+        next(error)
     }
 }
-export const getConnections = async (req: Request, res: Response) => {
+export const getConnections = async (req: Request, res: Response,next:NextFunction) => {
     try {
         const userId = req.user?.userId
         if (!userId) {
-            res.status(401).json({ message: "Authentication required!" })
+            res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required!" })
             return
         }
         const connections = await connectionService.getConnections(userId)
-         res.status(200).json({ data: connections })
+         res.status(STATUS_CODES.OK).json({ data: connections })
         return
     } catch (error) {
-        const err = error as Error;
-        
-        res.status(400).json({ message: err.message });
+        next(error)
     }
 }
-export const getMutualConnections = async (req: Request, res: Response) => {
+export const getMutualConnections = async (req: Request, res: Response,next:NextFunction) => {
     try {
         const { targetUserId } = req.params
         const userId = req.user?.userId
         if (!targetUserId || !userId) {
-             res.status(401).json({ message: "data not found in params" })
+             res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "data not found in params" })
             return
         }
         const mutualConnections = await connectionService.getMutualConnections(userId, targetUserId)
-        res.status(200).json({ data: mutualConnections })
+        res.status(STATUS_CODES.OK).json({ data: mutualConnections })
         return
     } catch (error) {
-        const err = error as Error;
-        
-        res.status(400).json({ message: err.message });
+        next(error)
     }
-
 }
-export const checkFollowStatus=async(req:Request,res:Response)=>{
-    
+export const checkFollowStatus=async(req:Request,res:Response,next:NextFunction)=>{
     const currentUser=req.user?.userId
     const checkUser=req.query.followingId as string
-    
-    
     if(!currentUser|| !checkUser)
     {
-        res.status(401).json({message:`${currentUser} id is undefined`})
+        res.status(STATUS_CODES.UNAUTHORIZED).json({message:`${currentUser} id is undefined`})
         return 
     }
     try {
         const isFollowing = await connectionService.checkFollowStatus(currentUser, checkUser)
-        res.status(200).json({isFollowing})
+        res.status(STATUS_CODES.OK).json({isFollowing})
     } catch (error) {
-        const err = error as Error;
-        
-        res.status(400).json({ message: err.message });
+        next(error)
     }
-   
 }
-export const pendingRequests=async(req:Request,res:Response)=>{
+export const pendingRequests=async(req:Request,res:Response,next:NextFunction)=>{
     try {
         const userId=req.user?.userId 
         if(!userId)
         {
-            res.status(401).json({message:"Unauthorized"})
+            res.status(STATUS_CODES.UNAUTHORIZED).json({message:"Unauthorized"})
         }
-        
         const requests=await connectionService.getPendingRequest(userId)
-        
-        res.status(200).json(requests)
+        res.status(STATUS_CODES.OK).json(requests)
     } catch (error) {
-        const err = error as Error;
-        
-        res.status(400).json({ message: err.message });
+        next(error)
     }
 }

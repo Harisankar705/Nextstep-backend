@@ -6,7 +6,6 @@ export class NotificationRepository{
     async createNotification(notificationData:any)
     {
         
-        console.log('notificationdata',notificationData)
         try {
             const newNotification=new Notification(notificationData)
             return await newNotification.save()
@@ -17,7 +16,6 @@ export class NotificationRepository{
     async getNotificationForUser(userId:string)
     {
         try {
-            console.log('notificationuserId',userId)
             const notifications= await Notification.find({recipientId:userId})
 
             .sort({createdAt:-1})

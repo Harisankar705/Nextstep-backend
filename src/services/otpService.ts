@@ -1,22 +1,17 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
-
 import { UserRepository } from '../repositories/userRepository'
 const otpStore: { [key: string]: { otp: string, expiry: Date } } = {};
-
 class otpService {
     private userRepository = new UserRepository()
     private generateOtp(): string {
         return crypto.randomInt(100000, 999999).toString()
-
     }
     async sendOTP(email: string, role: 'user' | 'employer'): Promise<void> {
         const otp = this.generateOtp()
         const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
         otpStore[email] = { otp, expiry: otpExpiry }
         console.log(otpStore[email])
-
-
         const transporter = nodemailer.createTransport({
             service: "Gmail",
             auth: {
@@ -37,7 +32,6 @@ class otpService {
         if(otpData && otpData.expiry>new Date())
         {
               console.log('sending otp')
-             
         }
         else
         {
@@ -45,28 +39,19 @@ class otpService {
             const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
             otpStore[email] = { otp, expiry: otpExpiry }
             await this.sendOTP(email, role)        }
-       
     }
     async verifyOtp(email: string, otp: string, role: "user" | "employer"): Promise<boolean> {
-        console.log('in otpserivee',{email,role,otp})
         const otpData = otpStore[email];
         if (!otpData) {
-            console.log("no otp found ")
-            return false
+           throw new Error("OTP not found!")
         }
-
         const { otp: storedOtp, expiry } = otpData
         console.log('stored otp',{storedOtp,expiry})
         const isValidOtp = storedOtp === otp && expiry > new Date()
         if (isValidOtp) {
             otpStore[email] = { otp: "", expiry: new Date(0) }
         }
-        console.log(isValidOtp)
         return isValidOtp
-
-
-
-
     }
     async saveUserWithPassword(email: string, password: string, role: "user" | "employer"): Promise<void> {
         if (role === 'user') {
@@ -79,7 +64,5 @@ class otpService {
             // if(!employer)throw new Error('employer not found')
         }
     }
-
-
 }
 export default otpService

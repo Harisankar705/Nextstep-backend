@@ -1,9 +1,7 @@
-import { sendRequest } from './../controllers/connectionController';
 import { ConnectionRepository } from "../repositories/connectionRepository";
 import { ConnectionStatus, IConnection } from '../types/authTypes';
 import ConnectionModel from '../models/connection';
 import notificationModel from '../models/notification';
-
 export class ConnectionService
 {
     private connectionRepository:ConnectionRepository
@@ -18,13 +16,10 @@ export class ConnectionService
             throw new Error("cannot send connection request to yourself!")
         }
         const existingConnection =await this.connectionRepository.findExisitingConnection(followerId,followingId)
-        
         if (existingConnection) {
             await ConnectionModel.findByIdAndDelete(existingConnection._id);
-            
             return false;
         }
-
         await ConnectionModel.create({
             followerId: followerId,
             followingId: followingId,
@@ -36,12 +31,7 @@ export class ConnectionService
             message:`${followerId} has followed you!`
         })
         await notificaton.save( )
-        
         return true
-
-        
-        
-
      }
      async getConnections(userId:string):Promise<IConnection[]>{
         return await this.connectionRepository.getUserConnection(userId)
@@ -69,5 +59,4 @@ export class ConnectionService
     async getPendingRequest(userId: string): Promise<IConnection[]>{
         return await this.connectionRepository.getPendingRequests(userId)
      }
-
 }

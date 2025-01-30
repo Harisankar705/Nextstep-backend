@@ -26,7 +26,6 @@ class JobService
         try {
             return await jobRepository.getJobById(jobId);
         } catch (error) {
-            console.error("Error fetching job by ID:", error);
             throw new Error("Failed to fetch job by ID");
         }
     };
@@ -104,7 +103,6 @@ class JobService
             }
             return applicant.applicationStatus; 
         } catch (error) {
-            console.error("Error occurred in applicantDetails", error);
             throw new Error("Error occurred in applicantDetails");
         }
     }

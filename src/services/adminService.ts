@@ -10,20 +10,16 @@ export class AdminService
         this.adminRepository=new AdminRepository()
     }
     async toggleUser(id: string, role: string) {
-
         if (role !== 'user' && role !== 'employer') {
             throw new Error('invalid role provided')
         }
         const model = role === 'user' ? UserModel : EmployerModel
-        
         const updatedUser = await this.adminRepository.changeUserStatus(model, id)
         return updatedUser
     }
     async getIndividualDetails(id: string,role:string): Promise<(IEmployer|IUser)[]> {
         try {
-
             let details: (IEmployer|IUser)[] = []
-
             if(role==='employer')
             {
                 const employer = await EmployerModel.findById(id)
@@ -41,26 +37,17 @@ export class AdminService
                 }
                 details.push(user)
             }
-            
-
             return details
-
         }
         catch (error) {
-            console.error("Error occured in getIndividual Details", error)
             throw new Error("Error occured ing getIndividual details")
         }
-
-
     }
     async verifyUser(id: string, status: "VERIFIED" | 'DENIED') {
-
         if (!id || !status) {
             throw new Error("invalid role or status provided")
             return
         }
-
         return this.adminRepository.updateVerificationStatus(id, status)
-
     }
 }

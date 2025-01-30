@@ -40,7 +40,7 @@ export class JobRepository {
       throw new Error("Job not found");
     }
     const user = await UserModel.findById(userId);
-    console.log("user", userId);
+    
     if (!user) {
       return;
     }
@@ -102,7 +102,6 @@ export class JobRepository {
       );
       return job;
     } catch (error) {
-      console.error("Error in repository fetching job by ID:", error);
       throw new Error("Failed to fetch job");
     }
   }
@@ -133,7 +132,7 @@ export class JobRepository {
         }
       );
     } catch (error) {
-      console.error("Error updating expired jobs:", error);
+      throw error
     }
   }
   constructor() {

@@ -7,8 +7,6 @@ const connectionSchema=new Schema<IConnection>({
     createdAt:{type:Date,default:Date.now},
     updatedAt:{type:Date,default:Date.now},
     status:{type:String,enum:ConnectionStatus,required:true}
-
-    
 })
 const ConnectionModel =mongoose.model("Connection",connectionSchema)
 export default ConnectionModel

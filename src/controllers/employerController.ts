@@ -1,20 +1,21 @@
 import { Response,Request,NextFunction } from 'express';
 import { handleFileUpload } from "../utils/formidable"
 import EmployerService from '../services/employerService';
+import { STATUS_CODES } from '../utils/statusCode';
 const employerService =new EmployerService()
 export const employerDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = req.user?.userId;
         if(!userId)
         {
-            res.status(401).json({message:"Unauthorized.UserId is required!"})
+            res.status(STATUS_CODES.UNAUTHORIZED).json({message:"Unauthorized.UserId is required!"})
             return
         }
         const isEdit=req.query.isEdit==='true'
         const uploadResponse=await handleFileUpload(req)
         if(!uploadResponse ||!uploadResponse.fields)
         {
-            res.status(400).json({message:"Invalid form data"})
+            res.status(STATUS_CODES.BAD_REQUEST).json({message:"Invalid form data"})
             return
         }
         const {logo}=uploadResponse.fileNames
@@ -33,43 +34,42 @@ export const employerDetails = async (req: Request, res: Response, next: NextFun
         }
         if(!userId)
         {
-             res.status(400).json({message:"User id is required"})
+             res.status(STATUS_CODES.BAD_REQUEST).json({message:"User id is required"})
             return
         }
         if (!data)
         {
-             res.status(400).json({message:"No data provided for update"})
+             res.status(STATUS_CODES.BAD_REQUEST).json({message:"No data provided for update"})
             return
         }
         const updatedUser=await employerService.updateUser(userId,data)
-        res.status(200).json({updatedUser,success:true,isEdit:isEdit,message:isEdit?"Company details updated!":"Company details added",
+        res.status(STATUS_CODES.OK).json({updatedUser,success:true,isEdit:isEdit,message:isEdit?"Company details updated!":"Company details added",
             redirectTo: isEdit ? '/employerhome' :"/employerhome"
         })
     } catch (error) {
-        res.status(500).json({message:"an error occured during employerDetails"})
+        next(error)
     }
 }
-export const isEmployerVerified=async(req:Request,res:Response)=>{
+export const isEmployerVerified=async(req:Request,res:Response,next:NextFunction)=>{
     try {
         const employerId=req.user?.userId
         if(!employerId)
         {
-            res.status(400).json({message:"employer id is required"})
+            res.status(STATUS_CODES.BAD_REQUEST).json({message:"employer id is required"})
             return
         }
         const isVerified=await employerService.isVerified(employerId)
         if(isVerified)
         {
-            res.status(200).json({message:"isVerified"})
+            res.status(STATUS_CODES.OK).json({message:"isVerified"})
             return
         }
         else
         {
-            res.status(200).json({message:"!isVerified"})
+            res.status(STATUS_CODES.OK).json({message:"!isVerified"})
             return
         }
     } catch (error) {
-        res.status(500).json({message:"an error occured during checking isemployerverified"})
-
+        next(error)
     }
 }

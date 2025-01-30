@@ -3,18 +3,14 @@ import { ChatRepository } from "../repositories/chatRepository";
 import { S3 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
-
 dotenv.config();
-
 export class ChatService {
     private s3: S3;
     private chatRepository: ChatRepository = new ChatRepository();
     private readonly bucketRegion: string;
     private readonly bucketName: string;
-
     constructor() {
         this.validateConfig();
-
         this.bucketRegion = process.env.AWS_REGION!;
         this.bucketName = process.env.AWS_BUCKET_NAME!;
         this.s3 = new S3({
@@ -26,7 +22,6 @@ export class ChatService {
             endpoint: `https://s3.${this.bucketRegion}.amazonaws.com`
         });
     }
-
     private validateConfig() {
         if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
             throw new Error("AWS credentials are not properly configured!");
@@ -38,7 +33,6 @@ export class ChatService {
             throw new Error("AWS bucket name is not configured!");
         }
     }
-
     async sendMessage(data: {
         sender: string;
         receiverId: string;
@@ -47,13 +41,10 @@ export class ChatService {
         file?: { data: string; name: string; type: string } | null;
     }) {
         const { sender, receiverId, content, file } = data;
-
         if (!sender || !receiverId || !content) {
             throw new Error("Sender, receiverId, and content are required!");
         }
-
         let fileDataToSave = null;
-
         if (file) {
             try {
                 const uniqueFileName = `${uuidv4()}-${file.name}`;
@@ -63,13 +54,6 @@ export class ChatService {
                     Body: Buffer.from(file.data, "base64"),
                     ContentType: file.type
                 };
-
-                console.log("Uploading file to S3:", {
-                    Bucket: this.bucketName,
-                    Key: uniqueFileName,
-                    ContentType: file.type
-                });
-
                 await this.s3.putObject(uploadParams);
                 fileDataToSave = {
                     name: file.name,
@@ -77,11 +61,9 @@ export class ChatService {
                     url: `https://${this.bucketName}.s3.${this.bucketRegion}.amazonaws.com/${uniqueFileName}`
                 };
             } catch (error) {
-                console.error("Error uploading file to S3:", error);
                 throw new Error("Failed to upload file to storage.");
             }
         }
-
         return await this.chatRepository.saveMessage({
             senderId: data.sender,
             receiverId: data.receiverId,

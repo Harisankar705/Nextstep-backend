@@ -1,4 +1,3 @@
-import EmployerModel from "../models/Employer"
 import { EmployerRepository } from "../repositories/employerRepository"
 import { IEmployer } from "../types/authTypes"
 const employerRepository=new EmployerRepository()
@@ -17,7 +16,6 @@ class EmployerService
             }
             return updatedUser
         } catch (error) {
-            console.error("Error occured while updating employer",error)
             throw new Error("Error occured while updatingEmployer")
         }
     }

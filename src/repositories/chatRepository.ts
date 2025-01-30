@@ -1,6 +1,4 @@
-import { timeStamp } from "console"
 import { chatModel } from "../models/chat"
-
 export class ChatRepository
 {
     async saveMessage(data:Record<string,any>)

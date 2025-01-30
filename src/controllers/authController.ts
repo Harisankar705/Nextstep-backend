@@ -2,14 +2,11 @@ import e, { NextFunction, Request, Response } from "express";
 import AuthService from "../services/authService";
 import otpService from "../services/otpService";
 import UserModel from "../models/User";
-import {
-  generateRefreshToken,
-  generateToken,
-  verifyToken,
-} from "../utils/jwtUtils";
+import {generateRefreshToken,generateToken,verifyToken} from "../utils/jwtUtils";
 import { CandidateData, IUser } from "../types/authTypes";
 import { handleFileUpload } from "../utils/formidable";
 import { validateRole } from "../utils/roleValidate";
+import { STATUS_CODES } from "../utils/statusCode";
 const authService = new AuthService();
 const otpServiceInstance = new otpService();
 export const setRefreshToken = (res: Response, refreshToken: string) => {
@@ -20,65 +17,51 @@ export const setRefreshToken = (res: Response, refreshToken: string) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
-export const signup = async (req: Request, res: Response): Promise<void> => {
+export const signup = async (req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
     const { userData } = req.body;
     if (!userData) {
-      res.status(400).json({ message: "Userdata is required for signup" });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Userdata is required for signup" });
       return;
     }
     const roleValidation = validateRole(userData.role);
     if (!roleValidation.valid) {
-      res.status(400).json({ message: roleValidation.message });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
       return;
     }
     const user = await authService.register(userData);
-    res.status(201).json(user);
+    res.status(STATUS_CODES.CREATED).json(user);
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };
-export const candidateDetails = async (req: Request, res: Response) => {
+export const candidateDetails = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log('in candidatedetails')
     const uploadResponse = await handleFileUpload(req);
     const userId = req.user?.userId;
     if (!userId) {
-      res.status(401).json({ message: "Authentication required" });
-      return;
+      return res.status(STATUS_CODES.CREATED).json({ message: "Authentication required" });
     }
     const { profilePicture, resumeFile } = uploadResponse.fileNames;
-    const userData: { userId?: string; data?: string } =
-      uploadResponse.fields || {};
-    if (!userId) {
-      res.status(400).json({ message: "User ID is required" });
-      return;
-    }
+    const userData: { userId?: string; data?: string } = uploadResponse.fields || {};
     if (!userData.data) {
-      res.status(400).json({ message: "No data provided for update" });
-      return;
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: "No data provided for update" });
     }
     let parsedData: CandidateData;
     try {
       parsedData = JSON.parse(userData.data) as CandidateData;
     } catch (error) {
-      res.status(400).json({ message: "Invalid data format" });
-      return;
+      return next(error);  
     }
     const user = await UserModel.findById(userId);
-    console.log("user",user)
     if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
     const userResume = user.resume || [];
     const newResume = uploadResponse.fileNames?.resumeFile || [];
     const mergedResume = Array.isArray(userResume) ? userResume : [userResume];
     const newResumeArray = Array.isArray(newResume) ? newResume : [newResume];
-    const mergedResumes = [
-      ...new Set([...mergedResume, ...newResumeArray]),
-    ].filter(Boolean);
+    const mergedResumes = [...new Set([...mergedResume, ...newResumeArray])].filter(Boolean);
     const updatePayload: Partial<IUser> = {
       profilePicture,
       resume: mergedResumes,
@@ -92,30 +75,30 @@ export const candidateDetails = async (req: Request, res: Response) => {
       skills: parsedData.skills,
     };
     const updatedUser = await authService.updateUser(userId, updatePayload);
-    res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       message: "User updated successfully!",
       updatedUser,
       profilePicture,
     });
   } catch (error) {
-    console.log('error',error)
+    return next(error);  
   }
 };
-export const search=async(req:Request,res:Response)=>{
+export const search=async(req:Request,res:Response,next:NextFunction)=>{
   const {query}=req.body
   try {
     const result=await authService.searchService(query as string)
     res.json({success:true,data:result})
   } catch (error) {
-    res.status(500).json({message:"Error occured while searching ",error})
+    next(error)
   }
 }
-export const createPost = async (req: Request, res: Response) => {
+export const createPost = async (req: Request, res: Response,next:NextFunction) => {
   try {
     const uploadResponse = await handleFileUpload(req);
     const { text, background, role, postImage } = uploadResponse.fields || {};
     if (!text?.[0] || !role?.[0]) {
-      res.status(400).json({
+      res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Missing required fields",
         received: { text: text?.[0], role: role?.[0] },
       });
@@ -123,11 +106,10 @@ export const createPost = async (req: Request, res: Response) => {
     }
     const roleValidation = validateRole(role[0]);
     if (!roleValidation.valid) {
-      res.status(400).json({ message: "Role not valid" });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Role not valid" });
       return;
     }
     const userId = req.user?.userId;
-    console.log('userid',userId)
 const postData = {
       text: text[0],
       background: background?.[0] || "",
@@ -139,26 +121,23 @@ const postData = {
       postData,
       role[0]
     );
-    res.status(201).json(response);
+    res.status(STATUS_CODES.CREATED).json(response);
     return;
   } catch (error) {
-    console.error("Create Post Error:", error);
-    res.status(500).json({
-      message: error instanceof Error ? error.message : "Internal server error",
-    });
+    next(error)
   }
 };
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
     const { email, password, role } = req.body;
     if(!email || !password || !role)
     {
-      res.status(400).json({message:"Data not present!"})
+      res.status(STATUS_CODES.BAD_REQUEST).json({message:"Data not present!"})
       return
     }
     const roleValidation = validateRole(role);
     if (!roleValidation.valid) {
-      res.status(400).json({ message: roleValidation.message });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
       return;
     }
     const { accessToken, refreshToken, user } = await authService.login(
@@ -167,7 +146,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       role
     );
     if (user.status === "Inactive") {
-      res.status(403).json({ message: "Your account it currently blocked" });
+      res.status(STATUS_CODES.FORBIDDEN).json({ message: "Your account it currently blocked" });
       return;
     }
     const tokenPrefix = role.toLowerCase();
@@ -183,135 +162,117 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res.status(200).json({ user });
+    res.status(STATUS_CODES.CREATED).json({ user });
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };
-export const sendOTPcontroller = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const sendOTPcontroller = async (req: Request,res: Response,next:NextFunction): Promise<void> => {
   try {
     const { email, role } = req.body;
     const roleValidation = validateRole(role);
     if (!roleValidation.valid) {
-      res.status(400).json({ message: roleValidation.message });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
       return;
     }
     if (!email || !role) {
-      res.status(400).send({ message: "Email and role required!" });
+      res.status(STATUS_CODES.BAD_REQUEST).send({ message: "Email and role required!" });
       return;
     }
     await otpServiceInstance.sendOTP(email, role);
-    res.status(200).send({ message: "otp sended" });
+    res.status(STATUS_CODES.CREATED).send({ message: "otp sended" });
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };
-export const resendOTPcontroller = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const resendOTPcontroller = async (req: Request,res: Response,next:NextFunction): Promise<void> => {
   try {
     const { email, role } = req.body;
     if (!email || !role) {
-      res.status(400).send({ message: "Email or role required!" });
+      res.status(STATUS_CODES.BAD_REQUEST).send({ message: "Email or role required!" });
     }
     const roleValidation = validateRole(role);
     if (!roleValidation.valid) {
-      res.status(400).json({ message: roleValidation.message });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
       return;
     }
     await otpServiceInstance.resendOTP(email, role);
-    res.status(200).send({ messsage: "OTP resended" });
+    res.status(STATUS_CODES.OK).send({ messsage: "OTP resended" });
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };
-export const verifyOTPController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const verifyOTPController = async (req: Request,res: Response,next:NextFunction): Promise<void> => {
   try {
     const { email, role, otp } = req.body;
     if (!email || !role || !otp) {
-      res.status(400).json({ message: "OTP,EMAIL,ROLE is required" });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: "OTP,EMAIL,ROLE is required" });
       return;
     }
     const roleValidation = validateRole(role);
     if (!roleValidation.valid) {
-      res.status(400).json({ message: roleValidation.message });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
       return;
     }
     const isVerified = await otpServiceInstance.verifyOtp(email, otp, role);
     if (isVerified) {
-      res.status(200).json({ message: "OTP verification successfull!" });
+      res.status(STATUS_CODES.OK).json({ message: "OTP verification successfull!" });
     } else {
-      res.status(400).json({ message: "Failed to verify otp" });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Failed to verify otp" });
     }
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };
-export const emailOrPhoneNumber = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const emailOrPhoneNumber = async (req: Request,res: Response,next:NextFunction): Promise<void> => {
   const { email, phoneNumber } = req.body;
   try {
     const userByEmail = await UserModel.findOne({ email });
     if (userByEmail) {
-      res.status(400).json({ isTaken: true, message: "Email already exists" });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ isTaken: true, message: "Email already exists" });
       return;
     }
     const userByPhoneNumber = await UserModel.findOne({ phoneNumber });
     if (userByPhoneNumber) {
       res
-        .status(400)
+        .status(STATUS_CODES.BAD_REQUEST)
         .json({ isTaken: true, message: "Phonenumber already exists" });
       return;
     }
     res.json({ isTaken: false });
     return;
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };
-export const refreshTokenController = async (req: Request, res: Response) => {
+export const refreshTokenController = async (req: Request, res: Response,next:NextFunction) => {
   try {
     const tokenPrefix = req.body.role.toLowerCase();
     const refreshToken = req.cookies[`${tokenPrefix}RefreshToken`];
     if (!refreshToken) {
-      res.status(401).send({ message: "Refresh token is missing" });
+      res.status(STATUS_CODES.UNAUTHORIZED).send({ message: "Refresh token is missing" });
       return;
     }
     const decoded = verifyToken(refreshToken, "refresh");
     if (!decoded) {
-      res.status(403).send({ message: "Failed to decode" });
+      res.status(STATUS_CODES.FORBIDDEN).send({ message: "Failed to decode" });
       return;
     }
     const { userId, role } = decoded;
     const newAccessToken = generateToken({ userId, role });
     const newRefreshToken = generateRefreshToken({ userId, role });
     setRefreshToken(res, newRefreshToken);
-    res.status(200).json({ accessToken: newAccessToken });
+    res.status(STATUS_CODES.OK).json({ accessToken: newAccessToken });
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };
-export const getUserPost = async (req: Request, res: Response) => {
+export const getUserPost = async (req: Request, res: Response,next:NextFunction) => {
   try {
     const authenticatedUserId = req.user?.userId;
     const targetUserId = req.query.userId
     if (!authenticatedUserId) {
-      res.status(401).json({ message: "authorization required" });
+      res.status(STATUS_CODES.BAD_REQUEST).json({ message: "authorization required" });
       return;
     }
     const userIdToFetch=targetUserId?targetUserId:authenticatedUserId
@@ -331,9 +292,8 @@ export const getUserPost = async (req: Request, res: Response) => {
         likedByUser
       };
     });
-    res.status(200).json( postsWithLikeStatus);
+    res.status(STATUS_CODES.OK).json( postsWithLikeStatus);
   } catch (error) {
-    const err = error as Error;
-    res.status(400).json({ message: err.message });
+    next(error)
   }
 };

@@ -6,7 +6,6 @@ export const hashPassword=async(password:string):Promise<string>=>{
         
         return hashed
     } catch (error) {
-        console.error('Error in hashPassword:', error);
         throw error
     }
     
@@ -17,8 +16,7 @@ export const comparePassword=async(enteredPassword:string,storedHash:string):Pro
         const isMatch=await bcrypt.compare(enteredPassword,storedHash)
         return isMatch
     } catch (error) {
-        console.error('error occured in comparepassword')
-        return false
+        throw error
     }
     
     

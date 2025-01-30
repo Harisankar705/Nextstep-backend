@@ -1,31 +1,27 @@
-import { Request, Response } from "express"
+import { NextFunction, Request, Response } from "express"
 import { notificationService } from "../services/notificationService"
-export const getNotification=async(req:Request,res:Response)=>{
+import { STATUS_CODES } from "../utils/statusCode"
+export const getNotification=async(req:Request,res:Response,next:NextFunction)=>{
     try {
         const userId=req.user?.userId
-        console.log('getNotification',userId)
         if (!userId) {
-            res.status(401).json({ message: "Employer id is required" })
+            res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Employer id is required" })
         }
         const notifications=await notificationService.getNotification(userId)
-        console.log("NOTIFICATIONS",notifications)
-        res.status(200).json(notifications)
+        res.status(STATUS_CODES.OK).json(notifications)
     } catch (error) {
-        console.error("Error occurred in getNotification:", error);
-        res.status(500).json({ message: "An error occurred while fetching the notifications." });
+        next(error)
     }
 }
-export const markNotificationAsRead=async(req:Request,res:Response)=>{
+export const markNotificationAsRead=async(req:Request,res:Response,next:NextFunction)=>{
     try {
         const notificationId=req.params.notificationId
         if(!notificationId)
         {
-            res.status(401).json({message:"Notification id is required"})
+            res.status(STATUS_CODES.UNAUTHORIZED).json({message:"Notification id is required"})
         }
         await notificationService.markNotificationAsRead(notificationId)
-
     } catch (error) {
-        console.error("Error occurred in getJobById:", error);
-        res.status(500).json({ message: "An error occurred while marking notification as read." });
+        next(error)
     }
 }

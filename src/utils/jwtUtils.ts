@@ -12,7 +12,7 @@ export const verifyToken = (token: string,type:"access"|"refresh"): IPayLoad | n
     try {
         return jwt.verify(token,secret) as IPayLoad
     } catch (error) {
-        return null
+        throw error
     }
 }
 export const generateRefreshToken=(payload:IPayLoad):string=>{
