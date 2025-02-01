@@ -1,30 +1,40 @@
 import mongoose from "mongoose";
+import { IApplicant, IJob } from './../types/authTypes';
+
 import ApplicantModel from "../models/applicant";
 import JobModel from "../models/job";
 import { Filters, InterviewScheduleData, JobData } from "../types/authTypes";
 import cron from "node-cron";
 import UserModel from "../models/User";
-export class JobRepository {
-  async createJob(jobData: JobData, employerId: string) {
+import { BaseRepository } from "./baseRepository";
+export class JobRepository extends BaseRepository<IJob>{
+  constructor()
+  {
+    super(JobModel)
+    cron.schedule("0 0 * * * ", () => {
+      this.updateExpiredJob();
+    });
+  }
+  async createJob(jobData: JobData, employerId: string):Promise<IJob> {
     const job = new JobModel({
       ...jobData.formData,
       employerId: employerId,
     });
-    return await job.save();
+    return  job.save();
   }
   async findCandidateById(userId: string) {
     return ApplicantModel.findOne({
       userId: new mongoose.Types.ObjectId(userId),
     });
   }
-  async findJobById(jobId: string) {
+  async findJobById(jobId: string):Promise<IJob|null> {
     return JobModel.findById(jobId);
   }
   async updateInterviewSchedule(
     userId: string,
     jobId: string,
     scheduleData: InterviewScheduleData
-  ): Promise<Document | null> {
+  ): Promise<IJob | null> {
     return ApplicantModel.findOneAndUpdate(
       { userId, jobId },
       {
@@ -34,7 +44,7 @@ export class JobRepository {
       { new: true }
     );
   }
-  async applyJob(jobId: string, userId: string) {
+  async applyJob(jobId: string, userId: string): Promise<IApplicant|IJob> {
     const job = await JobModel.findById(jobId);
     if (!job) {
       throw new Error("Job not found");
@@ -42,7 +52,7 @@ export class JobRepository {
     const user = await UserModel.findById(userId);
     
     if (!user) {
-      return;
+      throw new Error("User not found");
     }
     if (user?.jobApplicantionCount >= 1 && !user?.isPremium) {
       throw new Error(
@@ -66,7 +76,7 @@ export class JobRepository {
     await job.save();
     return newApplicant;
   }
-  async fetchJobs(filters: Filters) {
+  async fetchJobs(filters: Filters):Promise<IJob[]> {
     const query: any = {};
     if (filters.search) {
       query.$or = [
@@ -91,7 +101,7 @@ export class JobRepository {
     // .skip(skip) // Apply pagination
     // .limit(limit); // Apply pagination
   }
-  async getAllJobs(employerId: string) {
+  async getAllJobs(employerId: string):Promise<IJob[]> {
     return await JobModel.find({ employerId });
   }
   async getJobById(jobId: string) {
@@ -105,17 +115,17 @@ export class JobRepository {
       throw new Error("Failed to fetch job");
     }
   }
-  async updateJob(jobId: string, jobData: Partial<JobData>) {
+  async updateJob(jobId: string, jobData: Partial<JobData>):Promise<IJob|null> {
     return await JobModel.findByIdAndUpdate(jobId, jobData, { new: true });
   }
   async deleteJob(jobId: string): Promise<boolean> {
     await JobModel.findByIdAndDelete(jobId);
     return true;
   }
-  async findApplicantsByJobId(jobId: string) {
+  async findApplicantsByJobId(jobId: string):Promise<{applicants:IApplicant[];totalApplicants?:number|undefined}> {
     const job = await JobModel.findById(jobId);
     const applicants = await ApplicantModel.find({ jobId: jobId })
-      .populate("userId", "firstName secondName profilePicture") // Populating the user details
+      .populate("userId", "firstName secondName profilePicture") 
       .exec();
     return { applicants, totalApplicants: job?.applicantsCount };
   }
@@ -135,10 +145,6 @@ export class JobRepository {
       throw error
     }
   }
-  constructor() {
-    cron.schedule("0 0 * * * ", () => {
-      this.updateExpiredJob();
-    });
-  }
+  
 }
 export const jobRepository = new JobRepository();

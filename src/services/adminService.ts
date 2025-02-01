@@ -1,9 +1,10 @@
 import EmployerModel from '../models/Employer';
 import UserModel from '../models/User';
 import { IEmployer, IUser } from '../types/authTypes';
+import { IAdminService } from '../types/serviceInterface';
 import { AdminRepository } from './../repositories/adminRepository';
-export class AdminService
-{
+export class AdminService implements IAdminService 
+    {
     private adminRepository:AdminRepository
     constructor()
     {

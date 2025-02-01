@@ -2,8 +2,9 @@ import { ConnectionRepository } from "../repositories/connectionRepository";
 import { ConnectionStatus, IConnection } from '../types/authTypes';
 import ConnectionModel from '../models/connection';
 import notificationModel from '../models/notification';
-export class ConnectionService
-{
+import { IConnectionService } from "../types/serviceInterface";
+export class ConnectionService implements IConnectionService
+    {
     private connectionRepository:ConnectionRepository
     constructor()
     {
@@ -40,9 +41,12 @@ export class ConnectionService
      {
         return await this.connectionRepository.updateConnectionStatus(userId, connectionId, status)
      }
-    async getMutualConnections(userId1: string, userId2: string): Promise<IConnection[]>{
-         await this.connectionRepository.getMutualConnection
-     }
+     async getMutualConnections(userId1: string, userId2: string): Promise<IConnection[]> {
+        if (!userId1 || !userId2) {
+            throw new Error("Both user IDs are required!");
+        }
+        return await this.connectionRepository.getMutualConnection(userId1, userId2);
+    }
      async checkFollowStatus(currentUser:string,checkUser:string):Promise<boolean>{
         const connection=await this.connectionRepository.findExisitingConnection(currentUser,checkUser)
         return connection!==null
@@ -54,7 +58,7 @@ export class ConnectionService
         {
             throw new Error("no connection exists to follow")
         }
-        await this.connectionRepository.removeConnection(exisitingConnection._id)
+        // await this.connectionRepository.removeConnection(exisitingConnection._id)
      }
     async getPendingRequest(userId: string): Promise<IConnection[]>{
         return await this.connectionRepository.getPendingRequests(userId)

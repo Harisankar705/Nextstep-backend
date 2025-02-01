@@ -1,10 +1,12 @@
+import { IJob, IPosts } from './../types/authTypes';
 import { IAdmin, IEmployer, IUser } from '../types/authTypes';
 import { Model, Document, Types } from 'mongoose'
 import { postModel } from '../models/post';
 import EmployerModel from "../models/Employer";
 import UserModel from "../models/User";
 import { getModel } from '../utils/modelUtil';
-export class UserRepository {
+import { BaseRepository } from './baseRepository';
+export class UserRepository extends BaseRepository<Document> {
     async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = getModel(role);
@@ -22,7 +24,7 @@ export class UserRepository {
             throw new Error('Error occurred while finding by email');
         }
     }
-    async search(query:string) {
+    async search(query:string):Promise<{users:IUser[] ; posts:IPosts[]; employers:IEmployer[] }> {
         try
         {
             if(!query)
@@ -67,7 +69,7 @@ export class UserRepository {
             throw new Error("Error occured in findUserPosts")
         }
     }
-    async findById(userId: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
+    async findById(userId: string, role: string): Promise<IUser | IEmployer  | null> {
         try {
             const model = getModel(role);
             if (role === 'employer') {
@@ -76,9 +78,7 @@ export class UserRepository {
             if (role === 'user') {
                 return (model as Model<IUser & Document>).findById( userId ).exec();
             }
-            if (role === 'admin') {
-                return (model as Model<IAdmin & Document>).findById( userId ).exec();
-            }
+            
             throw new Error(`Invalid role: ${role}`);
         } catch (error) {
             throw new Error('Error occurred while finding by email');

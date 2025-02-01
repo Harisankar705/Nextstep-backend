@@ -1,8 +1,11 @@
+import { Document } from "mongoose"
 import EmployerModel from "../models/Employer"
 import Notification from "../models/notification"
 import UserModel from "../models/User"
+import { INotificationRepository } from "../types/repositoryInterface"
+import { BaseRepository } from "./baseRepository"
 
-export class NotificationRepository{
+export class NotificationRepository extends BaseRepository<Document> implements INotificationRepository {
     async createNotification(notificationData:any)
     {
         

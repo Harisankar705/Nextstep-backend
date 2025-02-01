@@ -3,8 +3,9 @@ import { ChatRepository } from "../repositories/chatRepository";
 import { S3 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
+import { IChatService } from "../types/serviceInterface";
 dotenv.config();
-export class ChatService {
+export class ChatService implements IChatService {
     private s3: S3;
     private chatRepository: ChatRepository = new ChatRepository();
     private readonly bucketRegion: string;

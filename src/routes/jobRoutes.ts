@@ -1,19 +1,18 @@
+import { jobController } from './../controllers/jobController';
 import express from 'express'
-import { applicantStatus, applyJob, changeApplicationStatus, changePremiumStatus, createJob, deleteJob, fetchJobs, getAllJobs, getApplicantsForJob, getJobById, paymentStripe, scheduleInterview, updateJob } from '../controllers/jobController'
 import { verifyToken } from "../middleware/authenticateToken";
 
 export const jobRoutes=express.Router()
-jobRoutes.post('/createjob',verifyToken,createJob)
-jobRoutes.get('/getjobs',verifyToken,getAllJobs)
-jobRoutes.get('/getjob/:jobId',verifyToken,getJobById)
-jobRoutes.put('/updatejob/:jobId',verifyToken,updateJob)
-jobRoutes.delete('/deletejob/:jobId',deleteJob)
-jobRoutes.post('/fetch-jobs',verifyToken,fetchJobs)
-jobRoutes.post("/apply-job",verifyToken,applyJob);
-jobRoutes.put('/changetopremium',verifyToken,changePremiumStatus)
-jobRoutes.post('/create-payment',verifyToken,paymentStripe)
-jobRoutes.post("/schedule-interview",verifyToken,scheduleInterview);
-jobRoutes.post("/change-applicationstatus",verifyToken,changeApplicationStatus);
-jobRoutes.get('/get-applicants/:jobId', verifyToken, getApplicantsForJob);
-jobRoutes.get('/applicantdetails/:id',applicantStatus)
+jobRoutes.post('/createjob',verifyToken,jobController.createJob)
+jobRoutes.get('/getjobs',verifyToken,jobController.getAllJobs)
+jobRoutes.get('/getjob/:jobId',verifyToken,jobController.getJobById)
+jobRoutes.put('/updatejob/:jobId',verifyToken,jobController.updateJob)
+jobRoutes.delete('/deletejob/:jobId',jobController.deleteJob)
+jobRoutes.post('/fetch-jobs',verifyToken,jobController.fetchJobs)
+jobRoutes.post("/apply-job",verifyToken,jobController.applyJob);
+jobRoutes.put('/changetopremium',verifyToken,jobController.changePremiumStatus)
+jobRoutes.post('/create-payment',verifyToken,jobController.paymentStripe)
+jobRoutes.post("/schedule-interview",verifyToken,jobController.scheduleInterview);
+jobRoutes.post("/change-applicationstatus",verifyToken,jobController.changeApplicationStatus);
+jobRoutes.get('/get-applicants/:jobId', verifyToken,jobController.getApplicantsForJob);
 

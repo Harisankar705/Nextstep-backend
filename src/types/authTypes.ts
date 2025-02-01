@@ -204,7 +204,31 @@ role:string,
 iat:number,
 exp:number
 }
-export interface ChatMessage{
+export interface IJob extends Document {
+    _id: string;
+    jobTitle: string;
+    description: string;
+    employerId: ObjectId;
+    employmentTypes: string[];
+    applicantsCount: number;
+    applicationDeadline: Date;
+    isActive: boolean;
+    salaryRange:{
+        min:number,
+        max:number
+    }
+    industry:string[]
+    categories:string[]
+    skills:string[],
+    responsibilities:string
+    whoYouAre:string,
+    niceToHave:string
+    benefits:string[]
+    createdAt: Date;
+    applicants:ObjectId
+  }
+
+export interface ChatMessage extends Document{
     _id:Types.ObjectId;
     senderId:Types.ObjectId,
     receiverId:Types.ObjectId,

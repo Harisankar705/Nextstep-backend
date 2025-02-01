@@ -76,14 +76,14 @@ class InteractionService{
         this.io.to(postId).emit('newComment',{postId,comment:comments})
         return comments
     }
-    async sharePost(userId:string,postId:string)
-    {
-        const share=await interactionRepository.createShare(userId,postId)
-        await postModel.findByIdAndUpdate(postId,{
-            $inc:{shareCount:1}
-        })
-        return share
-    }
+    // async sharePost(userId:string,postId:string)
+    // {
+    //     const share=await interactionRepository.createShare(userId,postId)
+    //     await postModel.findByIdAndUpdate(postId,{
+    //         $inc:{shareCount:1}
+    //     })
+    //     return share
+    // }
     async getPosts(userId:string)
     {
         const connections=await ConnectionModel.find({followerId:userId})

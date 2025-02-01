@@ -221,14 +221,36 @@ export const socketConfig = (io: Server) => {
       receiverId: string;
     }) => {
       try {
+        // Validate input data
+        if (!data.senderId || !data.receiverId) {
+          console.error('Invalid videoCallHangUp data:', data);
+          return;
+        }
+    
+        // Find recipient's socket ID
         const recipientSocketId = connectedUsers[data.receiverId];
+    
         if (recipientSocketId) {
+          // Emit event to specific recipient
           io.to(recipientSocketId).emit('videoCallEnded', {
-            senderId: data.senderId
+            senderId: data.senderId,
+            timestamp: new Date().toISOString()
           });
+    
+          // Optional: Logging
+          console.log(`Video call hang up: 
+            Sender: ${data.senderId}, 
+            Recipient: ${data.receiverId}`);
+        } else {
+          // Log if recipient is not connected
+          console.warn(`Recipient ${data.receiverId} not found in connected users`);
         }
       } catch (error) {
-        throw new Error('error occured in videocall')
+        // Comprehensive error handling
+        console.error('Error in videoCallHangUp:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          data
+        });
       }
     });
     socket.on('likePost',async({userId,recipient,postId,content,link})=>{

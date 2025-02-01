@@ -1,7 +1,7 @@
+import { IJob } from './../types/authTypes';
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
-
-const jobSchema = new Schema({
+const jobSchema = new Schema<IJob>({
     employerId: { type: Schema.Types.ObjectId, ref: "Employer", required: true },
     jobTitle: { type: String, required: true },
     description: { type: String, required: true },

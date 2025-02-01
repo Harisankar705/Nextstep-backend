@@ -1,8 +1,9 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { UserRepository } from '../repositories/userRepository'
+import { IOtpService } from '../types/serviceInterface';
 const otpStore: { [key: string]: { otp: string, expiry: Date } } = {};
-class otpService {
+class otpService implements IOtpService{
     private userRepository = new UserRepository()
     private generateOtp(): string {
         return crypto.randomInt(100000, 999999).toString()

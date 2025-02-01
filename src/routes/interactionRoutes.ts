@@ -1,12 +1,12 @@
 import express from "express";
-import { checkSavedStatus, commentPost, getComments, getPost, getPostInteractions, getSavedPost, likePost, savePost } from "../controllers/interactionController";
-import { verifyToken } from "../middleware/authenticateToken";
 export const interactionRoutes = express.Router()
-interactionRoutes.get('/getComments',verifyToken, getComments)
-interactionRoutes.post('/likepost',verifyToken,likePost)
-interactionRoutes.get('/getPostInteractions', verifyToken, getPostInteractions)
-interactionRoutes.get('/getsavedposts',verifyToken,getSavedPost)
-interactionRoutes.get('/saved-posts/check/:postId',verifyToken,checkSavedStatus)
-interactionRoutes.post('/savepost',verifyToken,savePost)
-interactionRoutes.get('/getpost',verifyToken,getPost)
-interactionRoutes.post('/commentpost', verifyToken, commentPost)
+import { verifyToken } from "../middleware/authenticateToken";
+import { interactionController } from "../controllers/interactionController";
+interactionRoutes.get('/getComments',verifyToken,interactionController.getComments)
+interactionRoutes.post('/likepost',verifyToken,interactionController.likePost)
+interactionRoutes.get('/getPostInteractions', verifyToken, interactionController.getPostInteractions)
+interactionRoutes.get('/getsavedposts',verifyToken,interactionController.getSavedPost)
+interactionRoutes.get('/saved-posts/check/:postId',verifyToken,interactionController.checkSavedStatus)
+interactionRoutes.post('/savepost',verifyToken,interactionController.savePost)
+interactionRoutes.get('/getpost',verifyToken,interactionController.getPost)
+interactionRoutes.post('/commentpost', verifyToken, interactionController.commentPost)

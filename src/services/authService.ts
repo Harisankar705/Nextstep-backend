@@ -5,11 +5,12 @@ import { generateRefreshToken, generateToken } from '../utils/jwtUtils'
 import UserModel from '../models/User'
 import EmployerModel from '../models/Employer'
 import otpService from './otpService'
+import { IAuthService } from '../types/serviceInterface';
 function isEmployerRole(role: string): role is 'employer' {
     return role === 'employer';
 }
 const userRepository = new UserRepository()
-class AuthService {
+class AuthService implements IAuthService {
     private OtpInstance = new otpService()
     private validateRole(role: string): boolean {
         return ['user', 'employer'].includes(role);
