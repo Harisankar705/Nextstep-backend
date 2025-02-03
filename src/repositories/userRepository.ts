@@ -1,4 +1,4 @@
-import { IJob, IPosts } from './../types/authTypes';
+import { IJob, IPosts, IEmployer } from './../types/authTypes';
 import { IAdmin, IEmployer, IUser } from '../types/authTypes';
 import { Model, Document, Types } from 'mongoose'
 import { postModel } from '../models/post';
@@ -7,6 +7,17 @@ import UserModel from "../models/User";
 import { getModel } from '../utils/modelUtil';
 import { BaseRepository } from './baseRepository';
 export class UserRepository extends BaseRepository<Document> {
+    private userModel:Model<IUser & Document>
+    private employerModel:Model<IEmployer & Document>
+    private postModel:Model<IPosts & Document>
+    constructor(userModel:Model<IUser & Document>,
+        employerModel:Model<IEmployer & Document>,
+        postModel:Model<IPosts & Document>)
+    {
+        super()
+        this.userModel=userModel
+        this.postModel
+    }
     async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = getModel(role);

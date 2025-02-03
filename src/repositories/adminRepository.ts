@@ -1,9 +1,17 @@
-import { Document } from "mongoose";
+import { Document, Model } from "mongoose";
 import EmployerModel from "../models/Employer";
 import UserModel from "../models/User";
 import { IAdminRepository } from "../types/repositoryInterface";
 import { BaseRepository } from "./baseRepository";
 export class AdminRepository extends BaseRepository<Document> implements IAdminRepository {
+    private userModel:Model<Document>
+    private employerModel:Model<Document>
+    constructor(userModel:Model<Document>,employerModel:Model<Document>)
+    {
+        super(userModel)
+        this.userModel=userModel
+        this.employerModel=employerModel
+    }
 async changeUserStatus(model:typeof UserModel| typeof EmployerModel,id:string):Promise<any> {
         const user=await (model as any).findById(id)
         if(!user)

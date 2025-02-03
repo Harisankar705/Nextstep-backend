@@ -6,13 +6,13 @@ import { IConnectionService } from "../types/serviceInterface";
 export class ConnectionService implements IConnectionService
     {
     private connectionRepository:ConnectionRepository
-    constructor()
+    constructor(connectionRepository:ConnectionRepository)
     {
-        this.connectionRepository=new ConnectionRepository()
+        this.connectionRepository=connectionRepository
     }
     async followUser(followerId: string, followingId: string): Promise<boolean>
      {
-        if(followerId ===followingId)
+        if(followerId ===followingId)   
         {
             throw new Error("cannot send connection request to yourself!")
         }

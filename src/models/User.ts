@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from '../types/authTypes';
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<IUser & Document>({
     firstName: { type: String },
     secondName: { type: String, },
     password: { type: String },

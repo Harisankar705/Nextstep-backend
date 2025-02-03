@@ -3,9 +3,10 @@ import { IConnection } from "../types/authTypes";
 import { IConnectionRepository } from '../types/repositoryInterface';
 import ConnectionModel from '../models/connection';
 import { BaseRepository } from "./baseRepository"; 
+import { Model } from 'mongoose';
 export class ConnectionRepository extends BaseRepository<IConnection> implements IConnectionRepository {
-    constructor() {
-        super(ConnectionModel); 
+    constructor(  model:Model<IConnection>) {
+        super(model); 
     }
     async findExisitingConnection(followerId: string, followingId: string): Promise<IConnection | null> {
         return await this.findOne({

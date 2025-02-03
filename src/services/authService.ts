@@ -6,18 +6,23 @@ import UserModel from '../models/User'
 import EmployerModel from '../models/Employer'
 import otpService from './otpService'
 import { IAuthService } from '../types/serviceInterface';
+import { Transporter } from 'nodemailer';
 function isEmployerRole(role: string): role is 'employer' {
     return role === 'employer';
 }
-const userRepository = new UserRepository()
 class AuthService implements IAuthService {
-    private OtpInstance = new otpService()
+    private userRepository:UserRepository
+    private OtpInstance:otpService
+    constructor(userRepository:UserRepository,transporter:Transporter)
+    {
+        this.userRepository=userRepository
+        this.OtpInstance=new otpService(userRepository,transporter)
+    }
     private validateRole(role: string): boolean {
         return ['user', 'employer'].includes(role);
     }
     async createPostService(userId: string, postData: object, role: string) {
-        const userRepository = new UserRepository()
-        const response = await userRepository.createPost(postData, role,userId)
+        const response = await this.userRepository.createPost(postData, role,userId)
         return response
     }
     async searchService(query:string)
@@ -27,18 +32,17 @@ class AuthService implements IAuthService {
             {
                 throw new Error("Query not given for search")
             }
-            const results=await userRepository.search(query)
+            const results=await this.userRepository.search(query)
             return results
         } catch (error) {
         }
     }
     async register(userData: IUser | IEmployer): Promise<IUser | IEmployer> {
         try {
-            const userRepository = new UserRepository();
             if (!this.validateRole(userData.role)) {
                 throw new Error('Invalid role. Must be "user" or "employer".');
             }
-            const existingUser = await userRepository.findByEmail(userData.email, userData.role);
+            const existingUser = await this.userRepository.findByEmail(userData.email, userData.role);
             if (existingUser) {
                 throw new Error('User already exists!');
             }
@@ -64,7 +68,7 @@ class AuthService implements IAuthService {
     async getUsersPosts(userId:string){
         try
         {
-            const posts = await userRepository.findUserPosts(userId)
+            const posts = await this.userRepository.findUserPosts(userId)
             return posts
         }
         catch(error)
@@ -74,8 +78,7 @@ class AuthService implements IAuthService {
     }
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
         try {
-            const userRepository = new UserRepository();
-            const user = await userRepository.findByEmail(email, role);
+            const user = await this.userRepository.findByEmail(email, role);
             if (!user) {
                 throw new Error('User not found! Try Signup!');
             }
@@ -93,7 +96,6 @@ class AuthService implements IAuthService {
         }
     }
     async updateUser(userId: string, userData: Partial<IUser>, profilePicturePath?: string, resume?: string): Promise<IUser | null> {
-        const userRepository = new UserRepository();
         try {
             if (profilePicturePath) {
                 userData.profilePicture = profilePicturePath;
@@ -101,7 +103,7 @@ class AuthService implements IAuthService {
             if (resume) {
                 userData.resume = [resume]
             }
-            const updatedUser = await userRepository.updateUser(userId, userData);
+            const updatedUser = await this.userRepository.updateUser(userId, userData);
             if (!updatedUser) {
                 throw new Error("User  not found");
             }

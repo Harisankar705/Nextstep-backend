@@ -4,24 +4,20 @@ import { S3 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 import { IChatService } from "../types/serviceInterface";
+import { ChatMessage } from "../types/authTypes";
 dotenv.config();
 export class ChatService implements IChatService {
     private s3: S3;
-    private chatRepository: ChatRepository = new ChatRepository();
+    private chatRepository: ChatRepository ;
     private readonly bucketRegion: string;
     private readonly bucketName: string;
-    constructor() {
-        this.validateConfig();
-        this.bucketRegion = process.env.AWS_REGION!;
-        this.bucketName = process.env.AWS_BUCKET_NAME!;
-        this.s3 = new S3({
-            region: this.bucketRegion,
-            credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
-            },
-            endpoint: `https://s3.${this.bucketRegion}.amazonaws.com`
-        });
+    constructor(chatRepository:ChatRepository,s3:S3,bucketRegion:string,bucketName:string) {
+         this.chatRepository=chatRepository
+         this.s3=s3
+         this.bucketRegion=bucketRegion
+         this.bucketName=bucketName
+         this.validateConfig()
+        
     }
     private validateConfig() {
         if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
@@ -34,12 +30,7 @@ export class ChatService implements IChatService {
             throw new Error("AWS bucket name is not configured!");
         }
     }
-    async sendMessage(data: {
-        sender: string;
-        receiverId: string;
-        content: string;
-        status: "sent" | "delivered" | "seen";
-        file?: { data: string; name: string; type: string } | null;
+    async sendMessage(data: {sender: string;receiverId: string;content: string;status: "sent" | "delivered" | "read";file?: { data: string; name: string; type: string } | null;
     }) {
         const { sender, receiverId, content, file } = data;
         if (!sender || !receiverId || !content) {
@@ -72,7 +63,7 @@ export class ChatService implements IChatService {
             status: data.status || "sent",
             timestamp: new Date(),
             file: fileDataToSave
-        });
+        }as ChatMessage);
     }
     async findMessageById(messageId:string)
     {

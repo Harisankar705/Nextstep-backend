@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { ConnectionStatus, Filters, IConnection, IEmployer, InterviewScheduleData, JobData } from "../types/authTypes";
+import { ConnectionStatus, Filters, IApplicant, IConnection, IEmployer, IJob, InterviewScheduleData, JobData } from "../types/authTypes";
 import UserModel from '../models/User';
 import EmployerModel from '../models/Employer';
 

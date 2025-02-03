@@ -1,50 +1,55 @@
-import { InterviewScheduleData } from './../types/authTypes';
+import { IJob, InterviewScheduleData } from './../types/authTypes';
 import ApplicantModel from "../models/applicant";
 import UserModel from "../models/User";
-import { jobRepository } from "../repositories/jobRepository";
+import { JobRepository } from "../repositories/jobRepository";
 import { Filters, JobData } from "../types/authTypes";
 type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'interviewScheduled' | 'interviewCompleted';
 class JobService
 {
+    private jobRepository:JobRepository
+    constructor(jobRepository:JobRepository)
+    {
+        this.jobRepository=jobRepository
+    }
     async createJob(employerId:string,jobData:JobData)
     {
         try {
-            return await jobRepository.createJob(jobData, employerId)
+            return await this.jobRepository.createJob(jobData, employerId)
         } catch (error) {
             throw new Error("Failed to create job")
         }
     }
-    async getAllJobs(employerId:string)
+    async getAllJobs(employerId:string):Promise<IJob[]>
     {
         try {
-            return await jobRepository.getAllJobs(employerId) 
+            return await this.jobRepository.getAllJobs(employerId) 
         } catch (error) {
             throw new Error("Failed to fetching all jobs")
         }
     }
     async getJobById(jobId: string)  {
         try {
-            return await jobRepository.getJobById(jobId);
+            return await this.jobRepository.getJobById(jobId);
         } catch (error) {
             throw new Error("Failed to fetch job by ID");
         }
     };
     async applyForJob(jobId:string,userId:string){
-        return await jobRepository.applyJob(jobId,userId)
+        return await this.jobRepository.applyJob(jobId,userId)
     }
     async getFilteredJobs (filters:Filters) {
-        return await jobRepository.fetchJobs(filters);
+        return await this.jobRepository.fetchJobs(filters);
     };
     async updateJob(jobId:string,jobData:Partial<JobData>)
     {
         try {
-            return await jobRepository.updateJob(jobId, jobData)
+            return await this.jobRepository.updateJob(jobId, jobData)
         } catch (error) {
             throw new Error("Failed to update job")
         }
     }
     async changeApplicationStatus(status: ApplicationStatus, userId: string) {
-        const applicant = await jobRepository.findCandidateById(userId);
+        const applicant = await this.jobRepository.findCandidateById(userId);
         if (!applicant) {
             throw new Error('Applicant not found');
         }
@@ -52,20 +57,16 @@ class JobService
         await applicant.save();
         return applicant; 
     }
-    async scheduleInterview(
-        userId: string,
-        jobId: string,
-        scheduleData: InterviewScheduleData
-    ) {
-        const candidate = await jobRepository.findCandidateById(userId);
+    async scheduleInterview(userId: string,jobId: string,scheduleData: InterviewScheduleData) {
+        const candidate = await this.jobRepository.findCandidateById(userId);
         if (!candidate) {
             throw new Error('Candidate not found');
         }
-        const job = await jobRepository.findJobById(jobId);
+        const job = await this.jobRepository.findJobById(jobId);
         if (!job) {
             throw new Error('Job not found');
         }
-        const updatedCandidate = await jobRepository.updateInterviewSchedule(userId, jobId, scheduleData);
+        const updatedCandidate = await this.jobRepository.updateInterviewSchedule(userId, jobId, scheduleData);
         if (!updatedCandidate) {
             throw new Error('Failed to update interview schedule');
         }
@@ -76,14 +77,14 @@ class JobService
     async deleteJob(jobId:string):Promise<boolean>
     {
         try {
-            return await jobRepository.deleteJob(jobId)
+            return await this.jobRepository.deleteJob(jobId)
         } catch (error) {
             throw new Error("Failed to update job")
         }
     }
     async getApplicantsForJob(jobId:string)
     {
-        const {applicants,totalApplicants}=await jobRepository.findApplicantsByJobId(jobId)
+        const {applicants,totalApplicants}=await this.jobRepository.findApplicantsByJobId(jobId)
         return {applicants,totalApplicants}
     }
     async changeToPremium(userId:string)
@@ -107,4 +108,5 @@ class JobService
         }
     }
 }
-export const jobService=new JobService()
+const jobRepository=new JobRepository()
+export const jobService=new JobService(jobRepository)

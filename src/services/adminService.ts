@@ -6,9 +6,9 @@ import { AdminRepository } from './../repositories/adminRepository';
 export class AdminService implements IAdminService 
     {
     private adminRepository:AdminRepository
-    constructor()
+    constructor(adminRepository:AdminRepository)
     {
-        this.adminRepository=new AdminRepository()
+        this.adminRepository=adminRepository
     }
     async toggleUser(id: string, role: string) {
         if (role !== 'user' && role !== 'employer') {

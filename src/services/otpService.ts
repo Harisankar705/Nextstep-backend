@@ -1,16 +1,23 @@
 import crypto from 'crypto'
-import nodemailer from 'nodemailer'
+import nodemailer, { Transporter } from 'nodemailer'
 import { UserRepository } from '../repositories/userRepository'
 import { IOtpService } from '../types/serviceInterface';
 const otpStore: { [key: string]: { otp: string, expiry: Date } } = {};
 class otpService implements IOtpService{
-    private userRepository = new UserRepository()
+    private userRepository:UserRepository
+    private transporter:Transporter
+    constructor(userRepository:UserRepository,transporter:Transporter)
+    {
+        this.userRepository =userRepository
+        this.transporter=transporter
+    }
+    
     private generateOtp(): string {
         return crypto.randomInt(100000, 999999).toString()
     }
     async sendOTP(email: string, role: 'user' | 'employer'): Promise<void> {
         const otp = this.generateOtp()
-        const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+        const otpExpiry = new Date(Date.now() + 5 *  60 * 1000)
         otpStore[email] = { otp, expiry: otpExpiry }
         console.log(otpStore[email])
         const transporter = nodemailer.createTransport({

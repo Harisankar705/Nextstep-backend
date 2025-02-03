@@ -1,14 +1,18 @@
 import { Server } from "socket.io";
 import {  postModel } from "../models/post";
-import { interactionRepository } from "../repositories/interactionRepository";
+import { InteractionRepository, interactionRepository } from "../repositories/interactionRepository";
 import { notificationService } from "./notificationService";
 import { getSenderData } from "../utils/modelUtil";
 import ConnectionModel from "../models/connection";
 class InteractionService{
     private io:Server
-    constructor(io:Server)
+    private interactionRepository:InteractionRepository
+    private notificationService:NotificationService
+    constructor(io:Server,interactionRepository:InteractionRepository,notificationService:NotificationService)
     {
-        this.io=io
+        this.io=io;
+        this.interactionRepository=interactionRepository;
+        this.notificationService=notificationService;
     }
     async likePost(userId: string, postId: string): Promise<boolean|any> {
         try {
@@ -125,4 +129,4 @@ class InteractionService{
     }
 }
 const io=new Server
-export const interactionService=new InteractionService(io)
+export const interactionService=new InteractionService(io,interactionRepository,notificationService)

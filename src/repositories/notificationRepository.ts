@@ -6,6 +6,10 @@ import { INotificationRepository } from "../types/repositoryInterface"
 import { BaseRepository } from "./baseRepository"
 
 export class NotificationRepository extends BaseRepository<Document> implements INotificationRepository {
+    constructor()
+    {
+        super(Notification)
+    }
     async createNotification(notificationData:any)
     {
         

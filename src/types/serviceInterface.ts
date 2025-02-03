@@ -1,4 +1,4 @@
-import { ApplicationStatus, Filters, IApplicant, IJob, InterviewScheduleData, IPosts, JobData } from './authTypes';
+import { ApplicationStatus, ChatMessage, Filters, IApplicant, IJob, InterviewScheduleData, IPosts, JobData } from './authTypes';
 import { ConnectionStatus, IConnection, IEmployer, ILoginResponse, IUser } from '../types/authTypes';
 import { IComment } from '../models/comment';
 export interface IAdminService {
@@ -15,7 +15,7 @@ export interface IAuthService {
     getUsersPosts(userId: string): Promise<any>;
     getCandidateService(role: string): Promise<(IUser | IEmployer)[]>;
 }
-export interface IChatService {sendMessage(data: {sender: string;receiverId: string;content: string;status: "sent" | "delivered" | "seen";file?: { data: string; name: string; type: string } | null;}): Promise<any>;
+export interface IChatService {sendMessage(data: {sender: string;receiverId: string;content: string;status: "sent" | "delivered" | "read";file?: { data: string; name: string; type: string } | null;}): Promise<ChatMessage>;
     findMessageById(messageId: string): Promise<any>;
     deleteMessage(messageId: string): Promise<any>;
     updateMessageStatus(messageId: string, status: "sent" | "delivered" | "seen"): Promise<any>;

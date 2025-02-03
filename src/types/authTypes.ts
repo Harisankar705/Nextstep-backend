@@ -229,9 +229,9 @@ export interface IJob extends Document {
   }
 
 export interface ChatMessage extends Document{
-    _id:Types.ObjectId;
-    senderId:Types.ObjectId,
-    receiverId:Types.ObjectId,
+    _id:Types.ObjectId|string;
+    senderId:Types.ObjectId|string,
+    receiverId:Types.ObjectId|string,
     content:string,
     type:'text'|'image'|'document',
     timestamp:Date,
@@ -240,8 +240,6 @@ export interface ChatMessage extends Document{
             type:string
             url:string
     }|null
-    senderRole:"User"|'Employer';
-    receiverRole:"User"|'Employer'
     isDeleted:boolean,
     status:'sent'|'delivered'|'read',
     seenAt?:Date,

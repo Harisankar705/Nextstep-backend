@@ -1,10 +1,10 @@
-import { Document } from "mongoose";
+import { Document, Model } from "mongoose";
 import { chatModel } from "../models/chat";
 import { IChatRepository } from "../types/repositoryInterface";
 import { BaseRepository } from "./baseRepository";
 import { ChatMessage } from "../types/authTypes";
 export class ChatRepository extends BaseRepository<ChatMessage> implements IChatRepository {
-    constructor() {
+    constructor(private chatModel:Model<ChatMessage>) {
         super(chatModel); 
     }
     async saveMessage(data: ChatMessage):Promise<ChatMessage> {

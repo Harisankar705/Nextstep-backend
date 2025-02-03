@@ -1,22 +1,24 @@
 import { getSenderData } from './../utils/modelUtil';
 import { NotificationRepository } from "../repositories/notificationRepository";
-const notificationRepository=new NotificationRepository()
 import { Server } from "socket.io";
 import { NotificationData } from "../types/authTypes";
+import Notification from '../models/notification';
  class NotificationService
 {
     private io:Server 
-    constructor(io:Server)
+    private notificationRepository:NotificationRepository
+    constructor(io:Server,notificationRepository:NotificationRepository)
     {
         this.io=io
+        this.notificationRepository=notificationRepository
     }
     async getNotification(userId:string)
     {
-        return await notificationRepository.getNotificationForUser(userId)
+        return await this.notificationRepository.getNotificationForUser(userId)
     }
     async markNotificationAsRead(notificationId:string)
     {
-        return await notificationRepository.markNotificationAsRead(notificationId)
+        return await this.notificationRepository.markNotificationAsRead(notificationId)
     }
     async createNotification(notificationData:NotificationData)
     {
@@ -53,7 +55,7 @@ import { NotificationData } from "../types/authTypes";
                 senderDetails,
                 senderModel
             }
-            const newNotification=await notificationRepository.createNotification(notification)
+            const newNotification=await this.notificationRepository.createNotification(notification)
             if(!notificationData.recipientId)
             {
                 return
@@ -66,4 +68,5 @@ import { NotificationData } from "../types/authTypes";
     }
 }
 const io=new Server()
-export const notificationService=new NotificationService(io)
+const notificationRepository=new NotificationRepository()
+export const notificationService=new NotificationService(io,notificationRepository)

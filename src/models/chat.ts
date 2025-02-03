@@ -20,8 +20,6 @@ const ChatSchema=new Schema<ChatMessage>({
             type:{type:String},
             url:{type:String}
     },   
-     senderRole:{type:String,enum:["User","Employer"]},
-    receiverRole:{type:String,enum:["User","Employer"]},
     isDeleted:{type:Boolean,default:false}
 })
 export const chatModel = mongoose.model("Chat", ChatSchema)

@@ -1,9 +1,14 @@
-import { EmployerRepository } from "../repositories/employerRepository"
+import { EmployerRepository } from './../repositories/employerRepository';
 import { IEmployer } from "../types/authTypes"
 import { IEmployerService } from "../types/serviceInterface"
 const employerRepository=new EmployerRepository()
 class EmployerService implements IEmployerService
 {
+    private employerRepository:EmployerRepository
+    constructor(employerRepository:EmployerRepository)
+    {
+        this.employerRepository=employerRepository
+    }
     async updateUser(userId:string,userData:Partial<IEmployer>,logoPath?:string){
         try {
             if(logoPath)
