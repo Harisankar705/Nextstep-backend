@@ -1,49 +1,66 @@
 import { Server, Socket } from "socket.io";
 import { ChatService } from "../services/chatService";
+import { TYPES } from "../types/types";
+import { inject, injectable } from "inversify";
 import cookie from "cookie";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { UserRepository } from "../repositories/userRepository";
-import { interactionService } from "../services/interactionService";
-const chatService = new ChatService();
+import { InteractionService } from "../services/interactionService";
 const connectedUsers: { [userId: string]: string } = {};
-export const socketConfig = (io: Server) => {
-  io.use(async (socket: Socket, next) => {
-    try {
-      const cookieHeader = socket.handshake.headers.cookie;
-      if (!cookieHeader) {
-        return next(new Error("No authentication cookies"));
+@injectable()
+export class SocketHandler {
+  private chatService: ChatService;
+  private userRepository: UserRepository;
+  private interactionService: InteractionService;
+  constructor(
+    @inject(TYPES.ChatService) chatService: ChatService,
+    @inject(TYPES.UserRepository) userRepository: UserRepository,
+    @inject(TYPES.InteractionService)
+    interactionService: InteractionService
+  ) {
+    this.chatService = chatService;
+    this.userRepository = userRepository;
+    this.interactionService = interactionService;
+  }
+  public configure(io: Server) {
+    io.use(async (socket: Socket, next) => {
+      try {
+        const cookieHeader = socket.handshake.headers.cookie;
+        if (!cookieHeader) {
+          return next(new Error("No authentication cookies"));
+        }
+        const cookies = cookie.parse(cookieHeader);
+        const token = cookies.employerAccessToken || cookies.userAccessToken;
+        if (!token) {
+          return next(new Error("No token found in cookies"));
+        }
+        const decoded = jwt.verify(
+          token,
+          process.env.ACCESS_TOKEN as string
+        ) as JwtPayload;
+        const role = decoded.role;
+        const userData = await this.userRepository.findById(
+          decoded.userId,
+          role
+        );
+        if (!userData || userData.status === "Inactive") {
+          return next(new Error("Authentication restricted"));
+        }
+        socket.data.user = {
+          userId: decoded.userId,
+          role: role,
+        };
+        connectedUsers[decoded.userId] = socket.id;
+        next();
+      } catch (error) {
+        return next(new Error("Authentication error"));
       }
-      const cookies = cookie.parse(cookieHeader);
-      const token = cookies.employerAccessToken || cookies.userAccessToken;
-      if (!token) {
-        return next(new Error("No token found in cookies"));
-      }
-      const decoded = jwt.verify(
-        token,
-        process.env.ACCESS_TOKEN as string
-      ) as JwtPayload;
-      const userRepository = new UserRepository();
-      const role = decoded.role;
-      const userData = await userRepository.findById(decoded.userId, role);
-      if (!userData || userData.status === "Inactive") {
-        return next(new Error("Authentication restricted"));
-      }
-      socket.data.user = {
-        userId: decoded.userId,
-        role: role,
-      };
-      connectedUsers[decoded.userId]=socket.id
-      next();
-    } catch (error) {
-      return next(new Error("Authentication error"));
-    }
-  });
+    });
   io.on("connection", (socket) => {
     const userId = socket.data.user.userId;
     socket.on("join", (roomId: string) => {
       if (!roomId) {
         throw new Error(`Invalid room ID for user ${userId}`);
-        
       }
       socket.join(roomId);
     });
@@ -59,7 +76,7 @@ export const socketConfig = (io: Server) => {
             throw new Error("Invalid message data");
           }
           const senderId = socket.data.user.userId;
-          const message = await chatService.sendMessage({
+          const message = await this.chatService.sendMessage({
             sender: senderId,
             receiverId: data.receiverId,
             content: data.content,
@@ -104,7 +121,7 @@ export const socketConfig = (io: Server) => {
           }
           const updatedMessages = await Promise.all(
             data.messageIds.map(async (messageId) => {
-              return await chatService.updateMessageStatus(
+              return await this.chatService.updateMessageStatus(
                 messageId,
                 data.status
               );
@@ -133,7 +150,7 @@ export const socketConfig = (io: Server) => {
         receiverId: string;
       }) => {
         try {
-          const message = await chatService.findMessageById(data.messageId);
+          const message = await this.chatService.findMessageById(data.messageId);
           if (!message) {
             throw new Error("message not  found");
           }
@@ -143,7 +160,7 @@ export const socketConfig = (io: Server) => {
           if (data.receiverId !== socket.data.user.userId) {
             throw new Error("Unauthorized message deletion attempt");
           }
-          await chatService.deleteMessage(data.messageId);
+          await this.chatService.deleteMessage(data.messageId);
           io.to(data.senderId)
             .to(data.receiverId)
             .emit("messageDeleted", {
@@ -221,32 +238,23 @@ export const socketConfig = (io: Server) => {
       receiverId: string;
     }) => {
       try {
-        // Validate input data
         if (!data.senderId || !data.receiverId) {
           console.error('Invalid videoCallHangUp data:', data);
           return;
         }
-    
-        // Find recipient's socket ID
         const recipientSocketId = connectedUsers[data.receiverId];
-    
         if (recipientSocketId) {
-          // Emit event to specific recipient
           io.to(recipientSocketId).emit('videoCallEnded', {
             senderId: data.senderId,
             timestamp: new Date().toISOString()
           });
-    
-          // Optional: Logging
           console.log(`Video call hang up: 
             Sender: ${data.senderId}, 
             Recipient: ${data.receiverId}`);
         } else {
-          // Log if recipient is not connected
           console.warn(`Recipient ${data.receiverId} not found in connected users`);
         }
       } catch (error) {
-        // Comprehensive error handling
         console.error('Error in videoCallHangUp:', {
           error: error instanceof Error ? error.message : 'Unknown error',
           data
@@ -255,7 +263,8 @@ export const socketConfig = (io: Server) => {
     });
     socket.on('likePost',async({userId,recipient,postId,content,link})=>{
       try {
-        const updatedPost=await interactionService.likePost(userId,postId)
+        console.log("IN likepost")
+        const updatedPost=await this.interactionService.likePost(userId,postId)
         io.to(recipient).emit('newNotification',{
           content,
           link,
@@ -268,7 +277,7 @@ export const socketConfig = (io: Server) => {
     })
     socket.on('commentPost',async({userId,postId,comment})=>{
       try {
-        const newComment=await interactionService.commentOnPost(userId,postId,comment)
+        const newComment=await this.interactionService.commentOnPost(userId,postId,comment)
         const userIdString = newComment.userId.toString();
         io.to(userIdString).emit('postCommented',{postId,userId,newComment})
       } catch (error) {
@@ -287,3 +296,4 @@ export const socketConfig = (io: Server) => {
     });
   });
 };
+}

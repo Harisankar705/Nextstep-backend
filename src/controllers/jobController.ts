@@ -1,19 +1,30 @@
+import { ChangeApplicationStatusDTO, CreateJobDTO, ScheduleInterviewDTO, UpdateJobDTO,  } from './../dtos/userDTO';
 import { NextFunction, Request, Response } from "express";
 import { ApplicationStatus, JobData } from "../types/authTypes";
-import { jobService } from "../services/jobService";
 import { jobRepository } from '../repositories/jobRepository';
 import ApplicantModel from "../models/applicant";
 import Stripe from "stripe";
 import dotenv from 'dotenv';
 import { STATUS_CODES } from "../utils/statusCode";
 import { IJobController } from "../types/controllerinterface";
+import { inject } from "inversify";
+import { TYPES } from "../types/types";
+import { JobService } from "../services/jobService";
+import { validateDTO } from "../dtos/validateDTO";
+import { ApplyJobDTO, FetchJobsDTO, PaymentStripeDTO } from "../dtos/userDTO";
+import { validate } from 'node-cron';
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-class JobController implements IJobController {
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+
+
+export class JobController implements IJobController {
+    constructor(@inject(TYPES.JobService)private jobService:JobService){}
     async fetchJobs(req: Request, res: Response, next: NextFunction) {
         try {
-            const filters = req.body;
-            const jobs = await jobService.getFilteredJobs(filters);
+            console.log('req.boduy',req.body)
+            const fetchJobsDTO=await validateDTO(FetchJobsDTO,req.body)
+            const jobs = await this.jobService.getFilteredJobs(fetchJobsDTO.filters);
             res.status(STATUS_CODES.OK).json(jobs);
         } catch (error) {
             next(error);
@@ -31,7 +42,7 @@ class JobController implements IJobController {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Job details required!" });
                 return;
             }
-            const job = await jobService.createJob(employerId, jobData);
+            const job = await this.jobService.createJob(employerId, jobData);
             res.status(STATUS_CODES.CREATED).json({ message: "Job posted!" });
         } catch (error) {
             next(error);
@@ -43,7 +54,7 @@ class JobController implements IJobController {
             if (!employerId) {
                 res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Employer id is required" });
             }
-            const jobs = await jobService.getAllJobs(employerId);
+            const jobs = await this.jobService.getAllJobs(employerId);
             res.status(STATUS_CODES.OK).json(jobs);
         } catch (error) {
             next(error);
@@ -57,7 +68,7 @@ class JobController implements IJobController {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Job ID is required!" });
                 return;
             }
-            const job = await jobService.getJobById(jobId);
+            const job = await this.jobService.getJobById(jobId);
             if (!job) {
                 res.status(STATUS_CODES.NOT_FOUND).json({ message: "Job not found!" });
                 return;
@@ -104,7 +115,7 @@ class JobController implements IJobController {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Job ID and Applicant ID are required" });
                 return;
             }
-            const job = await jobService.applyForJob(jobId, userId);
+            const job = await this.jobService.applyForJob(jobId, userId);
             res.status(STATUS_CODES.OK).json({ message: "Application successful", job });
         } catch (error) {
             next(error);
@@ -144,7 +155,7 @@ class JobController implements IJobController {
             if (!jobId) {
                 res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Job id is required!" });
             }
-            const deletedJob = await jobService.deleteJob(jobId);
+            const deletedJob = await this.jobService.deleteJob(jobId);
             if (deletedJob) {
                 res.status(STATUS_CODES.OK).json({ message: "Job deleted successfully!" });
             } else {
@@ -168,7 +179,7 @@ class JobController implements IJobController {
                 platform,
                 meetingLink,
             };
-            const interview = await jobService.scheduleInterview(userId, jobId, scheduleData);
+            const interview = await this.jobService.scheduleInterview(userId, jobId, scheduleData);
             res.status(STATUS_CODES.OK).json({ message: "Interview scheduled successfully!" });
         } catch (error) {
             next(error);
@@ -186,7 +197,7 @@ class JobController implements IJobController {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: 'Invalid status provided' });
                 return;
             }
-            const updatedApplicant = await jobService.changeApplicationStatus(status, userId);
+            const updatedApplicant = await this.jobService.changeApplicationStatus(status, userId);
             res.status(STATUS_CODES.OK).json(updatedApplicant);
         } catch (error) {
             next(error);
@@ -195,7 +206,7 @@ class JobController implements IJobController {
     async getApplicantsForJob(req: Request, res: Response) {
         try {
             const { jobId } = req.params;
-            const { applicants, totalApplicants } = await jobService.getApplicantsForJob(jobId);
+            const { applicants, totalApplicants } = await this.jobService.getApplicantsForJob(jobId);
             res.status(STATUS_CODES.OK).json({ success: true, data: { applicants, total: totalApplicants } });
         } catch (error) {
             res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: error });
@@ -207,7 +218,7 @@ class JobController implements IJobController {
             if (!userId) {
                 userId = req.user?.userId;
             }
-            const updatedUser = await jobService.changeToPremium(userId);
+            const updatedUser = await this. jobService.changeToPremium(userId);
             res.status(STATUS_CODES.OK).json({ message: "Status changed" });
         } catch (error) {
             res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: error });
@@ -221,7 +232,7 @@ class JobController implements IJobController {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Id not a string" });
                 return;
             }
-            const response = await jobService.applicantDetails(id, jobId);
+            const response = await this.jobService.applicantDetails(id, jobId);
             res.status(STATUS_CODES.OK).json(response);
         } catch (error) {
             const err = error as Error;
@@ -229,5 +240,3 @@ class JobController implements IJobController {
         }
     }
 }
-
-export const jobController = new JobController();

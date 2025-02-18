@@ -1,21 +1,20 @@
 import { EmployerRepository } from './../repositories/employerRepository';
 import { IEmployer } from "../types/authTypes"
 import { IEmployerService } from "../types/serviceInterface"
-const employerRepository=new EmployerRepository()
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../types/types';
+@injectable()
 class EmployerService implements IEmployerService
 {
-    private employerRepository:EmployerRepository
-    constructor(employerRepository:EmployerRepository)
-    {
-        this.employerRepository=employerRepository
-    }
+    constructor(@inject(TYPES.EmployerRepository)private employerRepository:EmployerRepository)
+    {}
     async updateUser(userId:string,userData:Partial<IEmployer>,logoPath?:string){
         try {
             if(logoPath)
             {
                 userData.logo=logoPath
             }
-            const updatedUser=await employerRepository.updateUser(userId,userData)
+            const updatedUser=await this.employerRepository.updateUser(userId,userData)
             if(!updatedUser)
             {
                 throw new Error('User not found')
@@ -27,7 +26,7 @@ class EmployerService implements IEmployerService
     }
     async isVerified(employerId:string):Promise<boolean>
     {
-        return await employerRepository.isVerified(employerId)
+        return await this. employerRepository.isVerified(employerId)
     }
 }
 export default EmployerService

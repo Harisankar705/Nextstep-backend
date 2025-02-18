@@ -7,6 +7,7 @@ import { Filters, InterviewScheduleData, JobData } from "../types/authTypes";
 import cron from "node-cron";
 import UserModel from "../models/User";
 import { BaseRepository } from "./baseRepository";
+import EmployerModel from "../models/Employer";
 export class JobRepository extends BaseRepository<IJob>{
   constructor()
   {
@@ -20,7 +21,9 @@ export class JobRepository extends BaseRepository<IJob>{
       ...jobData.formData,
       employerId: employerId,
     });
-    return  job.save();
+    const savedJob= await job.save();
+    await EmployerModel.findByIdAndUpdate(employerId,{$addToSet:{jobs:savedJob._id}})
+    return savedJob
   }
   async findCandidateById(userId: string) {
     return ApplicantModel.findOne({
@@ -49,6 +52,7 @@ export class JobRepository extends BaseRepository<IJob>{
     if (!job) {
       throw new Error("Job not found");
     }
+    console.log("USERID",userId)
     const user = await UserModel.findById(userId);
     
     if (!user) {
@@ -76,31 +80,35 @@ export class JobRepository extends BaseRepository<IJob>{
     await job.save();
     return newApplicant;
   }
-  async fetchJobs(filters: Filters):Promise<IJob[]> {
-    const query: any = {};
-    if (filters.search) {
-      query.$or = [
-        { jobTitle: { $regex: filters.search, $options: "i" } },
-        { description: { $regex: filters.search, $options: "i" } },
-      ];
+  async fetchJobs(filters?: Filters): Promise<IJob[]> {
+    const query: Record<string, unknown> = {};
+
+    // If filters exist and contain values, apply filters
+    if (filters) {
+        if (filters.search) {
+            query.$or = [
+                { jobTitle: { $regex: filters.search, $options: "i" } },
+                { description: { $regex: filters.search, $options: "i" } },
+            ];
+        }
+
+        if (filters.jobTypes && filters.jobTypes.length > 0) {
+            query.employmentTypes = { $in: filters.jobTypes };
+        }
+
+        if (filters.experienceLevels && filters.experienceLevels.length > 0) {
+            query.categories = { $in: filters.experienceLevels };
+        }
     }
-    if (filters.jobTypes && filters.jobTypes.length > 0) {
-      query.employmentTypes = { $in: filters.jobTypes };
-    }
-    if (filters.experienceLevels && filters.experienceLevels.length > 0) {
-      query.categories = { $in: filters.experienceLevels };
-    }
-    // // Pagination (optional)
-    // const limit = filters.limit || 10; // Default limit to 10
-    // const page = filters.page || 1; // Default page to 1
-    // const skip = (page - 1) * limit;
+
+    console.log("Query being executed:", JSON.stringify(query, null, 2));
+
     return await JobModel.find(query)
-      .populate("employerId", "companyName logo") // Populate employer data
-      .select("jobTitle description employmentTypes salaryRange createdAt") // Select only required fields
-      .sort({ createdAt: -1 }); // Sort by most recent
-    // .skip(skip) // Apply pagination
-    // .limit(limit); // Apply pagination
-  }
+        .populate("employerId", "companyName logo") // Populate employer data
+        .select("jobTitle description employmentTypes salaryRange createdAt") // Select only required fields
+        .sort({ createdAt: -1 });
+}
+
   async getAllJobs(employerId: string):Promise<IJob[]> {
     return await JobModel.find({ employerId });
   }

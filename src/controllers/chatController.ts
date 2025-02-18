@@ -1,31 +1,25 @@
+import { ChatService } from './../services/chatService';
 import { NextFunction, Request, Response } from "express";
-import { ChatService } from "../services/chatService";
 import { S3Client, GetObjectCommand, GetObjectCommandInput } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { STATUS_CODES } from "../utils/statusCode";
 import { IChatController } from "../types/controllerinterface";
+import { inject } from "inversify";
+import { TYPES } from '../types/types';
+import { GetChatDTO, GetURLDTO } from '../dtos/userDTO';
+import { validateDTO } from '../dtos/validateDTO';
 
-class ChatController implements IChatController {
-  private chatService: ChatService;
-  private s3Client: S3Client;
+export class ChatController implements IChatController {
+  
 
-  constructor() {
-    this.chatService = new ChatService();
-    this.s3Client = new S3Client({
-      region: process.env.AWS_REGION!,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-      },
-    });
-  }
+  constructor(@inject(TYPES.ChatService)private chatService:ChatService,@inject(TYPES.S3Client)private s3Client:S3Client) {}
 
   public getChat = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const userId = req.user?.userId;
       const messages = await this.chatService.getChat(id, userId);
-      res.status(STATUS_CODES.CREATED).json({ messages, userId });
+      res.status(STATUS_CODES.OK).json({ messages, userId });
     } catch (error) {
       next(error);
     }
@@ -34,6 +28,10 @@ class ChatController implements IChatController {
   public getMessages = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.userId;
+      if (!userId) {
+        res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized user" });
+        return;
+    }
       const messages = await this.chatService.getMessagesForUser(userId);
       res.status(STATUS_CODES.OK).json(messages);
     } catch (error) {
@@ -43,13 +41,10 @@ class ChatController implements IChatController {
 
   public getURL = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { url } = req.body;
-      if (!url) {
-        res.status(STATUS_CODES.BAD_REQUEST).json({ error: "Missing URL" });
-        return;
-      }
+      const getURLDTO=await validateDTO(GetURLDTO,req.body)
+      
 
-      const urlParts = new URL(url);
+      const urlParts = new URL(getURLDTO.url);
       const bucket = urlParts.hostname.split(".")[0];
       const key = decodeURIComponent(urlParts.pathname.substring(1));
 
@@ -67,4 +62,3 @@ class ChatController implements IChatController {
     }
   };
 }
-export const chatController = new ChatController();

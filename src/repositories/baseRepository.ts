@@ -1,4 +1,4 @@
-import { Model, Document, FilterQuery, UpdateQuery } from "mongoose";
+import { Model, Document, FilterQuery, UpdateQuery, QueryOptions } from "mongoose";
 
 export class BaseRepository<T extends Document> {
   constructor(protected readonly model: Model<T>) {}
@@ -8,7 +8,7 @@ export class BaseRepository<T extends Document> {
     return await entity.save();
   }
 
-  async findById(id: string,options?:any): Promise<T | null> {
+  async findById(id: string,options?:QueryOptions): Promise<T | null> {
     return await this.model.findById(id).exec();
   }
 

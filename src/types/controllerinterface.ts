@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { IPosts, IReport, Reason } from './authTypes';
 
 export interface IAdminController {
   getUsers(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -7,12 +8,18 @@ export interface IAdminController {
   verificationStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
   adminLogout(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
+export interface IReportController
+{
+  createReport(req: Request, res: Response, next: NextFunction):Promise<void>
+    getReports(req: Request, res: Response, next: NextFunction):Promise<void>
+    changeReportStatus(req: Request, res: Response, next: NextFunction):Promise<void>
+}
 
 export interface IAuthController {
   signup(req: Request, res: Response, next: NextFunction): Promise<void>;
   candidateDetails(req: Request, res: Response, next: NextFunction): Promise<void>;
   search(req: Request, res: Response, next: NextFunction): Promise<void>;
-  createPost(req: Request, res: Response, next: NextFunction): Promise<void>;
+  createPost(req: Request, res: Response, next: NextFunction): Promise<IPosts|void>;
   login(req: Request, res: Response, next: NextFunction): Promise<void>;
   sendOTPcontroller(req: Request, res: Response, next: NextFunction): Promise<void>;
   resendOTPcontroller(req: Request, res: Response, next: NextFunction): Promise<void>;

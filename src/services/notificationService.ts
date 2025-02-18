@@ -1,72 +1,69 @@
+import { INotificationService } from './../types/serviceInterface';
 import { getSenderData } from './../utils/modelUtil';
 import { NotificationRepository } from "../repositories/notificationRepository";
 import { Server } from "socket.io";
-import { NotificationData } from "../types/authTypes";
-import Notification from '../models/notification';
- class NotificationService
+import { INotification, NotificationData } from "../types/authTypes";
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../types/types';
+@injectable()
+ export class NotificationService implements INotificationService
 {
     private io:Server 
-    private notificationRepository:NotificationRepository
-    constructor(io:Server,notificationRepository:NotificationRepository)
+    constructor(@inject(TYPES.NotificationRepository)private notificationRepository:NotificationRepository,@inject(TYPES.SocketServer)private socketServer:Server)
     {
-        this.io=io
-        this.notificationRepository=notificationRepository
+        this.io=socketServer
     }
-    async getNotification(userId:string)
+    async getNotification(userId:string):Promise<NotificationData[]>
     {
         return await this.notificationRepository.getNotificationForUser(userId)
     }
-    async markNotificationAsRead(notificationId:string)
+    async markNotificationAsRead(notificationId:string):Promise<INotification|null>
     {
         return await this.notificationRepository.markNotificationAsRead(notificationId)
     }
-    async createNotification(notificationData:NotificationData)
-    {
+    async createNotification(notificationData: NotificationData): Promise<NotificationData> {
         try {
-            if(!notificationData)
-            {
-                throw new Error("Notificationdata not available!")
+            if (!notificationData) {
+                throw new Error("Notification data not available!");
             }
-            const {senderId,recipientId,type,content,link}=notificationData
-            let senderDetails;
-            const sender=await getSenderData(senderId)
-            const senderModel = sender?.role === 'employer' ? 'Employer' : 'User';
-            if(sender?.role==='employer')
-            {
-                senderDetails={
-                    companyName:sender.companyName,
-                    logo:sender.logo
-                }
+    
+            const { senderId, recipientId, type, content, link } = notificationData;
+    
+            if (!recipientId) {
+                throw new Error("No recipient provided");
             }
-            else
-            {
-                senderDetails={
-                    profilePicture:sender?.profilePicture,
-                    secondName:sender?.secondName
-                }
+    
+            const sender = await getSenderData(senderId);
+            if (!sender) {
+                throw new Error("Sender not found");
             }
-            const notification={
-                type,
-                sender:senderId,
+    
+            let senderDetails = sender.role === 'employer' 
+                ? { companyName: sender.companyName, logo: sender.logo } 
+                : { profilePicture: sender.profilePicture, secondName: sender.secondName };
+    
+            const notification = {
+                senderId,
                 recipientId,
+                type,
                 content,
                 link,
-                createdAt:new Date(),
+                createdAt: new Date(),
                 senderDetails,
-                senderModel
-            }
-            const newNotification=await this.notificationRepository.createNotification(notification)
-            if(!notificationData.recipientId)
-            {
-                return
-            }
-            this.io.to(notificationData?.recipientId.toString()).emit('newNotification',newNotification)
-            return newNotification
+                senderModel: sender.role === 'employer' ? 'Employer' : 'User'
+            };
+    
+            // Save notification
+            const newNotificationDoc = await this.notificationRepository.createNotification(notification);
+            const newNotification = newNotificationDoc.toObject() as unknown as NotificationData; 
+    
+            this.io.to(recipientId.toString()).emit('newNotification', newNotification);
+    
+            return newNotification;
         } catch (error) {
-            throw error
+            throw error;
         }
     }
+    
+    
 }
-const io=new Server()
-const notificationRepository=new NotificationRepository()
-export const notificationService=new NotificationService(io,notificationRepository)

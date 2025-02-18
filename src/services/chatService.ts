@@ -1,21 +1,22 @@
-import { chatModel } from "../models/chat";
-import { ChatRepository } from "../repositories/chatRepository";
+import { ChatRepository } from './../repositories/chatRepository';
+import { ChatModel } from "../models/chat";
 import { S3 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 import { IChatService } from "../types/serviceInterface";
-import { ChatMessage } from "../types/authTypes";
+import { IChatMessage } from "../types/authTypes";
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../types/types';
 dotenv.config();
+@injectable()
 export class ChatService implements IChatService {
     private s3: S3;
-    private chatRepository: ChatRepository ;
     private readonly bucketRegion: string;
     private readonly bucketName: string;
-    constructor(chatRepository:ChatRepository,s3:S3,bucketRegion:string,bucketName:string) {
-         this.chatRepository=chatRepository
-         this.s3=s3
-         this.bucketRegion=bucketRegion
-         this.bucketName=bucketName
+    constructor(@inject(TYPES.ChatRepository)private chatRepository:ChatRepository,@inject(TYPES.S3Client)private s3Client:S3) {
+         this.s3=s3Client
+         this.bucketRegion=process.env.AWS_REGION!;
+         this.bucketName=process.env.AWS_BUCKET_NAME!;
          this.validateConfig()
         
     }
@@ -63,15 +64,16 @@ export class ChatService implements IChatService {
             status: data.status || "sent",
             timestamp: new Date(),
             file: fileDataToSave
-        }as ChatMessage);
+        }as IChatMessage);
     }
     async findMessageById(messageId:string)
     {
-        return await chatModel.findById(messageId)
+        return await ChatModel.findById(messageId)
     }
     async deleteMessage(messageId:string)
     {
-        return await chatModel.findByIdAndDelete(messageId)
+        const deletedMessage= await ChatModel.findByIdAndDelete(messageId)
+        return deletedMessage?true:null
     }
     async updateMessageStatus(messageId:string,status:'sent'|'delivered'|'seen')
     {

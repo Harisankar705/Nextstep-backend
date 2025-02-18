@@ -1,38 +1,59 @@
+import { IApplicant, IEmployer, IUser } from './../types/authTypes';
 import { Document, Model } from "mongoose";
-import EmployerModel from "../models/Employer";
-import UserModel from "../models/User";
 import { IAdminRepository } from "../types/repositoryInterface";
 import { BaseRepository } from "./baseRepository";
-export class AdminRepository extends BaseRepository<Document> implements IAdminRepository {
-    private userModel:Model<Document>
-    private employerModel:Model<Document>
-    constructor(userModel:Model<Document>,employerModel:Model<Document>)
+import { inject } from 'inversify';
+import { TYPES } from '../types/types';
+import { getModel } from '../utils/modelUtil';
+
+export class AdminRepository extends BaseRepository<IUser & Document> implements IAdminRepository {
+    constructor(@inject(TYPES.UserModel)private userModel:Model<IUser & Document>,@inject(TYPES.EmployerModel)private employerModel:Model<IEmployer & Document>,)
     {
         super(userModel)
-        this.userModel=userModel
-        this.employerModel=employerModel
     }
-async changeUserStatus(model:typeof UserModel| typeof EmployerModel,id:string):Promise<any> {
-        const user=await (model as any).findById(id)
-        if(!user)
-        {
-            throw new Error("user is undefined")
+    async  changeUserStatus(model: Model<IUser | IEmployer | IApplicant>, id: string): Promise<IUser | IEmployer | IApplicant | null> {  
+        const user = await model.findById(id).lean();
+        if (!user) {
+            throw new Error("User not found");
         }
-        const newStatus=user.status==="Active"?"Inactive":"Active"
-        const updatedUser = await model.updateOne({ _id: id }, { $set: { status: newStatus } }, { new: true });
-        if(!updatedUser)
-        {
-            throw new Error("Failed to update user status")
+        if (!("status" in user)) {
+            throw new Error("User does not have a status field");
         }
-        return updatedUser
+        const newStatus = user.status === "Active" ? "Inactive" : "Active";
+        const updatedUser = await model.findByIdAndUpdate(
+            id,
+            { $set: { status: newStatus } },
+            { new: true, runValidators: true }
+        ).lean() as IUser|IEmployer|IApplicant|null
+        if (!updatedUser) {
+            throw new Error("Failed to update user status");
+        }
+        return updatedUser;
     }
-    async updateVerificationStatus(id: string, status: "VERIFIED" | "DENIED") {
+    async updateVerificationStatus(id: string, status: "VERIFIED" | "DENIED"):Promise<IEmployer|null> {
         try {
-            const employer = await EmployerModel.findById(id)
-            const updatedEmployer = await EmployerModel.findByIdAndUpdate(id, { $set: { isVerified: status } }, { new: true })
+            const employer = await this.employerModel.findById(id)
+            const updatedEmployer = await this.employerModel.findByIdAndUpdate(id, { $set: { isVerified: status } }, { new: true })
             return updatedEmployer
         } catch (error) {
             throw error
         }
-}
+    }
+
+    async getIndividualDetails(id:string,role:string)
+    {
+        let details:(IEmployer|IUser)[]=[]
+        const userModel = await getModel(role)
+        if(!userModel)
+        {
+            throw new Error("Invalid role")
+        }
+        let userDetails=await (userModel as Model<IEmployer|IUser>).findById(id).populate("jobs")
+        if(userDetails)
+        {
+            details.push(userDetails)
+
+        }
+        return details
+    }
 }

@@ -1,6 +1,6 @@
 import mongoose, {Schema, Types} from 'mongoose'
-import { ChatMessage } from '../types/authTypes'
-const ChatSchema=new Schema<ChatMessage>({
+import { IChatMessage } from '../types/authTypes'
+const ChatSchema=new Schema<IChatMessage>({
     senderId:{type:Schema.Types.ObjectId,ref:"User",required:true},
     receiverId:{type:Schema.Types.ObjectId,ref:"Employer",required:true},
     content:{type:String,required:true},
@@ -22,4 +22,4 @@ const ChatSchema=new Schema<ChatMessage>({
     },   
     isDeleted:{type:Boolean,default:false}
 })
-export const chatModel = mongoose.model("Chat", ChatSchema)
+export const ChatModel = mongoose.model("Chat", ChatSchema)

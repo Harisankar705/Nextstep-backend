@@ -1,16 +1,24 @@
+import { UserRepository } from './../repositories/userRepository';
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { UserRepository } from "../repositories/userRepository";
 import { JwtPayload } from "../types/authTypes";
 import { STATUS_CODES } from "../utils/statusCode";
-const userRespository = new UserRepository();
-export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+import { inject } from "inversify";
+import { TYPES } from '../types/types';
+export class AuthMiddleware{
+    constructor
+    (
+        @inject(TYPES.UserRepository)private userRespository:UserRepository
+    ){}
+
+ public verifyToken = async (req: Request, res: Response, next: NextFunction) => {
     const employerToken = req.cookies.employerAccessToken;
     const candidateToken = req.cookies.userAccessToken;
     const adminToken = req.cookies.adminAccessToken;
     const token = employerToken || candidateToken || adminToken;
     if (!token) {
          res.status(STATUS_CODES.FORBIDDEN).json({ message: "Token not found" });
+         return
     }
     let role: string;
     if (employerToken) {
@@ -26,7 +34,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN as string) as JwtPayload;
         req.user = decoded;
-        const userData = await userRespository.findById(decoded.userId, role);
+        const userData = await this.userRespository.findUserById(decoded.userId, role);
         if (!userData || userData.status === 'Inactive') {
             const cookieName = employerToken ? "employerAccessToken" : candidateToken ? "userAccessToken" : "adminAccessToken";
             res.clearCookie(cookieName);
@@ -38,3 +46,4 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
         next(error);
     }
 };
+}

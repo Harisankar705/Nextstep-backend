@@ -28,6 +28,6 @@ export class EmployerRepository extends BaseRepository<IEmployer> implements IEm
     }
     async isVerified(employerId: string): Promise<boolean> {
         const employer = await this.findById(employerId);
-        return employer?.isVerified === 'APPROVED'; 
+        return employer?.isVerified === 'VERIFIED'; 
     }
 }

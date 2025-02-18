@@ -1,10 +1,10 @@
-import mongoose, { mongo } from "mongoose";
-const notificationSchema=new mongoose.Schema({
+import mongoose, { Schema } from "mongoose";
+import { INotification } from "../types/authTypes";
+const notificationSchema=new Schema<INotification>({
     recipientId:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
     },
-    
     sender:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
@@ -13,8 +13,6 @@ const notificationSchema=new mongoose.Schema({
         type:String,
         required:true,
         enum: ['User', 'Employer']
-
-
     },
     type:{
         type:String,
@@ -44,7 +42,6 @@ const notificationSchema=new mongoose.Schema({
         type:Date,
         default:Date.now()
     }
-
 })
 const Notification=mongoose.model("Notification",notificationSchema)
 export default Notification

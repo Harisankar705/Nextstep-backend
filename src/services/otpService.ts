@@ -2,11 +2,13 @@ import crypto from 'crypto'
 import nodemailer, { Transporter } from 'nodemailer'
 import { UserRepository } from '../repositories/userRepository'
 import { IOtpService } from '../types/serviceInterface';
+import { inject } from 'inversify';
+import { TYPES } from '../types/types';
 const otpStore: { [key: string]: { otp: string, expiry: Date } } = {};
 class otpService implements IOtpService{
     private userRepository:UserRepository
     private transporter:Transporter
-    constructor(userRepository:UserRepository,transporter:Transporter)
+    constructor(@inject(TYPES.UserRepository)userRepository:UserRepository,@inject(TYPES.Transporter)transporter:Transporter)
     {
         this.userRepository =userRepository
         this.transporter=transporter
@@ -20,20 +22,14 @@ class otpService implements IOtpService{
         const otpExpiry = new Date(Date.now() + 5 *  60 * 1000)
         otpStore[email] = { otp, expiry: otpExpiry }
         console.log(otpStore[email])
-        const transporter = nodemailer.createTransport({
-            service: "Gmail",
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        })
+       
         const mailOption = {
             from: "nextstep@gmail.com",
             to: email,
             subject: "Your otp for nextstep is",
             text: `Your OTP code is ${otp} It will expire in 5 minutes`
         }
-        await transporter.sendMail(mailOption)
+        await this.transporter.sendMail(mailOption)
     }
     async resendOTP(email:string,role:'user'|"employer",):Promise<void>{
         const otpData=otpStore[email]

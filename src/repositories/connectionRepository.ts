@@ -3,7 +3,7 @@ import { IConnection } from "../types/authTypes";
 import { IConnectionRepository } from '../types/repositoryInterface';
 import ConnectionModel from '../models/connection';
 import { BaseRepository } from "./baseRepository"; 
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 export class ConnectionRepository extends BaseRepository<IConnection> implements IConnectionRepository {
     constructor(  model:Model<IConnection>) {
         super(model); 
@@ -40,10 +40,10 @@ export class ConnectionRepository extends BaseRepository<IConnection> implements
             followerId: userId,
         }).populate('followerId followingId', 'firstName lastName email profilePicture').exec();
     }
-    async find(query: any): Promise<IConnection[]> {
-        return await this.find(query);
+    async find(query:FilterQuery<IConnection>): Promise<IConnection[]> {
+        return await this.model.find(query).exec()
     }
-    async findWithPopulate(query: any): Promise<IConnection[]> {
+    async findWithPopulate(query:FilterQuery<IConnection>): Promise<IConnection[]> {
         return await this.model.find(query)
             .populate('followerId followingId', 'firstName lastName email profilePicture')
             .exec();

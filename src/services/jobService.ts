@@ -1,16 +1,14 @@
-import { IJob, InterviewScheduleData } from './../types/authTypes';
+import { JobRepository } from './../repositories/jobRepository';
+import { ApplicationStatus, IJob, InterviewScheduleData } from './../types/authTypes';
 import ApplicantModel from "../models/applicant";
 import UserModel from "../models/User";
-import { JobRepository } from "../repositories/jobRepository";
 import { Filters, JobData } from "../types/authTypes";
-type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'interviewScheduled' | 'interviewCompleted';
-class JobService
+import { inject } from 'inversify';
+import { TYPES } from '../types/types';
+export class JobService
 {
-    private jobRepository:JobRepository
-    constructor(jobRepository:JobRepository)
-    {
-        this.jobRepository=jobRepository
-    }
+    constructor(@inject(TYPES.JobRepository)private jobRepository:JobRepository)
+    {}
     async createJob(employerId:string,jobData:JobData)
     {
         try {
@@ -43,6 +41,7 @@ class JobService
     async updateJob(jobId:string,jobData:Partial<JobData>)
     {
         try {
+            console.log(jobData)
             return await this.jobRepository.updateJob(jobId, jobData)
         } catch (error) {
             throw new Error("Failed to update job")
@@ -108,5 +107,3 @@ class JobService
         }
     }
 }
-const jobRepository=new JobRepository()
-export const jobService=new JobService(jobRepository)

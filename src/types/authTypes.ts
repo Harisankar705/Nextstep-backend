@@ -1,4 +1,4 @@
-import mongoose, { Document, mongo, ObjectId, Types } from "mongoose";
+import mongoose, { Document, ObjectId, Types } from "mongoose";
 export interface IUser extends Document {
     _id: string | mongoose.Types.ObjectId;
     username?: string;
@@ -12,7 +12,7 @@ export interface IUser extends Document {
     experience?: string;
     skills?: string[];
     resume?: string[];
-    profilePicture?: string;
+    profilePicture?: string
     aboutMe?: string;
     dateOfBirth?: Date;
     gender?: string;
@@ -30,6 +30,7 @@ export interface IUser extends Document {
     premiumExpiry:Date,
     status: "Active" | "Inactive"
 }
+export type Reason='spam'|'inappropirate'|'offensive'|'misinformation'|'sexual content'|'other'
 export interface CustomError extends Error
 {
     status?:number
@@ -40,6 +41,24 @@ userId:string,
 role:string,
 iat:number,
 exp:number
+}
+export interface INotification extends Document
+{
+    recipientId:mongoose.Types.ObjectId,
+    sender:mongoose.Types.ObjectId,
+    senderModel:"User"|"Employer",
+    type: 
+        | "post_like"
+        | "post_comment"
+        | "friend_request"
+        | "friend_request_accepted"
+        | "new_message"
+        | "job_application"
+        | "job_application_update";
+    content:string,
+    link?:string,
+    read:boolean,
+    createdAt:Date
 }
 export type ApplicationStatus = 'pending' | 'accepted' |'in-review'|'shortlisted'| 'rejected' |'interview'| 'interviewScheduled' | 'interviewCompleted';
 export interface IConnection extends Document
@@ -58,7 +77,7 @@ export interface IEmployer extends Document {
     role: "employer"
     document:string,
     documentType:"GST"|"PAN"|"INCORPORATION"|"OTHER",
-    isVerified:  "PENDING"|'APPROVED'|'REJECTED',
+    isVerified:  "PENDING"|'APPROVED'|'REJECTED'|'VERIFIED',
     documentNumber:string,
     logo: string,
     website: string,
@@ -70,6 +89,7 @@ export interface IEmployer extends Document {
     companyName: string
     isProfileComplete: boolean,
     status: "Active" | "Inactive"
+    jobs:mongoose.Types.ObjectId
 }
 export interface IAdmin extends Document {
     _id: string | mongoose.Types.ObjectId,
@@ -100,14 +120,44 @@ export interface    IPosts extends Document
     image:string[],
     background?:string,
     location:string,
+    postIds?:string
     createdAt:Date,
     comments:mongoose.Types.ObjectId[],
-    likes:mongoose.Types.ObjectId[]
+    likes:ILike[]
 }
-export interface Like {
-    _id: ObjectId;
-    postId: ObjectId;
-    userId: ObjectId;
+export interface IReport extends Document {
+    post:mongoose.Types.ObjectId,
+    reporter: mongoose.Types.ObjectId
+    reporterModel:"User"|"Employer"   
+    reason:Reason
+    description?:string,
+    createdAt:Date,
+    status:string
+
+}
+export interface ILike {
+    _id: ObjectId|string;
+    postId: ObjectId|string;
+    userId: ObjectId|string;
+    createdAt: Date;
+}
+export interface ICommentor
+{
+    _id:string,
+    firstName?:string
+    secondName?:string,
+    profilePicture?:string,
+    logo?:string
+    companyName?:string
+}
+export interface IComments {
+    _id?: Types.ObjectId|string,
+    postId: ObjectId|string,
+    userId: ObjectId|string,
+    commentorModel?:"User"|"Employer",
+    comment: string;
+    commentor?:ICommentor|null
+    likes: ILike[]
     createdAt: Date;
 }
 export interface ISavedPost
@@ -125,7 +175,7 @@ export enum ConnectionStatus
 export interface JobData
 {
     formData:{
-        employerId:Types.ObjectId|string,
+        employerId:Types.ObjectId|string|undefined
         jobTitle:string
         description:string,
         employmentTypes:string[],
@@ -141,6 +191,7 @@ export interface JobData
         benefits: string[]
         createdAt: Date, 
         isActive: boolean
+
     }
 }
 export interface Filters {
@@ -161,6 +212,14 @@ export interface NotificationData{
     type:string,
     content:string,
     link:string
+    read?:boolean,
+    senderDetails?:{
+        companyName?:string,
+        logo?:string,
+        profilePicture?:string,
+        firstName?:string
+    }
+    createdAt?:Date
 }
 export const notificationTypes={
     LIKE_POST:'like_post',
@@ -170,7 +229,7 @@ export const notificationTypes={
 export interface IApplicant extends Document {
     jobId: mongoose.Types.ObjectId;
     userId: mongoose.Types.ObjectId;
-    applicationStatus: 'pending' | 'accepted' | 'rejected' | 'interviewScheduled' | 'interviewCompleted';
+    applicationStatus: ApplicationStatus;
     appliedAt: Date;
     resume?: string; 
     coverLetter?: string;
@@ -228,7 +287,7 @@ export interface IJob extends Document {
     applicants:ObjectId
   }
 
-export interface ChatMessage extends Document{
+export interface IChatMessage extends Document{
     _id:Types.ObjectId|string;
     senderId:Types.ObjectId|string,
     receiverId:Types.ObjectId|string,
@@ -244,4 +303,59 @@ export interface ChatMessage extends Document{
     status:'sent'|'delivered'|'read',
     seenAt?:Date,
     deliveredAt?:Date
+}
+
+export interface IUploadedFile {
+    filepath: string;
+    originalFilename: string;
+    mimetype: string;
+    size: number;
+}
+
+export interface IUploadedFiles {
+    [key: string]: undefined | IUploadedFile[];
+}
+
+export interface IUploadedFields {
+    [key: string]: string | string[] | undefined;
+}
+export interface VideoCallOffer
+{
+    senderId:string,
+    receiverId:string,
+    offer:RTCSessionDescriptionInit
+}
+export interface VideoCallAnswer
+{
+    senderId:string,
+    receiverId:string,
+    answer:RTCSessionDescriptionInit
+}
+export interface newIceCandidate
+{
+    senderId:string,
+    receiverId:string,
+    candidate:RTCIceCandidate
+}
+export interface LikePostData
+{
+    userId:string,
+    recipient:string,
+    postId:string,
+    content:string,
+    link:string
+}
+export interface CommentPostData
+{
+    userId:string,
+    postId:string,
+    comment:string
+}
+export enum EmployerDocumentType
+{
+    GST="GST",
+    PAN='PAN',
+    INCORPORATION='INCORPORATION',
+    OTHER='OTHER'
+
 }

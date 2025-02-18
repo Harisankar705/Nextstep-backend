@@ -2,20 +2,23 @@ import { ConnectionService } from './../services/connectionService';
 import { NextFunction, Response, Request } from 'express';
 import { ConnectionStatus } from '../types/authTypes';
 import { STATUS_CODES } from '../utils/statusCode';
-class ConnectionController {
-    private connectionService: ConnectionService;
-    constructor() {
-        this.connectionService = new ConnectionService();
-    }
+import { TYPES } from '../types/types';
+import { inject } from 'inversify';
+import { IConnectionController } from '../types/controllerinterface';
+import { FollowBackDTO, FollowUserDTO, RespondToRequestDTO } from '../dtos/userDTO';
+import { validateDTO } from '../dtos/validateDTO';
+import { validate } from 'node-cron';
+export class ConnectionController implements IConnectionController {
+    constructor(@inject(TYPES.ConnectionService)private connectionService:ConnectionService) {}
     public followUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { followingId } = req.body;
+            const followUserDTO=await validateDTO(FollowUserDTO,req.body)
             const followerId = req.user?.userId;
-            if (!followerId || !followingId) {
+            if (!followerId ) {
                  res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required!" });
                  return
             }
-            const connection = await this.connectionService.followUser(followerId, followingId);
+            const connection = await this.connectionService.followUser(followerId, followUserDTO.followingId);
             res.status(STATUS_CODES.OK).json({ success: true, data: connection });
             return; 
         } catch (error) {
@@ -25,13 +28,13 @@ class ConnectionController {
     };
     public followBack = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { connectionId } = req.body;
+            const followBackDTO=await validateDTO(FollowBackDTO,req.body)
             const userId = req.user?.userId;
-            if (!userId || !connectionId) {
+            if (!userId ) {
                  res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required" });
                  return
             }
-            const connection = await this.connectionService.respondToRequest(userId, connectionId, ConnectionStatus.FOLLOWBACK);
+            const connection = await this.connectionService.respondToRequest(userId, followBackDTO.connectionId, ConnectionStatus.FOLLOWBACK);
             if (!connection) {
                  res.status(STATUS_CODES.NOT_FOUND).json({ message: "Connection request not found" });
                  return
@@ -45,17 +48,14 @@ class ConnectionController {
     };
     public respondToRequest = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { connectionId, status } = req.body;
+            const respondToRequestDTO=await validateDTO(RespondToRequestDTO,req.body)
             const userId = req.user?.userId;
             if (!userId) {
                  res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required" });
                  return
             }
-            if (!connectionId) {
-                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Invalid connection Id" });
-                 return
-            }
-            const connection = await this.connectionService.respondToRequest(connectionId, userId, status);
+            
+            const connection = await this.connectionService.respondToRequest(respondToRequestDTO.connectionId, userId, respondToRequestDTO.status);
             res.status(STATUS_CODES.OK).json({ success: true, data: connection });
             return;
         } catch (error) {
@@ -126,4 +126,3 @@ class ConnectionController {
         }
     };
 }
-export const connectionController = new ConnectionController();

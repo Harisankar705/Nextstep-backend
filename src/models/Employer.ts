@@ -17,7 +17,8 @@ const employerSchema=new Schema<IEmployer>({
     website:{type:String,required:false},
     role:{type:String,default:'employer'},
     isProfileComplete:{type:Boolean,default:false},
-    status:{type:String,enum:["Active","Inactive"],default:"Active"}
+    status:{type:String,enum:["Active","Inactive"],default:"Active"},
+    jobs:[{type:mongoose.Schema.Types.ObjectId,ref:'Job'}],
 })
 const EmployerModel=mongoose.model<IEmployer>("Employer",employerSchema)
 export default EmployerModel

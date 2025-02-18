@@ -36,4 +36,4 @@ const postSchema: Schema<IPosts> = new mongoose.Schema({
     likes: [{ type: mongoose.Schema.ObjectId, ref: "Like" }] 
 });
 
-export const postModel = mongoose.model("Post", postSchema);
+export const PostModel = mongoose.model("Post", postSchema);

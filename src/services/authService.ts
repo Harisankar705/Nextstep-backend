@@ -1,5 +1,6 @@
+import { inject } from 'inversify';
 import { UserRepository } from './../repositories/userRepository';
-import { IEmployer, ILoginResponse, IUser } from './../types/authTypes';
+import { IEmployer, ILoginResponse, IPosts, IUser } from './../types/authTypes';
 import { comparePassword, hashPassword } from '../utils/hashPassword'
 import { generateRefreshToken, generateToken } from '../utils/jwtUtils'
 import UserModel from '../models/User'
@@ -7,23 +8,26 @@ import EmployerModel from '../models/Employer'
 import otpService from './otpService'
 import { IAuthService } from '../types/serviceInterface';
 import { Transporter } from 'nodemailer';
+import { injectable } from 'inversify';
+import { TYPES } from '../types/types';
 function isEmployerRole(role: string): role is 'employer' {
     return role === 'employer';
 }
-class AuthService implements IAuthService {
-    private userRepository:UserRepository
-    private OtpInstance:otpService
-    constructor(userRepository:UserRepository,transporter:Transporter)
-    {
-        this.userRepository=userRepository
-        this.OtpInstance=new otpService(userRepository,transporter)
-    }
+@injectable()
+export class AuthService implements IAuthService {
+
+    constructor(@inject(TYPES.UserRepository)private userRepository:UserRepository,@inject(TYPES.Transporter) private transporter:Transporter,@inject(TYPES.OtpService) private OtpInstance:otpService)
+    {}
     private validateRole(role: string): boolean {
         return ['user', 'employer'].includes(role);
     }
     async createPostService(userId: string, postData: object, role: string) {
         const response = await this.userRepository.createPost(postData, role,userId)
-        return response
+        return response as IPosts
+    }
+    async editPostService(postId:string,updatedData:IPosts,role:string,userId:string) {
+        const response = await this.userRepository.editPost(postId,updatedData,role,userId)
+        return response as IPosts
     }
     async searchService(query:string)
     {
@@ -35,6 +39,7 @@ class AuthService implements IAuthService {
             const results=await this.userRepository.search(query)
             return results
         } catch (error) {
+            throw new Error("Error occured during searching")
         }
     }
     async register(userData: IUser | IEmployer): Promise<IUser | IEmployer> {
@@ -65,17 +70,15 @@ class AuthService implements IAuthService {
             throw error;
         }
     }
-    async getUsersPosts(userId:string){
-        try
-        {
-            const posts = await this.userRepository.findUserPosts(userId)
-            return posts
-        }
-        catch(error)
-        {
-            throw error
+    async getUsersPosts(userId: string): Promise<IPosts[]> {
+        try {
+            const posts = await this.userRepository.findUserPosts(userId) 
+            return posts as IPosts[]
+        } catch (error) {
+            throw error;
         }
     }
+    
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
         try {
             const user = await this.userRepository.findByEmail(email, role);
@@ -91,9 +94,14 @@ class AuthService implements IAuthService {
             const isProfileComplete: boolean = user.isProfileComplete || false
             return { accessToken, refreshToken, user, isProfileComplete };
         } 
-            catch (error:any) {
-                throw error
+        catch (error: unknown) {
+            if (error instanceof Error) {
+                throw new Error(`Error login: ${error.message}`);
+            } else {
+                throw new Error(`Error login`);
+            }
         }
+        
     }
     async updateUser(userId: string, userData: Partial<IUser>, profilePicturePath?: string, resume?: string): Promise<IUser | null> {
         try {
@@ -131,4 +139,3 @@ class AuthService implements IAuthService {
         }
     }
 }
-export default AuthService;

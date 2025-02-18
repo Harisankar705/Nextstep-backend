@@ -1,26 +1,18 @@
-import { IJob, IPosts, IEmployer } from './../types/authTypes';
-import { IAdmin, IEmployer, IUser } from '../types/authTypes';
+import {  IPosts,IAdmin, IEmployer, IUser } from './../types/authTypes';
 import { Model, Document, Types } from 'mongoose'
-import { postModel } from '../models/post';
-import EmployerModel from "../models/Employer";
-import UserModel from "../models/User";
 import { getModel } from '../utils/modelUtil';
 import { BaseRepository } from './baseRepository';
-export class UserRepository extends BaseRepository<Document> {
-    private userModel:Model<IUser & Document>
-    private employerModel:Model<IEmployer & Document>
-    private postModel:Model<IPosts & Document>
-    constructor(userModel:Model<IUser & Document>,
-        employerModel:Model<IEmployer & Document>,
-        postModel:Model<IPosts & Document>)
-    {
-        super()
-        this.userModel=userModel
-        this.postModel
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../types/types';
+@injectable()
+export class UserRepository extends BaseRepository<IUser> {
+    constructor(@inject(TYPES.UserModel)private userModel:Model<IUser & Document>,@inject(TYPES.EmployerModel)private employerModel:Model<IEmployer & Document>,@inject(TYPES.PostModel)private postModel:Model<IPosts& Document>){
+        super(userModel)
     }
     async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = getModel(role);
+            
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findOne({ email }).exec();
             }
@@ -43,19 +35,19 @@ export class UserRepository extends BaseRepository<Document> {
                 throw new Error("query not found")
             }
             const [users,posts,employers]=await Promise.all([
-                UserModel.find({
+                this.userModel.find({
                     $or:[
                         {firstName:{$regex:query,$options:'i'}},
                         {secondName:{$regex:query,$options:'i'}}
                     ]
                 }).select('-password'),
-                postModel.find({
+                this.postModel.find({
                     $or:[
                         {location:{$regex:query,$options:'i'}},
                         {text:{$regex:query,$options:'i'}}
                     ]
                 }),
-                EmployerModel.find({
+                this.employerModel.find({
                     $or:[
                         {companyName:{$regex:query,$options:'i'}},
                     ]
@@ -71,7 +63,7 @@ export class UserRepository extends BaseRepository<Document> {
     async findUserPosts(userId:string)
     {
         try {
-            const posts = await postModel.find({ userId }).sort({ createdAt: -1 })
+            const posts = await this.postModel.find({ userId }).sort({ createdAt: -1 })
                 .lean()
                 .populate('likes')
                 .populate('comments')
@@ -80,16 +72,19 @@ export class UserRepository extends BaseRepository<Document> {
             throw new Error("Error occured in findUserPosts")
         }
     }
-    async findById(userId: string, role: string): Promise<IUser | IEmployer  | null> {
+    async findUserById(userId: string, role: string): Promise<IUser | IEmployer  | IAdmin|null> {
         try {
             const model = getModel(role);
+            console.log("MODEL",model)
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findById(userId ).exec();
             }
             if (role === 'user') {
                 return (model as Model<IUser & Document>).findById( userId ).exec();
             }
-            
+            if (role === 'admin') {
+                return (model as Model<IAdmin & Document>).findById( userId ).exec();
+            }
             throw new Error(`Invalid role: ${role}`);
         } catch (error) {
             throw new Error('Error occurred while finding by email');
@@ -120,7 +115,7 @@ export class UserRepository extends BaseRepository<Document> {
                 throw new Error("user not found in createpost")
             }
             const newPost={...postData,userId:userId,createdAt:new Date(),userType:role==='employer'?'employer':'user'}
-            const savedPost=await postModel.create(newPost)
+            const savedPost=await this.postModel.create(newPost)
             if(savedPost)
             {
             }
@@ -128,11 +123,31 @@ export class UserRepository extends BaseRepository<Document> {
         } catch (error) {
             throw new Error("Error creating post")
         }
-    }
+    }   
+    async editPost (postId:string,updatePostData:object,role:string,userId:string):Promise<Document|null>{
+        try {
+            const model=getModel(role)as Model<IUser |IEmployer>
+            const user=await model.findById(userId)
+            if(!user)
+            {
+                throw new Error("user not found in createpost")
+            }
+            const post=await this.postModel.findById(postId)
+            if(!post)
+            {
+                throw new Error("Post not found!")
+            }
+            const updatedPost={...updatePostData,updatedAt:new Date()}
+            const savedPost=await this.postModel.findByIdAndUpdate(postId,updatePostData,{new:true})
+            return savedPost
+        } catch (error) {
+            throw new Error("Error updating post")
+        }
+    }   
     async updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
         try {
             const objectId = new Types.ObjectId(userId);
-            const user = await UserModel.findById(objectId);
+            const user = await this.userModel.findById(objectId);
             if (!user) {
                 throw new Error("User not found");
             }
@@ -146,7 +161,7 @@ export class UserRepository extends BaseRepository<Document> {
                     updatePayLoad.experience &&
                     updatePayLoad.skills?.length &&
                     updatePayLoad.education?.length);
-            const updatedUser = await UserModel.findByIdAndUpdate(objectId, { $set: { ...updatePayLoad, isProfileComplete: true } }, { new: true });
+            const updatedUser = await this.userModel.findByIdAndUpdate(objectId, { $set: { ...updatePayLoad, isProfileComplete: true } }, { new: true });
             return updatedUser;
         } catch (error) {
             throw new Error("Error occurred while updating user");

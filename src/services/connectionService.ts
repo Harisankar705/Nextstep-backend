@@ -1,17 +1,17 @@
-import { ConnectionRepository } from "../repositories/connectionRepository";
+import { ConnectionRepository } from './../repositories/connectionRepository';
 import { ConnectionStatus, IConnection } from '../types/authTypes';
 import ConnectionModel from '../models/connection';
 import notificationModel from '../models/notification';
 import { IConnectionService } from "../types/serviceInterface";
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../types/types';
+@injectable()
 export class ConnectionService implements IConnectionService
     {
-    private connectionRepository:ConnectionRepository
-    constructor(connectionRepository:ConnectionRepository)
-    {
-        this.connectionRepository=connectionRepository
-    }
+    constructor(@inject(TYPES.ConnectionRepository)private connectionRepository:ConnectionRepository)
+    {}
     async followUser(followerId: string, followingId: string): Promise<boolean>
-     {
+     {  
         if(followerId ===followingId)   
         {
             throw new Error("cannot send connection request to yourself!")
