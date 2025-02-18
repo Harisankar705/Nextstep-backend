@@ -42,6 +42,13 @@ role:string,
 iat:number,
 exp:number
 }
+export interface IReportData
+{
+    postId:string,
+    reason:string,
+    description?:string
+    role:string
+}
 export interface INotification extends Document
 {
     recipientId:mongoose.Types.ObjectId,

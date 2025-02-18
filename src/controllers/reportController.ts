@@ -1,7 +1,7 @@
 import { STATUS_CODES } from './../utils/statusCode';
 import { CreateReportDTO, ReportStatusDTO } from './../dtos/adminDTO';
 import { NextFunction } from 'express';
-import { ReportService } from '../services/ReportService';
+import { ReportService } from '../services/reportService';
 import { TYPES } from '../types/types';
 import { inject, injectable } from "inversify";
 import { validateDTO } from '../dtos/validateDTO';
@@ -15,8 +15,11 @@ export class ReportController  implements IReportController
     async createReport(req:Request,res:Response,next:NextFunction)
     {
         try {
-            const {reportData}=await  validateDTO(CreateReportDTO,req.body)
-        const report=await this.reportService.createReport(reportData)
+            const userId=req.user?.userId
+            const reportData=await  validateDTO(CreateReportDTO,req.body)
+            console.log('in createreport',reportData)
+
+        const report=await this.reportService.createReport(reportData,userId)
         res.status(STATUS_CODES.OK).json(report);
         } catch (error) {
            next(error) 
@@ -28,6 +31,7 @@ export class ReportController  implements IReportController
     {
         try {
             const reports= await this.reportService.getReports()
+            console.log('reports',reports)
         res.status(STATUS_CODES.OK).json(reports)
         } catch (error) {
             next(error)

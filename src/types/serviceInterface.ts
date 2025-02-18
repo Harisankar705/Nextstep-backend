@@ -1,8 +1,5 @@
-import { IApplicant, IChatMessage,IComments,IJob, INotification, IPosts, IReport, NotificationData, Reason } from './authTypes';
+import { IApplicant, IChatMessage, INotification, IPosts, IReport, IReportData, NotificationData, Reason } from './authTypes';
 import { ConnectionStatus, IConnection, IEmployer, ILoginResponse, IUser } from '../types/authTypes';
-import { Server } from 'http';
-import { ObjectId } from 'mongodb';
-import { IndividualDetailsDTO, ToggleUserDTO, VerifyUserDTO } from '../dtos/adminDTO';
 export interface IAdminService {
     toggleUser(id: string, role: string): Promise<IUser | IEmployer|IApplicant|null>;
     getIndividualDetails(id: string,role:string): Promise<(IEmployer | IUser)[]>;
@@ -10,7 +7,7 @@ export interface IAdminService {
 }
 export interface IReportService
 {
-    createReport(reportData:IReport):Promise<IReport>
+    createReport(reportData:IReportData,userId:string):Promise<IReport>
     getReports(filter?:object):Promise<IReport[]>
     changeReportStatus(reportId:string,newStatus:Reason):Promise<boolean>
 }

@@ -90,16 +90,11 @@ export class InteractionController implements IInteractionController {
     }
     public async deletePost(req: Request, res: Response, next: NextFunction) {
         try {
-            const userId = req.user?.userId;
-            console.log("USERID:", userId);
-            console.log("REQUEST BODY:", req.body); // Debugging
+            console.log("REQUEST BODY:", req.body); 
     
             const deletePostDTO=await validateDTO(LikeSavePostDTO,req.body)
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
-                return;
-            }
-            const isDeleted = await this.interactionService.deletePost(userId, deletePostDTO.postId);
+            
+            const isDeleted = await this.interactionService.deletePost( deletePostDTO.postId);
             console.log("ISDELETED",deletePostDTO.postId)
             if(isDeleted)
             {

@@ -29,9 +29,9 @@ async createLike(userId: string, postId: string): Promise<ILike | null> {
     async removeLike(userId: string, postId: string): Promise<ILike | null> {
         return likeModel.findOneAndDelete({ userId, postId })
     }
-    async deletePost(userId: string, postId: string) {
+    async deletePost( postId: string) {
         const objectId=new mongoose.Types.ObjectId(postId)
-        return PostModel.findOneAndDelete({ _id:objectId,userId })
+        return PostModel.findOneAndDelete({ _id:objectId, })
     }
     
     

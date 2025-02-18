@@ -1,3 +1,4 @@
+import { IsOptional, IsString } from "class-validator";
 import { IReport, Reason } from "../types/authTypes";
 
 export class VerifyUserDTO
@@ -26,9 +27,21 @@ export class IndividualDetailsDTO {
 
    
 }
-export class CreateReportDTO{
-    reportData!:IReport
+export class CreateReportDTO {
+    @IsString()
+    postId!: string;
+
+    @IsString()
+    reason!: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string; 
+
+    @IsString()
+    role!:string
 }
+
 export class ReportStatusDTO{
     reportId!:string
     newStatus!:Reason

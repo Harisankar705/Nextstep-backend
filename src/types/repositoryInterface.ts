@@ -1,7 +1,5 @@
 import { Document, FilterQuery, Model } from 'mongoose';
-import { ConnectionStatus, Filters, IApplicant, IChatMessage, IComments, IConnection, IEmployer, IJob, ILike, InterviewScheduleData, IPosts, IReport, IUser, JobData, NotificationData, Reason } from "../types/authTypes";
-import UserModel from '../models/User';
-import EmployerModel from '../models/Employer';
+import { ConnectionStatus, IApplicant, IChatMessage, IComments, IConnection, IEmployer, ILike, IPosts, IReport, IReportData, IUser, NotificationData, Reason } from "../types/authTypes";
 
 export interface INotificationRepository {
   createNotification(notificationData: NotificationData): Promise<Document>;
@@ -9,7 +7,7 @@ export interface INotificationRepository {
   markNotificationAsRead(notificationId: string): Promise<Document | null>;
 }
 export interface IReportRepository {
-  createReport(reportData:IReport):Promise<IReport>
+  createReport(reportData:IReportData,model:Model<IUser|IEmployer>,reporterId:string):Promise<IReport>
   changeStatus(reportId:string,newStatus:Reason):Promise<boolean>
   getReports(filter?:object):Promise<IReport[]>
 }

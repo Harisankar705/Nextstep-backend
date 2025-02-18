@@ -1,3 +1,4 @@
+import { EmailService } from './emailService';
 import { ReportModel } from './../models/report';
 import { JobService } from './../services/jobService';
 import { ChatController } from './../controllers/chatController';
@@ -39,7 +40,8 @@ import { AuthService } from '../services/authService';
 import { PostModel } from '../models/post';
 import { AuthMiddleware } from '../middleware/authenticateToken';
 import { ReportRepository } from '../repositories/reportRepository';
-import { ReportService } from '../services/ReportService';
+import { ReportService } from '../services/reportService';
+import { ReportController } from '../controllers/reportController';
 const container=new Container()
 container.bind<Transporter>(TYPES.Transporter).toConstantValue(nodemailer.createTransport({
     service: "Gmail",
@@ -91,4 +93,6 @@ container.bind<JobController>(TYPES.JobController).to(JobController)
 container.bind<AuthMiddleware>(TYPES.AuthMiddleware).to(AuthMiddleware)
 container.bind<ReportRepository>(TYPES.ReportRepository).to(ReportRepository)
 container.bind<ReportService>(TYPES.ReportService).to(ReportService)
+container.bind<ReportController>(TYPES.ReportController).to(ReportController)
+container.bind<EmailService>(TYPES.EmailService).to(EmailService)
 export {container}

@@ -35,6 +35,8 @@
         AuthMiddleware:Symbol.for('AuthMiddleware'),
         ReportModel:Symbol.for('ReportModel'),
         ReportRepository:Symbol.for('ReportRepository'),
-        ReportService:Symbol.for('ReportService')
+        ReportService:Symbol.for('ReportService'),
+        ReportController:Symbol.for('ReportController'),
+        EmailService:Symbol.for('EmailService')
     }
     export {TYPES}

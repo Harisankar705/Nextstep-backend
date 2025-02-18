@@ -106,9 +106,9 @@ export class InteractionService  {
         const savedPost=await this.interactionRepository.savePost(userId,postId)
         return savedPost
     }
-    async deletePost(userId:string,postId:string)
+    async deletePost(postId:string)
     {
-        const deletePost=await this.interactionRepository.deletePost(userId,postId)
+        const deletePost=await this.interactionRepository.deletePost(postId)
         if(deletePost)
         {
         console.log('deleted')
