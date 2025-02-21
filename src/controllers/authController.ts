@@ -180,6 +180,7 @@ import { TYPES } from '../types/types';
     };
     public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
+        console.log("IN LOGIN")
         const loginData=await validateDTO(LoginDTO,req.body)
         if (!loginData.email || !loginData.password || !loginData.role) {
           res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Data not present!" });
