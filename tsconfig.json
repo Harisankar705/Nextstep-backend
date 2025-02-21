@@ -10,5 +10,5 @@
     "esModuleInterop": true
   },
   "exclude": ["node_modules"],
-  "include": ["src/**/*", "src/middleware/.ts"]
+  "include": ["src/**/*"]
 }
