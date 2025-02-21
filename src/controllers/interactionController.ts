@@ -8,6 +8,9 @@ import { inject, injectable } from "inversify";
 import { validateDTO } from "../dtos/validateDTO";
 import { CommentPostDTO, LikeSavePostDTO } from "../dtos/userDTO";
 import { PostModel } from "../models/post";
+import { EmailService } from "../utils/emailService";
+import { container } from "../utils/inversifyContainer";
+import UserModel from "../models/User";
 @injectable()
 export class InteractionController implements IInteractionController {
     constructor(@inject(TYPES.InteractionService)private interactionService:InteractionService){}
@@ -92,20 +95,36 @@ export class InteractionController implements IInteractionController {
         try {
             console.log("REQUEST BODY:", req.body); 
     
-            const deletePostDTO=await validateDTO(LikeSavePostDTO,req.body)
+            const deletePostDTO = await validateDTO(LikeSavePostDTO, req.body);
             
-            const isDeleted = await this.interactionService.deletePost( deletePostDTO.postId);
-            console.log("ISDELETED",deletePostDTO.postId)
-            if(isDeleted)
-            {
-                res.status(STATUS_CODES.OK).json({message:"Deleted"})
-                return
+            const post = await this.interactionService.getPostById(deletePostDTO.postId);
+            if (!post) {
+                 res.status(STATUS_CODES.NOT_FOUND).json({ message: "Post not found" });
+                 return
             }
-            else
-            {
-                res.status(STATUS_CODES.BAD_REQUEST).json({message:"Failed to Delete"})
+            const user=await UserModel.findById(post.userId)
+            const userEmail=user?.email
+    
+            const isDeleted = await this.interactionService.deletePost(deletePostDTO.postId);
+            console.log("ISDELETED", deletePostDTO.postId);
+            console.log("ISADMIN",req.user.role)
+            if (isDeleted) {
+                const isAdmin = req.user.role !== 'admin';
+                if (isAdmin) {
+                    const emailService = container.get<EmailService>(TYPES.EmailService);
+                    const subject = `Your post titled "${post.text}" has been deleted due to not following community guidelines!`;
+                    const text = `Hello ${user?.firstName},\n\n${subject}\n\nThank you,\nTeam Nextstep`;
+                    
+                    await emailService.sendEmail(userEmail, subject, text);
+                }
+    
+                res.status(STATUS_CODES.OK).json({ message: "Deleted" });
+                return;
+            } else {
+                res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Failed to Delete" });
             }
         } catch (error) {
+            console.error('Error deleting post:', error); 
             next(error);
         }
     }

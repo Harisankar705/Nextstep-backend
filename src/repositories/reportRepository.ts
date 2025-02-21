@@ -20,6 +20,7 @@ export class ReportRepository extends BaseRepository<IReport & Document> impleme
     {
     try {
         const post=await this.postModel.findById(reportData.postId)
+        console.log("POST",post)
         if (!post) {
             throw new Error('Post not found');
         }
@@ -30,16 +31,17 @@ export class ReportRepository extends BaseRepository<IReport & Document> impleme
             throw new Error('Post owner not found!');
         }
         const postOwnerEmail=postOwner.email
+        const user=postOwner as IUser
 
 
         const subject="Your post has been reported!"
-        const text=`Hello,Your post titled as ${post?.title} has been reported for the following reason ${reportData.reason}
+        const text=`Hello,${user.firstName} Your post titled as ${post?.text} has been reported for the following reason ${reportData.reason}
         Post Details:
-        -Content:${post?.title}
+        -Content:${post?.text}
         -Created At:${post?.createdAt}
         -Report Reason:${reportData.reason}
 
-        Please review your post and take necessary actions
+        Please review your post and take necessary actions or else necessary actions will be taken from Nextstep's side
         Thank You
         Team Nextstep`
         const emailService=container.get<EmailService>(TYPES.EmailService)

@@ -49,6 +49,10 @@ export class InteractionService  {
             throw error;
         }
     }
+    async getPostById(postId:string)
+    {
+        return await PostModel.findById(postId)
+    }
     async commentOnPost(userId: string, postId: string, comment:string)
     {
         if (!comment.trim())
@@ -109,14 +113,6 @@ export class InteractionService  {
     async deletePost(postId:string)
     {
         const deletePost=await this.interactionRepository.deletePost(postId)
-        if(deletePost)
-        {
-        console.log('deleted')
-        }
-        else
-        {
-            console.log("NOt deleted")
-        }
         return deletePost
     }
     async getSavedPost(userId:string)

@@ -5,7 +5,7 @@ import { TYPES } from '../types/types';
 @injectable()
 export class EmailService{
     constructor(@inject(TYPES.Transporter)private tranporter:Transporter){}
-    async sendEmail(to:string,subject:string,text:string)
+    async sendEmail(to:string|undefined,subject:string,text:string)
     {
         const emailOptions={
             from:process.env.EMAIL_USER,
