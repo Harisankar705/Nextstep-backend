@@ -21,25 +21,33 @@ import { container } from "./utils/inversifyContainer";
 const app = express();
 dbConnection();
 
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// CORS 
 const allowedOrigins = [
-  'https://nextstepbyhari.online',
+  'http://localhost:5173', 
+  'https://nextstepbyhari.online', 
   'https://www.nextstepbyhari.online'
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(new Error('Not allowed by CORS'));
     }
   },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+app.options('*', cors());
 
 app.use("/uploads", express.static(path.join(__dirname, "utils/uploads")));
 
@@ -51,20 +59,20 @@ app.use(interactionRoutes);
 app.use(jobRoutes);
 app.use(chatRoutes);
 
+// Error Handler
 app.use(errorHandler);
+
+// Logger Middleware
 app.use(morganMiddleware);
 
+// Socket.io Setup
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://nextstepbyhari.online",
-      "https://www.nextstepbyhari.online"
-    ],
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST"],
-  },
+    methods: ["GET", "POST"]
+  }
 });
 
 const socketHandler = container.get<SocketHandler>(TYPES.SocketHandler);
