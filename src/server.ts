@@ -65,7 +65,6 @@ app.use(errorHandler);
 // Logger Middleware
 app.use(morganMiddleware);
 
-// Socket.io Setup
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {

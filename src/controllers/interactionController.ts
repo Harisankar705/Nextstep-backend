@@ -47,6 +47,7 @@ export class InteractionController implements IInteractionController {
     }
     public async getPost(req: Request, res: Response, next: NextFunction) {
         try {
+            console.log("IN GETPOST")
             const userId = req.user?.userId;
             if (!userId) {
                 res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
