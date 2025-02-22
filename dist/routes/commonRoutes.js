@@ -1,0 +1,27 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.commonRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const inversifyContainer_1 = require("../utils/inversifyContainer");
+const types_1 = require("../types/types");
+exports.commonRoutes = express_1.default.Router();
+const connectionController = inversifyContainer_1.container.get(types_1.TYPES.ConnectionController);
+const notificationController = inversifyContainer_1.container.get(types_1.TYPES.NotificationController);
+const reportController = inversifyContainer_1.container.get(types_1.TYPES.ReportController);
+const authMiddleware = inversifyContainer_1.container.get(types_1.TYPES.AuthMiddleware);
+exports.commonRoutes.post('/followaccount', authMiddleware.verifyToken.bind(authMiddleware), connectionController.followUser.bind(connectionController));
+exports.commonRoutes.post('/followback', authMiddleware.verifyToken.bind(authMiddleware), connectionController.followBack.bind(connectionController));
+exports.commonRoutes.post('/respond-requests', authMiddleware.verifyToken.bind(authMiddleware), connectionController.respondToRequest.bind(connectionController));
+exports.commonRoutes.get('/connections', authMiddleware.verifyToken.bind(authMiddleware), connectionController.getConnections.bind(connectionController));
+exports.commonRoutes.get('/pendingrequests', authMiddleware.verifyToken.bind(authMiddleware), connectionController.pendingRequests.bind(connectionController));
+exports.commonRoutes.get('/followstatus', authMiddleware.verifyToken.bind(authMiddleware), connectionController.checkFollowStatus.bind(connectionController));
+exports.commonRoutes.get('/notifications', authMiddleware.verifyToken.bind(authMiddleware), notificationController.getNotification.bind(notificationController));
+exports.commonRoutes.post('/mark-as-read', authMiddleware.verifyToken.bind(authMiddleware), notificationController.markNotificationAsRead.bind(notificationController));
+exports.commonRoutes.get('/mutualconnections', authMiddleware.verifyToken.bind(authMiddleware), connectionController.getMutualConnections.bind(connectionController));
+exports.commonRoutes.post('/create-report', authMiddleware.verifyToken.bind(authMiddleware), reportController.createReport.bind(reportController));
+exports.commonRoutes.get('/getreports', authMiddleware.verifyToken.bind(authMiddleware), reportController.getReports.bind(reportController));
+exports.commonRoutes.post('/change-report-status', authMiddleware.verifyToken.bind(authMiddleware), reportController.changeReportStatus.bind(reportController));
+exports.default = exports.commonRoutes;

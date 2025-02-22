@@ -1,0 +1,24 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.jobRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const inversifyContainer_1 = require("../utils/inversifyContainer");
+const types_1 = require("../types/types");
+const jobController = inversifyContainer_1.container.get(types_1.TYPES.JobController);
+const authMiddleware = inversifyContainer_1.container.get(types_1.TYPES.AuthMiddleware);
+exports.jobRoutes = express_1.default.Router();
+exports.jobRoutes.post('/createjob', authMiddleware.verifyToken.bind(authMiddleware), jobController.createJob.bind(jobController));
+exports.jobRoutes.get('/getjobs', authMiddleware.verifyToken.bind(authMiddleware), jobController.getAllJobs.bind(jobController));
+exports.jobRoutes.get('/getjob/:jobId', authMiddleware.verifyToken.bind(authMiddleware), jobController.getJobById.bind(jobController));
+exports.jobRoutes.put('/updatejob/:jobId', authMiddleware.verifyToken.bind(authMiddleware), jobController.updateJob.bind(jobController));
+exports.jobRoutes.delete('/deletejob/:jobId', authMiddleware.verifyToken.bind(authMiddleware), jobController.deleteJob.bind(jobController));
+exports.jobRoutes.post('/fetch-jobs', authMiddleware.verifyToken.bind(authMiddleware), jobController.fetchJobs.bind(jobController));
+exports.jobRoutes.post("/apply-job", authMiddleware.verifyToken.bind(authMiddleware), jobController.applyJob.bind(jobController));
+exports.jobRoutes.put('/changetopremium', authMiddleware.verifyToken.bind(authMiddleware), jobController.changePremiumStatus.bind(jobController));
+exports.jobRoutes.post('/create-payment', authMiddleware.verifyToken.bind(authMiddleware), jobController.paymentStripe.bind(jobController));
+exports.jobRoutes.post("/schedule-interview", authMiddleware.verifyToken.bind(authMiddleware), jobController.scheduleInterview.bind(jobController));
+exports.jobRoutes.post("/change-applicationstatus", authMiddleware.verifyToken.bind(authMiddleware), jobController.changeApplicationStatus.bind(jobController));
+exports.jobRoutes.get('/get-applicants/:jobId', authMiddleware.verifyToken.bind(authMiddleware), jobController.getApplicantsForJob.bind(jobController));
