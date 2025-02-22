@@ -24,22 +24,12 @@ dbConnection();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const allowedOrigins = [
-  'https://nextstepbyhari.online',
-  'https://www.nextstepbyhari.online'
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "https://www.nextstepbyhari.online",
+    credentials: true,
+  })
+);
 
 app.use("/uploads", express.static(path.join(__dirname, "utils/uploads")));
 
@@ -57,11 +47,7 @@ app.use(morganMiddleware);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://nextstepbyhari.online",
-      "https://www.nextstepbyhari.online"
-    ],
+    origin: "https://www.nextstepbyhari.online",
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -70,7 +56,6 @@ const io = new Server(server, {
 const socketHandler = container.get<SocketHandler>(TYPES.SocketHandler);
 socketHandler.configure(io);
 
-const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+server.listen(4000, () => {
+  console.log("Server is running on http://localhost:4000");
 });
