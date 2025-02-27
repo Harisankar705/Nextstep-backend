@@ -26,30 +26,60 @@ const app = (0, express_1.default)();
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+// CORS 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://nextstepbyhari.online',
+    'https://www.nextstepbyhari.online'
+];
 app.use((0, cors_1.default)({
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: (origin, callback) => {
+        if (!origin)
+            return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        else {
+            return callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', "PATCH"],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
+app.options('*', (0, cors_1.default)());
 app.use("/uploads", express_1.default.static(path_1.default.join(__dirname, "utils/uploads")));
+app.use(userRoutes_1.default);
 app.use(adminRoutes_1.default);
 app.use(commonRoutes_1.commonRoutes);
 app.use(employerRoutes_1.employerRoutes);
-app.use(userRoutes_1.default);
 app.use(interactionRoutes_1.interactionRoutes);
 app.use(jobRoutes_1.jobRoutes);
 app.use(chatRoutes_1.chatRoutes);
 app.use(errorMiddleware_1.errorHandler);
 app.use(morgan_1.default);
+app.get('/debug/uploads', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    const directoryPath = path.join(__dirname, 'utils/uploads/profile-pictures');
+    fs.readdir(directoryPath, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: "Unable to scan directory" });
+        }
+        res.json({ files });
+    });
+});
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: allowedOrigins,
         credentials: true,
-        methods: ["GET", "POST"],
-    },
+        methods: ["GET", "POST"]
+    }
 });
 const socketHandler = inversifyContainer_1.container.get(types_1.TYPES.SocketHandler);
 socketHandler.configure(io);
-server.listen(4000, () => {
-    console.log("Server is running on http://localhost:4000");
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });

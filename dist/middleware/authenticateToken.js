@@ -29,6 +29,7 @@ let AuthMiddleware = class AuthMiddleware {
             const candidateToken = req.cookies.userAccessToken;
             const adminToken = req.cookies.adminAccessToken;
             const token = employerToken || candidateToken || adminToken;
+            console.log(token);
             if (!token) {
                 res.status(statusCode_1.STATUS_CODES.FORBIDDEN).json({ message: "Token not found" });
                 return;
@@ -60,6 +61,7 @@ let AuthMiddleware = class AuthMiddleware {
                 next();
             }
             catch (error) {
+                console.log("ERROR", error);
                 next(error);
             }
         };

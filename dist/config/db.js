@@ -10,6 +10,7 @@ dotenv_1.default.config();
 const dbConnection = async () => {
     try {
         const mongoUri = process.env.MONGO_DB;
+        console.log("MONGOURI", mongoUri);
         if (!mongoUri) {
             throw new Error('MONGO_DB environment variable not found');
         }

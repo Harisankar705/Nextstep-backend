@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReportStatusDTO = exports.CreateReportDTO = exports.IndividualDetailsDTO = exports.ToggleUserDTO = exports.LoginDTO = exports.VerifyUserDTO = void 0;
+exports.ReportStatusDTO = exports.CreateSubscriptionDTO = exports.CreateReportDTO = exports.IndividualDetailsDTO = exports.ToggleUserDTO = exports.LoginDTO = exports.VerifyUserDTO = void 0;
 const class_validator_1 = require("class-validator");
 class VerifyUserDTO {
 }
@@ -43,6 +43,39 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateReportDTO.prototype, "role", void 0);
+class CreateSubscriptionDTO {
+}
+exports.CreateSubscriptionDTO = CreateSubscriptionDTO;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDTO.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateSubscriptionDTO.prototype, "price", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Number)
+], CreateSubscriptionDTO.prototype, "validity", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.ArrayNotEmpty)(),
+    __metadata("design:type", Array)
+], CreateSubscriptionDTO.prototype, "features", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateSubscriptionDTO.prototype, "isPopular", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDTO.prototype, "targetRole", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDTO.prototype, "status", void 0);
 class ReportStatusDTO {
 }
 exports.ReportStatusDTO = ReportStatusDTO;

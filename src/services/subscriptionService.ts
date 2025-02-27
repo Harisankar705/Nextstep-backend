@@ -1,4 +1,3 @@
-import { SubscriptionRepository } from './../repositories/subscriptionRepository';
 import { inject, injectable } from "inversify";
 import { ISubscription } from "../types/authTypes";
 import { TYPES } from "../types/types";

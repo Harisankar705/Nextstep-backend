@@ -33,7 +33,8 @@ let AuthController = class AuthController {
         this.otpServiceInstance = otpServiceInstance;
         this.signup = async (req, res, next) => {
             try {
-                const signupData = await (0, validateDTO_1.validateDTO)(userDTO_1.SignupDTO, req.body);
+                const { userData } = req.body;
+                const signupData = await (0, validateDTO_1.validateDTO)(userDTO_1.SignupDTO, { email: userData.email, password: userData.password, role: userData.role });
                 const roleValidation = (0, roleValidate_1.validateRole)(signupData.role);
                 if (!roleValidation.valid) {
                     res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
@@ -185,6 +186,7 @@ let AuthController = class AuthController {
         };
         this.login = async (req, res, next) => {
             try {
+                console.log("IN LOGIN");
                 const loginData = await (0, validateDTO_1.validateDTO)(adminDTO_1.LoginDTO, req.body);
                 if (!loginData.email || !loginData.password || !loginData.role) {
                     res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: "Data not present!" });
@@ -201,16 +203,19 @@ let AuthController = class AuthController {
                     return;
                 }
                 const tokenPrefix = loginData.role.toLowerCase();
+                const isProduction = process.env.NODE_ENV === 'production';
                 res.cookie(`${tokenPrefix}AccessToken`, accessToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "strict",
+                    secure: isProduction,
+                    sameSite: isProduction ? 'none' : 'lax',
+                    path: '/',
                     maxAge: 40 * 60 * 1000,
                 });
                 res.cookie(`${tokenPrefix}RefreshToken`, refreshToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "strict",
+                    secure: isProduction,
+                    sameSite: isProduction ? 'none' : 'lax',
+                    path: '/',
                     maxAge: 7 * 24 * 60 * 60 * 1000,
                 });
                 res.status(statusCode_1.STATUS_CODES.CREATED).json({ user });

@@ -40,6 +40,10 @@ const TYPES = {
     ReportRepository: Symbol.for('ReportRepository'),
     ReportService: Symbol.for('ReportService'),
     ReportController: Symbol.for('ReportController'),
-    EmailService: Symbol.for('EmailService')
+    EmailService: Symbol.for('EmailService'),
+    SubscriptionModel: Symbol.for('SubscriptionModel'),
+    SubscriptionRepository: Symbol.for('SubscriptionRepository'),
+    SubscriptionService: Symbol.for('SubscriptionService'),
+    SubscriptionController: Symbol.for('SubscriptionController')
 };
 exports.TYPES = TYPES;

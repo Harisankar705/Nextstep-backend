@@ -45,6 +45,10 @@ const authenticateToken_1 = require("../middleware/authenticateToken");
 const reportRepository_1 = require("../repositories/reportRepository");
 const reportService_1 = require("../services/reportService");
 const reportController_1 = require("../controllers/reportController");
+const subscription_1 = require("../models/subscription");
+const subscriptionRepository_1 = require("../repositories/subscriptionRepository");
+const subscriptionService_1 = require("../services/subscriptionService");
+const subscriptionController_1 = require("../controllers/subscriptionController");
 const container = new inversify_1.Container();
 exports.container = container;
 container.bind(types_1.TYPES.Transporter).toConstantValue(nodemailer_1.default.createTransport({
@@ -64,6 +68,7 @@ container.bind(types_1.TYPES.S3Client).toConstantValue(new client_s3_1.S3Client(
 const io = new socket_io_1.Server();
 container.bind(types_1.TYPES.SocketServer).toConstantValue(io);
 container.bind(types_1.TYPES.UserModel).toConstantValue(User_1.default);
+container.bind(types_1.TYPES.SubscriptionModel).toConstantValue(subscription_1.SubscriptionModel);
 container.bind(types_1.TYPES.EmployerModel).toConstantValue(Employer_1.default);
 container.bind(types_1.TYPES.ChatModel).toConstantValue(chat_1.ChatModel);
 container.bind(types_1.TYPES.PostModel).toConstantValue(post_1.PostModel);
@@ -99,3 +104,6 @@ container.bind(types_1.TYPES.ReportRepository).to(reportRepository_1.ReportRepos
 container.bind(types_1.TYPES.ReportService).to(reportService_1.ReportService);
 container.bind(types_1.TYPES.ReportController).to(reportController_1.ReportController);
 container.bind(types_1.TYPES.EmailService).to(emailService_1.EmailService);
+container.bind(types_1.TYPES.SubscriptionRepository).to(subscriptionRepository_1.SubscriptionRepository);
+container.bind(types_1.TYPES.SubscriptionService).to(subscriptionService_1.SubscriptionService);
+container.bind(types_1.TYPES.SubscriptionController).to(subscriptionController_1.SubscriptionController);

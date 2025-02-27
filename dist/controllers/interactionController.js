@@ -66,11 +66,13 @@ let InteractionController = class InteractionController {
     async getPost(req, res, next) {
         try {
             const userId = req.user?.userId;
+            console.log("USERID", userId);
             if (!userId) {
                 res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
                 return;
             }
             const posts = await this.interactionService.getPosts(userId);
+            console.log("POST", posts);
             res.status(statusCode_1.STATUS_CODES.OK).json({ posts });
         }
         catch (error) {
