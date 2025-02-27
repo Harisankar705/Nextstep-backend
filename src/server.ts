@@ -49,7 +49,7 @@ app.use(cors({
 
 app.options('*', cors());
 
-app.use("/uploads", express.static(path.join(__dirname, "utils/uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "dist/utils/uploads")));
 app.use(candidateRoutes);
 
 app.use(adminRoutes);

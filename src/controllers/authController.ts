@@ -203,14 +203,14 @@ import { TYPES } from '../types/types';
         res.cookie(`${tokenPrefix}AccessToken`, accessToken, {
           httpOnly: true,
           secure: isProduction, 
-          sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site requests
+          sameSite: isProduction ? 'none' : 'lax', 
           path: '/',    
           maxAge: 40 * 60 * 1000,
         });
         res.cookie(`${tokenPrefix}RefreshToken`, refreshToken, {
           httpOnly: true,
           secure: isProduction, 
-          sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site requests
+          sameSite: isProduction ? 'none' : 'lax',
           path: '/',  
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
