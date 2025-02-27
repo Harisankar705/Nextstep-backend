@@ -6,7 +6,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 console.log("AWS Region:", process.env.AWS_REGION);
-console.log("S3 Bucket Name:", process.env.S3_BUCKET_NAME);
+console.log("S3 Bucket Name:", process.env.AWS_BUCKET_NAME);
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "eu-north-1",
   credentials: {
@@ -15,7 +15,7 @@ const s3Client = new S3Client({
   }
 });
 
-const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || "your-bucket-name";
+const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME || "your-bucket-name";
 
 const PROFILE_PICTURE_PREFIX = "profile-pictures/";
 const POST_PREFIX = "posts/";
@@ -130,7 +130,7 @@ const uploadFileToS3 = async (
   const upload = new Upload({
     client: s3Client,
     params: {
-      Bucket: S3_BUCKET_NAME,
+      Bucket: AWS_BUCKET_NAME,
       Key: s3Key,
       Body: fileStream,
       ContentType: file.mimetype || undefined,
@@ -148,7 +148,7 @@ const uploadFileToS3 = async (
     console.warn(`Failed to delete temporary file: ${file.filepath}`, error);
   }
   
-  return `https://${S3_BUCKET_NAME}.s3.amazonaws.com/${s3Key}`;
+  return `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${s3Key}`;
 };
 
 const handleBase64Upload = async (
@@ -172,7 +172,7 @@ const handleBase64Upload = async (
     const upload = new Upload({
       client: s3Client,
       params: {
-        Bucket: S3_BUCKET_NAME,
+        Bucket: AWS_BUCKET_NAME,
         Key: s3Key,
         Body: buffer,
         ContentType: mimeType,
@@ -182,7 +182,7 @@ const handleBase64Upload = async (
 
     await upload.done();
     
-    return `https://${S3_BUCKET_NAME}.s3.amazonaws.com/${s3Key}`;
+    return `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${s3Key}`;
   } catch (error) {
     throw new Error("Failed to handle base64 upload");
   }
@@ -320,7 +320,7 @@ export const handleFileUpload = (
 };
 
 export const getS3FileUrl = (key: string): string => {
-  return `https://${S3_BUCKET_NAME}.s3.amazonaws.com/${key}`;
+  return `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`;
 };
 
 export const validateFileExtension = (filename: string): boolean => {
