@@ -16,6 +16,9 @@ export class AuthMiddleware{
     const candidateToken = req.cookies.userAccessToken;
     const adminToken = req.cookies.adminAccessToken;
     const token = employerToken || candidateToken || adminToken;
+    console.log("Cookies in request:", req.cookies);
+
+    console.log(token)
     if (!token) {
          res.status(STATUS_CODES.FORBIDDEN).json({ message: "Token not found" });
          return
@@ -43,6 +46,7 @@ export class AuthMiddleware{
         }
         next();
     } catch (error) {
+        console.log("ERROR",error)
         next(error);
     }
 };

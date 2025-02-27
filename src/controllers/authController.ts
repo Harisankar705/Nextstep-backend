@@ -198,19 +198,20 @@ import { TYPES } from '../types/types';
           return;
         }
         const tokenPrefix = loginData.role.toLowerCase();
-        const isProduction=process.env.NODE_ENV==='production'
+        const isProduction = process.env.NODE_ENV === 'production';
+
         res.cookie(`${tokenPrefix}AccessToken`, accessToken, {
           httpOnly: true,
           secure: isProduction, 
-          sameSite: isProduction?'strict':'lax',  
+          sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site requests
           path: '/',    
           maxAge: 40 * 60 * 1000,
         });
         res.cookie(`${tokenPrefix}RefreshToken`, refreshToken, {
           httpOnly: true,
           secure: isProduction, 
-          sameSite: isProduction?'strict':'lax',  
-            path: '/',  
+          sameSite: isProduction ? 'none' : 'lax', // Use 'none' in production for cross-site requests
+          path: '/',  
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.status(STATUS_CODES.CREATED).json({ user });
