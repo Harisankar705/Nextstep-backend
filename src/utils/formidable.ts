@@ -6,26 +6,22 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 
-// AWS S3 Configuration
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "us-east-1",
+  region: process.env.AWS_REGION || "eu-north-1",
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
   }
 });
 
-// Define S3 bucket name
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || "your-bucket-name";
 
-// Define folder paths in S3
 const PROFILE_PICTURE_PREFIX = "profile-pictures/";
 const POST_PREFIX = "posts/";
 const COMPANY_LOGO_PREFIX = "company-logos/";
 const CHAT_PREFIX = "chat/";
 const COMPANY_DOCUMENTS_PREFIX = "company-documents/";
 
-// Define allowed file types
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -38,7 +34,6 @@ const ALLOWED_DOCUMENT_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ] as const;
 
-// Type definitions
 type AllowedImageType = typeof ALLOWED_IMAGE_TYPES[number];
 type AllowedDocumentType = typeof ALLOWED_DOCUMENT_TYPES[number];
 type AllowedFileType = AllowedImageType | AllowedDocumentType;
@@ -124,7 +119,6 @@ const uploadFileToS3 = async (
     throw new Error("Invalid file object");
   }
   
-  // Ensure the file exists before trying to upload
   if (!fs.existsSync(file.filepath)) {
     throw new Error(`File does not exist at path: ${file.filepath}`);
   }
@@ -139,23 +133,20 @@ const uploadFileToS3 = async (
       Key: s3Key,
       Body: fileStream,
       ContentType: file.mimetype || undefined,
-      ACL: "public-read" // Make sure this is appropriate for your security needs
+      ACL: "public-read" 
     }
   });
 
   await upload.done();
   
-  // Clean up temp file after successful upload
   try {
     if (fs.existsSync(file.filepath)) {
       fs.unlinkSync(file.filepath);
     }
   } catch (error) {
     console.warn(`Failed to delete temporary file: ${file.filepath}`, error);
-    // Continue execution even if cleanup fails
   }
   
-  // Return S3 URL
   return `https://${S3_BUCKET_NAME}.s3.amazonaws.com/${s3Key}`;
 };
 
@@ -184,7 +175,7 @@ const handleBase64Upload = async (
         Key: s3Key,
         Body: buffer,
         ContentType: mimeType,
-        ACL: "public-read" // Make sure this is appropriate for your security needs
+        ACL: "public-read"
       }
     });
 
@@ -201,7 +192,6 @@ export const handleFileUpload = (
   options: UploadOptions = {}
 ): Promise<UploadResult> => {
   return new Promise((resolve, reject) => {
-    // For temporary storage before S3 upload
     const tempDir = path.join(process.cwd(), "temp");
     try {
       fs.mkdirSync(tempDir, { recursive: true });
@@ -243,7 +233,6 @@ export const handleFileUpload = (
       const fileNames: Partial<Record<FileKey, string | string[]>> = {};
       
       try {
-        // Handle base64 logo upload if present
         if (
           Array.isArray(fields.logo) &&
           typeof fields.logo[0] === "string" &&
@@ -256,7 +245,6 @@ export const handleFileUpload = (
           delete mutableFields.logo;
         }
 
-        // Process file uploads to S3
         const fileKeys: FileKey[] = [
           "profilePicture",
           "resumeFile",
@@ -272,7 +260,6 @@ export const handleFileUpload = (
           if (uploadedFiles?.length) {
             try {
               if (fileKey === 'postImage') {
-                // Handle multiple files for postImage
                 const s3Urls: string[] = [];
                 
                 for (const file of uploadedFiles) {
@@ -286,7 +273,6 @@ export const handleFileUpload = (
                   fileNames[fileKey] = s3Urls;
                 }
               } else {
-                // Handle single file for other types
                 const file = uploadedFiles[0];
                 if (file && file.filepath) {
                   const s3Url = await uploadFileToS3(file);
@@ -307,7 +293,6 @@ export const handleFileUpload = (
         });
         
       } catch (error) {
-        // Clean up temp files in case of error
         if (files) {
           Object.values(files).forEach(fileArray => {
             if (Array.isArray(fileArray)) {
@@ -317,7 +302,6 @@ export const handleFileUpload = (
                     fs.unlinkSync(file.filepath);
                   }
                 } catch (e) {
-                  // Ignore cleanup errors
                   console.warn("Error cleaning up temporary file:", e);
                 }
               });
