@@ -1,5 +1,5 @@
 import { Document, FilterQuery, Model } from 'mongoose';
-import { ConnectionStatus, IApplicant, IChatMessage, IComments, IConnection, IEmployer, ILike, IPosts, IReport, IReportData, IUser, NotificationData, Reason } from "../types/authTypes";
+import { ConnectionStatus, IApplicant, IChatMessage, IComments, IConnection, IEmployer, ILike, IPosts, IReport, IReportData, ISubscription, IUser, NotificationData, Reason } from "../types/authTypes";
 
 export interface INotificationRepository {
   createNotification(notificationData: NotificationData): Promise<Document>;
@@ -11,7 +11,13 @@ export interface IReportRepository {
   changeStatus(reportId:string,newStatus:Reason):Promise<boolean>
   getReports(filter?:object):Promise<IReport[]>
 }
-
+export interface ISubscriptionRepository
+{
+  createSubscription(subscriptionData:ISubscription):Promise<ISubscription>
+  getSubscriptions():Promise<(ISubscription&Document)[]>
+  updateSubscription(id: string, updateData: Partial<ISubscription>): Promise<(ISubscription & Document) | null>;
+  findSubscriptionById(id:string):Promise<ISubscription|null>
+}
 export interface IEmployerRepository {
     updateUser(
       userId: string,

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { IPosts, IReport, Reason } from './authTypes';
+import { IPosts, IReport, ISubscription, Reason } from './authTypes';
 
 export interface IAdminController {
   getUsers(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -14,7 +14,11 @@ export interface IReportController
     getReports(req: Request, res: Response, next: NextFunction):Promise<void>
     changeReportStatus(req: Request, res: Response, next: NextFunction):Promise<void>
 }
-
+export interface ISubscriptionController
+{
+  createSubscription(req:Request,res:Response,next:NextFunction):Promise<void>
+  getSubscriptions(req:Request,res:Response,next:NextFunction):Promise<void>
+}
 export interface IAuthController {
   signup(req: Request, res: Response, next: NextFunction): Promise<void>;
   candidateDetails(req: Request, res: Response, next: NextFunction): Promise<void>;

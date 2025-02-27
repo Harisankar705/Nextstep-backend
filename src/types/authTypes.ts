@@ -142,6 +142,20 @@ export interface IReport extends Document {
     status:string
 
 }
+export interface ISubscription {
+    name:string,
+    price:number,
+    validity:Number,
+    features:string[],
+    targetRole:string,
+    status:string,
+    plan?:string
+    createdAt?:Date
+}
+export interface ISubscriptionDocument extends ISubscription,Document{
+    _id:Types.ObjectId
+}
+
 export interface ILike {
     _id: ObjectId|string;
     postId: ObjectId|string;

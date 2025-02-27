@@ -3,20 +3,20 @@ import express from 'express'
 import { container } from '../utils/inversifyContainer';
 import { TYPES } from '../types/types';
 import { AuthMiddleware } from '../middleware/authenticateToken';
+export const jobRoutes=express.Router()
 const jobController = container.get<JobController>(TYPES.JobController);
 const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware);
-
-export const jobRoutes=express.Router()
-jobRoutes.post('/createjob', authMiddleware.verifyToken.bind(authMiddleware),jobController.createJob.bind(jobController))
-jobRoutes.get('/getjobs',authMiddleware.verifyToken.bind(authMiddleware),jobController.getAllJobs.bind(jobController))
-jobRoutes.get('/getjob/:jobId',authMiddleware.verifyToken.bind(authMiddleware),jobController.getJobById.bind(jobController))
-jobRoutes.put('/updatejob/:jobId',authMiddleware.verifyToken.bind(authMiddleware),jobController.updateJob.bind(jobController))
-jobRoutes.delete('/deletejob/:jobId',authMiddleware.verifyToken.bind(authMiddleware),jobController.deleteJob.bind(jobController))
-jobRoutes.post('/fetch-jobs',authMiddleware.verifyToken.bind(authMiddleware),jobController.fetchJobs.bind(jobController))
-jobRoutes.post("/apply-job",authMiddleware.verifyToken.bind(authMiddleware),jobController.applyJob.bind(jobController));
-jobRoutes.put('/changetopremium',authMiddleware.verifyToken.bind(authMiddleware),jobController.changePremiumStatus.bind(jobController))
-jobRoutes.post('/create-payment',authMiddleware.verifyToken.bind(authMiddleware),jobController.paymentStripe.bind(jobController))
-jobRoutes.post("/schedule-interview",authMiddleware.verifyToken.bind(authMiddleware),jobController.scheduleInterview.bind(jobController));
-jobRoutes.post("/change-applicationstatus",authMiddleware.verifyToken.bind(authMiddleware),jobController.changeApplicationStatus.bind(jobController));
-jobRoutes.get('/get-applicants/:jobId', authMiddleware.verifyToken.bind(authMiddleware),jobController.getApplicantsForJob.bind(jobController));
+jobRoutes.use(authMiddleware.verifyToken.bind(authMiddleware))
+jobRoutes.route('/createjob').post(jobController.createJob.bind(jobController))
+jobRoutes.route('/getjobs').get(jobController.getAllJobs.bind(jobController))
+jobRoutes.route('/getjob/:jobId').get(jobController.getJobById.bind(jobController))
+jobRoutes.route('/updatejob/:jobId').put(jobController.updateJob.bind(jobController))
+jobRoutes.route('/deletejob/:jobId').delete(authMiddleware.verifyToken.bind(authMiddleware),jobController.deleteJob.bind(jobController))
+jobRoutes.route('/fetch-jobs').post(jobController.fetchJobs.bind(jobController))
+jobRoutes.route("/apply-job").post(jobController.applyJob.bind(jobController));
+jobRoutes.route('/changetopremium').put(jobController.changePremiumStatus.bind(jobController))
+jobRoutes.route('/create-payment').post(jobController.paymentStripe.bind(jobController))
+jobRoutes.route("/schedule-interview").post(jobController.scheduleInterview.bind(jobController));
+jobRoutes.route("/change-applicationstatus").post(jobController.changeApplicationStatus.bind(jobController));
+jobRoutes.route('/get-applicants/:jobId').get(jobController.getApplicantsForJob.bind(jobController));
 

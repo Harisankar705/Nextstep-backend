@@ -11,21 +11,22 @@ const connectionController = container.get<ConnectionController>(TYPES.Connectio
 const notificationController = container.get<NotificationController>(TYPES.NotificationController);
 const reportController = container.get<ReportController>(TYPES.ReportController);
 const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware);
+commonRoutes.use(authMiddleware.verifyToken.bind(authMiddleware))
 
 
 
-commonRoutes.post('/followaccount', authMiddleware.verifyToken.bind(authMiddleware), connectionController.followUser.bind(connectionController));
-commonRoutes.post('/followback', authMiddleware.verifyToken.bind(authMiddleware), connectionController.followBack.bind(connectionController));
-commonRoutes.post('/respond-requests', authMiddleware.verifyToken.bind(authMiddleware), connectionController.respondToRequest.bind(connectionController));
-commonRoutes.get('/connections', authMiddleware.verifyToken.bind(authMiddleware), connectionController.getConnections.bind(connectionController));
-commonRoutes.get('/pendingrequests',authMiddleware.verifyToken.bind(authMiddleware), connectionController.pendingRequests.bind(connectionController));
-commonRoutes.get('/followstatus',authMiddleware.verifyToken.bind(authMiddleware), connectionController.checkFollowStatus.bind(connectionController));
-commonRoutes.get('/notifications', authMiddleware.verifyToken.bind(authMiddleware), notificationController.getNotification.bind(notificationController));
-commonRoutes.post('/mark-as-read', authMiddleware.verifyToken.bind(authMiddleware), notificationController.markNotificationAsRead.bind(notificationController));
-commonRoutes.get('/mutualconnections',authMiddleware.verifyToken.bind(authMiddleware), connectionController.getMutualConnections.bind(connectionController));
-commonRoutes.post('/create-report',authMiddleware.verifyToken.bind(authMiddleware), reportController.createReport.bind(reportController));
-commonRoutes.get('/getreports',authMiddleware.verifyToken.bind(authMiddleware), reportController.getReports.bind(reportController));
-commonRoutes.post('/change-report-status',authMiddleware.verifyToken.bind(authMiddleware), reportController.changeReportStatus.bind(reportController));
+commonRoutes.route('/followaccount').post( connectionController.followUser.bind(connectionController));
+commonRoutes.route('/followback').post(connectionController.followBack.bind(connectionController));
+commonRoutes.route('/respond-requests').post( connectionController.respondToRequest.bind(connectionController));
+commonRoutes.route('/connections').get(connectionController.getConnections.bind(connectionController));
+commonRoutes.route('/pendingrequests').get(connectionController.pendingRequests.bind(connectionController));
+commonRoutes.route('/followstatus').get( connectionController.checkFollowStatus.bind(connectionController));
+commonRoutes.route('/notifications').get( notificationController.getNotification.bind(notificationController));
+commonRoutes.route('/mark-as-read').post( notificationController.markNotificationAsRead.bind(notificationController));
+commonRoutes.route('/mutualconnections').get( connectionController.getMutualConnections.bind(connectionController));
+commonRoutes.route('/create-report').post(reportController.createReport.bind(reportController));
+commonRoutes.route('/getreports').get(reportController.getReports.bind(reportController));
+commonRoutes.route('/change-report-status').post(reportController.changeReportStatus.bind(reportController));
 
 
 export default commonRoutes;

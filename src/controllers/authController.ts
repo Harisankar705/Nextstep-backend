@@ -27,7 +27,8 @@ import { TYPES } from '../types/types';
     }
     public signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        const signupData=await validateDTO(SignupDTO,req.body)
+        const {userData}=req.body
+        const signupData=await validateDTO(SignupDTO,{email:userData.email,password:userData.password,role:userData.role})
         
         const roleValidation = validateRole(signupData.role);
         if (!roleValidation.valid) {
@@ -199,14 +200,16 @@ import { TYPES } from '../types/types';
         const tokenPrefix = loginData.role.toLowerCase();
         res.cookie(`${tokenPrefix}AccessToken`, accessToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          secure: false, 
+          sameSite: 'lax',  
+          path: '/',    
           maxAge: 40 * 60 * 1000,
         });
         res.cookie(`${tokenPrefix}RefreshToken`, refreshToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          secure: false, 
+            sameSite: 'lax',  
+            path: '/',  
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.status(STATUS_CODES.CREATED).json({ user });

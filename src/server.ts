@@ -42,7 +42,7 @@ app.use(cors({
       return callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS',"PATCH"],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
@@ -50,19 +50,17 @@ app.use(cors({
 app.options('*', cors());
 
 app.use("/uploads", express.static(path.join(__dirname, "utils/uploads")));
+app.use(candidateRoutes);
 
 app.use(adminRoutes);
 app.use(commonRoutes);
 app.use(employerRoutes);
-app.use(candidateRoutes);
 app.use(interactionRoutes);
 app.use(jobRoutes);
 app.use(chatRoutes);
 
-// Error Handler
 app.use(errorHandler);
 
-// Logger Middleware
 app.use(morganMiddleware);
 
 const server = http.createServer(app);

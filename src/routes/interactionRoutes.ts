@@ -7,13 +7,14 @@ import { InteractionController } from "../controllers/interactionController";
 import { AuthMiddleware } from "../middleware/authenticateToken";
 const interactionController = container.get<InteractionController>(TYPES.InteractionController);
 const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware);
+interactionRoutes.use(authMiddleware.verifyToken.bind(authMiddleware))
 
-interactionRoutes.get('/getComments', authMiddleware.verifyToken.bind(authMiddleware),interactionController.getComments.bind(interactionController))
-interactionRoutes.post('/likepost', authMiddleware.verifyToken.bind(authMiddleware),interactionController.likePost.bind(interactionController))
-interactionRoutes.get('/getPostInteractions',  authMiddleware.verifyToken.bind(authMiddleware), interactionController.getPostInteractions.bind(interactionController))
-interactionRoutes.get('/getsavedposts', authMiddleware.verifyToken.bind(authMiddleware),interactionController.getSavedPost.bind(interactionController))
-interactionRoutes.get('/saved-posts/check/:postId', authMiddleware.verifyToken.bind(authMiddleware),interactionController.checkSavedStatus.bind(interactionController))
-interactionRoutes.post('/savepost', authMiddleware.verifyToken.bind(authMiddleware),interactionController.savePost.bind(interactionController))
-interactionRoutes.delete('/deletepost', authMiddleware.verifyToken.bind(authMiddleware),interactionController.deletePost.bind(interactionController))
-interactionRoutes.get('/getpost', authMiddleware.verifyToken.bind(authMiddleware),interactionController.getPost.bind(interactionController))
-interactionRoutes.post('/commentpost',  authMiddleware.verifyToken.bind(authMiddleware),interactionController.commentPost.bind(interactionController))
+interactionRoutes.route('/getComments').get(interactionController.getComments.bind(interactionController))
+interactionRoutes.route('/likepost').post(interactionController.likePost.bind(interactionController))
+interactionRoutes.route('/getPostInteractions').get( interactionController.getPostInteractions.bind(interactionController))
+interactionRoutes.route('/getsavedposts').get(interactionController.getSavedPost.bind(interactionController))
+interactionRoutes.route('/saved-posts/check/:postId').get(interactionController.checkSavedStatus.bind(interactionController))
+interactionRoutes.route('/savepost').post(interactionController.savePost.bind(interactionController))
+interactionRoutes.route('/deletepost').delete(interactionController.deletePost.bind(interactionController))
+interactionRoutes.route('/getpost').get(interactionController.getPost.bind(interactionController))
+interactionRoutes.route('/commentpost').post(interactionController.commentPost.bind(interactionController))

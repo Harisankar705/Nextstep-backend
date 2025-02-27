@@ -125,6 +125,7 @@ export class JobController implements IJobController {
         try {
             const userId = req.user?.userId;
             const { amount } = req.body;
+            const convertedAmount=Math.round(amount*100)
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
                 line_items: [
@@ -135,7 +136,7 @@ export class JobController implements IJobController {
                                 name: 'Premium Subscription',
                                 description: 'Unlimited job applications access',
                             },
-                            unit_amount: amount,
+                            unit_amount: convertedAmount,
                         },
                         quantity: 1,
                     },

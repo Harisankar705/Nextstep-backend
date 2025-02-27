@@ -1,4 +1,4 @@
-import { IApplicant, IChatMessage, INotification, IPosts, IReport, IReportData, NotificationData, Reason } from './authTypes';
+import { IApplicant, IChatMessage, INotification, IPosts, IReport, IReportData, ISubscription, NotificationData, Reason } from './authTypes';
 import { ConnectionStatus, IConnection, IEmployer, ILoginResponse, IUser } from '../types/authTypes';
 export interface IAdminService {
     toggleUser(id: string, role: string): Promise<IUser | IEmployer|IApplicant|null>;
@@ -10,6 +10,11 @@ export interface IReportService
     createReport(reportData:IReportData,userId:string):Promise<IReport>
     getReports(filter?:object):Promise<IReport[]>
     changeReportStatus(reportId:string,newStatus:Reason):Promise<boolean>
+}
+export interface ISubscriptionService
+{
+  createSubscription(subscriptionData:ISubscription):Promise<ISubscription>
+  getSubscriptions():Promise<ISubscription[]>
 }
 export interface IAuthService {
     register(userData: IUser | IEmployer): Promise<IUser | IEmployer>;

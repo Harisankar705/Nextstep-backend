@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 import { IReport, Reason } from "../types/authTypes";
 
 export class VerifyUserDTO
@@ -40,6 +40,25 @@ export class CreateReportDTO {
 
     @IsString()
     role!:string
+}
+export class CreateSubscriptionDTO
+{
+    @IsString()
+    name!:string
+    @IsNumber()
+    price!:number
+    @IsString()
+    validity!:number
+    @IsArray()
+    @IsString({each:true})
+    @ArrayNotEmpty()
+    features!:string[]
+    @IsBoolean()
+    isPopular!:boolean
+    @IsString()
+    targetRole!:string
+    @IsString()
+    status!:string
 }
 
 export class ReportStatusDTO{

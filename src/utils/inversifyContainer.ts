@@ -26,7 +26,7 @@ import { Server } from 'socket.io';
 import { JobRepository } from '../repositories/jobRepository';
 import { NotificationRepository } from '../repositories/notificationRepository';
 import UserModel from '../models/User';
-import { IChatMessage, IEmployer, IPosts, IReport, IUser } from '../types/authTypes';
+import { IChatMessage, IEmployer, IPosts, IReport, ISubscription, IUser } from '../types/authTypes';
 import { Model } from 'mongoose';
 import EmployerModel from '../models/Employer';
 import { ChatModel } from '../models/chat';
@@ -42,6 +42,10 @@ import { AuthMiddleware } from '../middleware/authenticateToken';
 import { ReportRepository } from '../repositories/reportRepository';
 import { ReportService } from '../services/reportService';
 import { ReportController } from '../controllers/reportController';
+import { SubscriptionModel } from '../models/subscription';
+import { SubscriptionRepository } from '../repositories/subscriptionRepository';
+import { SubscriptionService } from '../services/subscriptionService';
+import { SubscriptionController } from '../controllers/subscriptionController';
 const container=new Container()
 container.bind<Transporter>(TYPES.Transporter).toConstantValue(nodemailer.createTransport({
     service: "Gmail",
@@ -60,6 +64,7 @@ container.bind<S3Client>(TYPES.S3Client).toConstantValue(new S3Client({
 const io=new Server()   
 container.bind<Server>(TYPES.SocketServer).toConstantValue(io)
 container.bind<Model<IUser & Document>>(TYPES.UserModel).toConstantValue(UserModel as unknown as Model<IUser & Document>);
+container.bind<Model<ISubscription & Document>>(TYPES.SubscriptionModel).toConstantValue(SubscriptionModel as unknown as Model<ISubscription & Document>);
 container.bind<Model<IEmployer & Document>>(TYPES.EmployerModel).toConstantValue(EmployerModel as unknown as Model<IEmployer & Document>);
 container.bind<Model<IChatMessage & Document>>(TYPES.ChatModel).toConstantValue(ChatModel as unknown as Model<IChatMessage & Document>);
 container.bind<Model<IPosts & Document>>(TYPES.PostModel).toConstantValue(PostModel as unknown as Model<IPosts & Document>);
@@ -95,4 +100,7 @@ container.bind<ReportRepository>(TYPES.ReportRepository).to(ReportRepository)
 container.bind<ReportService>(TYPES.ReportService).to(ReportService)
 container.bind<ReportController>(TYPES.ReportController).to(ReportController)
 container.bind<EmailService>(TYPES.EmailService).to(EmailService)
+container.bind<SubscriptionRepository>(TYPES.SubscriptionRepository).to(SubscriptionRepository)
+container.bind<SubscriptionService>(TYPES.SubscriptionService).to(SubscriptionService)
+container.bind<SubscriptionController>(TYPES.SubscriptionController).to(SubscriptionController)
 export {container}

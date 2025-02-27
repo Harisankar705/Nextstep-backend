@@ -20,7 +20,6 @@ export class AuthMiddleware{
          res.status(STATUS_CODES.FORBIDDEN).json({ message: "Token not found" });
          return
     }
-    console.log('in verifytoken')
     let role: string;
     if (employerToken) {
         role = "employer";
@@ -34,7 +33,6 @@ export class AuthMiddleware{
     }
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN as string) as JwtPayload;
-        console.log("DECODED",decoded)
         req.user = decoded;
         const userData = await this.userRespository.findUserById(decoded.userId, role);
         if (!userData || userData.status === 'Inactive') {
