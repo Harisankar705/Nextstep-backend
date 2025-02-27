@@ -5,7 +5,8 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
-
+console.log("AWS Region:", process.env.AWS_REGION);
+console.log("S3 Bucket Name:", process.env.S3_BUCKET_NAME);
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "eu-north-1",
   credentials: {
