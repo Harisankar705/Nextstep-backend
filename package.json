@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@auth/express": "^0.8.4",
-    "@aws-sdk/client-s3": "^3.731.1",
+    "@aws-sdk/client-s3": "^3.750.0",
+    "@aws-sdk/lib-storage": "^3.750.0",
     "@aws-sdk/s3-request-presigner": "^3.731.1",
     "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.7",
@@ -38,7 +39,7 @@
     "stripe": "^17.6.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.6.3",
-    "uuid": "^11.0.3",
+    "uuid": "^11.1.0",
     "xss-clean": "^0.1.4"
   },
   "scripts": {
