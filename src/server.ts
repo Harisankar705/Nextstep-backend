@@ -62,19 +62,7 @@ app.use(chatRoutes);
 app.use(errorHandler);
 
 app.use(morganMiddleware);
-app.get('/debug/uploads', (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
 
-  const directoryPath = path.join(__dirname, 'utils/uploads/profile-pictures');
-  
-  fs.readdir(directoryPath, (err:any, files:any) => {
-    if (err) {
-      return res.status(500).json({ error: "Unable to scan directory" });
-    } 
-    res.json({ files });
-  });
-});
 
 
 const server = http.createServer(app);
