@@ -17,6 +17,8 @@ import morganMiddleware from "./utils/morgan";
 import { SocketHandler } from "./utils/socketConfig";
 import { TYPES } from "./types/types";
 import { container } from "./utils/inversifyContainer";
+import fs from 'fs';
+
 
 const app = express();
 dbConnection();
@@ -69,6 +71,30 @@ const io = new Server(server, {
     origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST"]
+  }
+});
+
+// Add this debugging code to your server
+console.log('Current directory:', __dirname);
+
+// Try to list the contents of potential upload directories
+const potentialPaths = [
+  path.join(__dirname, "utils/uploads"),
+  path.join(__dirname, "dist/utils/uploads"),
+  path.join(__dirname, "../utils/uploads"),
+  "/opt/render/project/src/dist/utils/uploads",
+  "/opt/render/project/src/utils/uploads"
+];
+
+potentialPaths.forEach(p => {
+  console.log(`Checking path: ${p}`);
+  console.log(`Path exists: ${fs.existsSync(p)}`);
+  if (fs.existsSync(p)) {
+    try {
+      console.log(`Contents: ${fs.readdirSync(p)}`);
+    } catch (err) {
+      console.log(`Error reading directory`,err);
+    }
   }
 });
 
