@@ -25,7 +25,7 @@ export interface IUser extends Document {
     isBlocked?: boolean;
     connections?: string[];
     isPremium?: boolean;
-    phonenumber?: number,
+    phoneNumber?: number,
     jobApplicantionCount:number,
     premiumExpiry:Date,
     status: "Active" | "Inactive"

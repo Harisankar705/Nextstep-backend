@@ -14,7 +14,7 @@ const userSchema = new Schema<IUser & Document>({
     profilePicture: { type: String },
     aboutMe: { type: String },
     dateOfBirth: { type: Date },
-    phonenumber:{type:Number},
+    phoneNumber:{type:Number},
     status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
     education: [
         {
