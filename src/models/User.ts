@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from '../types/authTypes';
 const userSchema = new Schema<IUser & Document>({
-    firstName: { type: String },
-    secondName: { type: String, },
+    firstName: { type: String,required:true },
+    secondName: { type: String,required:true },
     password: { type: String },
     email: { type: String, required: true, unique: true },
     role: { type: String, enum: ["user", "employer"] },

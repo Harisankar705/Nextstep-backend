@@ -14,6 +14,10 @@ export class SignupDTO
    @IsBoolean()
    @IsOptional()
    isVerified?:boolean
+   @IsString()
+   firstName!:string
+   @IsString()
+   secondName!:string
 }
 export class SendOTPDTO
 {

@@ -28,7 +28,7 @@ import { TYPES } from '../types/types';
     public signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         const {userData}=req.body
-        const signupData=await validateDTO(SignupDTO,{email:userData.email,password:userData.password,role:userData.role})
+        const signupData=await validateDTO(SignupDTO,{email:userData.email,password:userData.password,role:userData.role,firstName:userData.firstName,secondName:userData.secondName})
         
         const roleValidation = validateRole(signupData.role);
         if (!roleValidation.valid) {
