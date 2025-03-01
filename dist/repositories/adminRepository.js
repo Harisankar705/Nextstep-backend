@@ -55,7 +55,10 @@ let AdminRepository = class AdminRepository extends baseRepository_1.BaseReposit
         if (!userModel) {
             throw new Error("Invalid role");
         }
-        let userDetails = await userModel.findById(id).populate("jobs");
+        let userDetails = await userModel.findById(id);
+        if (role === 'employer') {
+            userDetails = await userDetails.populate('jobs');
+        }
         if (userDetails) {
             details.push(userDetails);
         }

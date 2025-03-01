@@ -39,12 +39,14 @@ let SocketHandler = class SocketHandler {
                 }
                 const cookies = cookie_1.default.parse(cookieHeader);
                 const token = cookies.employerAccessToken || cookies.userAccessToken;
+                console.log("TOKEN", token);
                 if (!token) {
                     return next(new Error("No token found in cookies"));
                 }
                 const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN);
                 const role = decoded.role;
-                const userData = await this.userRepository.findById(decoded.userId, role);
+                console.log("ROLE", decoded.userId);
+                const userData = await this.userRepository.findUserById(decoded.userId, role);
                 if (!userData || userData.status === "Inactive") {
                     return next(new Error("Authentication restricted"));
                 }

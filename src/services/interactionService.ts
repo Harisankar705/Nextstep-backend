@@ -94,10 +94,13 @@ export class InteractionService  {
     async getPosts(userId:string)
     {
         const connections=await ConnectionModel.find({followerId:userId})
+        console.log("CONNECTIONS",connections)
         const followingIds=connections.map(connection=>connection.followingId)
+        console.log(followingIds)
         const posts=await PostModel.find({userId:{$in:followingIds}})
         .populate('userId', 'firstName secondName profilePicture') 
         .sort({createdAt:1})
+        console.log("POSTS",posts)
         return posts
     }
     async getComments(postId:string)

@@ -19,6 +19,7 @@ const adminDTO_1 = require("../dtos/adminDTO");
 const statusCode_1 = require("../utils/statusCode");
 const types_1 = require("../types/types");
 const subscriptionService_1 = require("../services/subscriptionService");
+const mongoose_1 = require("mongoose");
 let SubscriptionController = class SubscriptionController {
     constructor(subscriptionService) {
         this.subscriptionService = subscriptionService;
@@ -27,7 +28,10 @@ let SubscriptionController = class SubscriptionController {
         try {
             console.log(req.body);
             const subscriptionData = await (0, validateDTO_1.validateDTO)(adminDTO_1.CreateSubscriptionDTO, req.body);
-            const subscription = await this.subscriptionService.createSubscription(subscriptionData);
+            const usersObjectId = subscriptionData.users.map(id => new mongoose_1.Types.ObjectId(id));
+            const subscription = await this.subscriptionService.createSubscription({
+                ...subscriptionData, users: usersObjectId
+            });
             res.status(statusCode_1.STATUS_CODES.OK).json(subscription);
         }
         catch (error) {

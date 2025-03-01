@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsMongoId, IsNumber, IsOptional, IsString } from "class-validator";
 import { IReport, Reason } from "../types/authTypes";
 
 export class VerifyUserDTO
@@ -59,6 +59,9 @@ export class CreateSubscriptionDTO
     targetRole!:string
     @IsString()
     status!:string
+    @IsArray()
+    @IsMongoId({ each: true }) 
+    users!:string[]
 }
 
 export class ReportStatusDTO{

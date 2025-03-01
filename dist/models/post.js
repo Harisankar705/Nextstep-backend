@@ -14,7 +14,7 @@ const postSchema = new mongoose_1.default.Schema({
     userType: {
         type: String,
         required: true,
-        enum: ['user', 'employer']
+        enum: ["User", "Employer"],
     },
     text: {
         type: String,

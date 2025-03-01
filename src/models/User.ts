@@ -28,7 +28,8 @@ const userSchema = new Schema<IUser & Document>({
     connections: [{ type: Schema.Types.ObjectId, ref: 'Connection' }],
     jobApplicantionCount:{type:Number,default:0},
     isPremium: { type: Boolean, default: false },
-    premiumExpiry:{type:Date}
+    premiumExpiry:{type:Date},
+    currentPlan:{type:Schema.Types.ObjectId,ref:"Subscription",default:null}
 });
 const UserModel = mongoose.model<IUser>('User', userSchema);
 export default UserModel;

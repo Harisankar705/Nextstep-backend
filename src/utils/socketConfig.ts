@@ -26,11 +26,14 @@ export class SocketHandler {
     io.use(async (socket: Socket, next) => {
       try {
         const cookieHeader = socket.handshake.headers.cookie;
+        
         if (!cookieHeader) {
           return next(new Error("No authentication cookies"));
         }
         const cookies = cookie.parse(cookieHeader);
         const token = cookies.employerAccessToken || cookies.userAccessToken;
+        console.log("TOKEN",token)
+       
         if (!token) {
           return next(new Error("No token found in cookies"));
         }
@@ -39,10 +42,12 @@ export class SocketHandler {
           process.env.ACCESS_TOKEN as string
         ) as JwtPayload;
         const role = decoded.role;
-        const userData = await this.userRepository.findById(
+        console.log("ROLE",decoded.userId)
+        const userData = await this.userRepository.findUserById(
           decoded.userId,
           role
         );
+
         if (!userData || userData.status === "Inactive") {
           return next(new Error("Authentication restricted"));
         }

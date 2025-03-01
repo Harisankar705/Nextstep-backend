@@ -128,7 +128,7 @@ let UserRepository = class UserRepository extends baseRepository_1.BaseRepositor
             if (!user) {
                 throw new Error("user not found in createpost");
             }
-            const newPost = { ...postData, userId: userId, createdAt: new Date(), userType: role === 'employer' ? 'employer' : 'user' };
+            const newPost = { ...postData, userId: userId, createdAt: new Date(), userType: role === 'employer' ? 'Employer' : 'User' };
             const savedPost = await this.postModel.create(newPost);
             if (savedPost) {
             }

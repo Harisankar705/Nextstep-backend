@@ -26,6 +26,7 @@ const subscriptionSchema=new Schema<ISubscriptionDocument>({
         type:String,
         default:'active'
     },
+    users:[{type:Schema.Types.ObjectId,ref:"User"}],
     createdAt:{
         type:Date,
         default:Date.now()

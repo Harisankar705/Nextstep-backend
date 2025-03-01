@@ -29,6 +29,7 @@
             try {
                 const { id } = req.params;
                 const individualDetailsDTO=await validateDTO(IndividualDetailsDTO,req.body)
+                console.log(req.body)
                 const role = req.query.role as string;
                 if (!id || typeof id !== 'string') {
                     res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Id not a string" });

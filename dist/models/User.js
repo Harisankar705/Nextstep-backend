@@ -35,8 +35,8 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const userSchema = new mongoose_1.Schema({
-    firstName: { type: String },
-    secondName: { type: String, },
+    firstName: { type: String, required: true },
+    secondName: { type: String, required: true },
     password: { type: String },
     email: { type: String, required: true, unique: true },
     role: { type: String, enum: ["user", "employer"] },
@@ -48,7 +48,7 @@ const userSchema = new mongoose_1.Schema({
     profilePicture: { type: String },
     aboutMe: { type: String },
     dateOfBirth: { type: Date },
-    phonenumber: { type: Number },
+    phoneNumber: { type: Number },
     status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
     education: [
         {
@@ -62,7 +62,8 @@ const userSchema = new mongoose_1.Schema({
     connections: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Connection' }],
     jobApplicantionCount: { type: Number, default: 0 },
     isPremium: { type: Boolean, default: false },
-    premiumExpiry: { type: Date }
+    premiumExpiry: { type: Date },
+    currentPlan: { type: mongoose_1.Schema.Types.ObjectId, ref: "Subscription", default: null }
 });
 const UserModel = mongoose_1.default.model('User', userSchema);
 exports.default = UserModel;

@@ -76,6 +76,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSubscriptionDTO.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateSubscriptionDTO.prototype, "users", void 0);
 class ReportStatusDTO {
 }
 exports.ReportStatusDTO = ReportStatusDTO;

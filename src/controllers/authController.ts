@@ -258,13 +258,16 @@ import { TYPES } from '../types/types';
           res.status(STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
           return;
         }
+        console.log("VERIFY OTP DTO",verifyOTPDTO)
         const isVerified = await this.otpServiceInstance.verifyOtp(verifyOTPDTO.email,verifyOTPDTO.otp,verifyOTPDTO.role);
-        if (isVerified) {
+        console.log("IS VERIFIED",isVerified)
+        if (isVerified===true) {
           res.status(STATUS_CODES.OK).json({ message: "OTP verification successful!" });
         } else {
           res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Failed to verify OTP" });
         }
       } catch (error) {
+        console.log("ERROR IN OTP VERIFICATION",error)
         next(error);
       }
     };
@@ -273,16 +276,22 @@ import { TYPES } from '../types/types';
       try {
         const emailOrPhoneNumberDTO=await validateDTO(EmailOrPhoneDTO,req.body)
         const { email, phoneNumber } = emailOrPhoneNumberDTO
+        console.log(email)
+        console.log(phoneNumber)
         const userByEmail = await UserModel.findOne({ email });
         if (userByEmail) {
           res.status(STATUS_CODES.BAD_REQUEST).json({ isTaken: true, message: "Email already exists" });
           return;
         }
-        const userByPhoneNumber = await UserModel.findOne({ phoneNumber });
-        if (userByPhoneNumber) {
-          res.status(STATUS_CODES.BAD_REQUEST).json({ isTaken: true, message: "Phone number already exists" });
-          return;
+        if(phoneNumber)
+        {
+          const userByPhoneNumber = await UserModel.findOne({ phoneNumber });
+          if (userByPhoneNumber) {
+            res.status(STATUS_CODES.BAD_REQUEST).json({ isTaken: true, message: "Phone number already exists" });
+            return;
+          }
         }
+        
         res.json({ isTaken: false });
       } catch (error) {
         next(error);

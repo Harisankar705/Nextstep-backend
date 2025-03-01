@@ -26,7 +26,6 @@ const app = (0, express_1.default)();
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-// CORS 
 const allowedOrigins = [
     'http://localhost:5173',
     'https://nextstepbyhari.online',
@@ -58,17 +57,6 @@ app.use(jobRoutes_1.jobRoutes);
 app.use(chatRoutes_1.chatRoutes);
 app.use(errorMiddleware_1.errorHandler);
 app.use(morgan_1.default);
-app.get('/debug/uploads', (req, res) => {
-    const fs = require('fs');
-    const path = require('path');
-    const directoryPath = path.join(__dirname, 'utils/uploads/profile-pictures');
-    fs.readdir(directoryPath, (err, files) => {
-        if (err) {
-            return res.status(500).json({ error: "Unable to scan directory" });
-        }
-        res.json({ files });
-    });
-});
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
     cors: {

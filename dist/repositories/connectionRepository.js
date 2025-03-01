@@ -1,11 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConnectionRepository = void 0;
 const authTypes_1 = require("./../types/authTypes");
+const connection_1 = __importDefault(require("../models/connection"));
 const baseRepository_1 = require("./baseRepository");
 class ConnectionRepository extends baseRepository_1.BaseRepository {
     constructor(model) {
-        super(model);
+        super(connection_1.default);
     }
     async findExisitingConnection(followerId, followingId) {
         return await this.findOne({

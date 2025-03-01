@@ -60,6 +60,7 @@ const subscriptionSchema = new mongoose_1.Schema({
         type: String,
         default: 'active'
     },
+    users: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
     createdAt: {
         type: Date,
         default: Date.now()

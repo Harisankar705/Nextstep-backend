@@ -48,7 +48,11 @@ export class AdminRepository extends BaseRepository<IUser & Document> implements
         {
             throw new Error("Invalid role")
         }
-        let userDetails=await (userModel as Model<IEmployer|IUser>).findById(id).populate("jobs")
+        let userDetails=await (userModel as Model<IEmployer|IUser>).findById(id)
+        if(role==='employer')
+        {
+            userDetails=await (userDetails  as IEmployer).populate('jobs')
+        }
         if(userDetails)
         {
             details.push(userDetails)

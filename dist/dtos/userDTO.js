@@ -33,6 +33,14 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], SignupDTO.prototype, "isVerified", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], SignupDTO.prototype, "firstName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], SignupDTO.prototype, "secondName", void 0);
 class SendOTPDTO {
 }
 exports.SendOTPDTO = SendOTPDTO;

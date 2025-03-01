@@ -5,6 +5,8 @@ import UserModel from "../models/User";
 import { Filters, JobData } from "../types/authTypes";
 import { inject } from 'inversify';
 import { TYPES } from '../types/types';
+import { SubscriptionModel } from '../models/subscription';
+import { Types } from "mongoose";
 export class JobService
 {
     constructor(@inject(TYPES.JobRepository)private jobRepository:JobRepository)
@@ -86,9 +88,27 @@ export class JobService
         const {applicants,totalApplicants}=await this.jobRepository.findApplicantsByJobId(jobId)
         return {applicants,totalApplicants}
     }
-    async changeToPremium(userId:string)
+    async changeToPremium(userId:string,planId:string)
     {
-        const updatedUser=await UserModel.findByIdAndUpdate(userId,{isPremium:true},{new:true})
+        const selectedPlan=await SubscriptionModel.findById(planId)
+        if(!selectedPlan)
+        {
+            throw new Error("selected subscription not found! ")
+        }
+        const validityStr=selectedPlan.validity
+        const validityInDays = parseInt(String(validityStr).split(" ")[0], 10);
+        if(isNaN(validityInDays))
+        {
+            throw new Error("Invalid validity in days!")
+        }
+        const premiumExpiry=new Date()
+        premiumExpiry.setDate(premiumExpiry.getDate()+validityInDays)
+        if(!selectedPlan.users.includes(new Types.ObjectId(planId)))
+        {
+            selectedPlan.users.push(new Types.ObjectId(planId))
+            await selectedPlan.save()
+        }
+        const updatedUser=await UserModel.findByIdAndUpdate(userId,{isPremium:true,currentPlan:selectedPlan._id,premiumExpiry:premiumExpiry},{new:true})
         if(!updatedUser)
         {
             throw new Error('No user found')

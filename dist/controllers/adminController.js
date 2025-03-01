@@ -45,6 +45,7 @@ let AdminController = class AdminController {
         try {
             const { id } = req.params;
             const individualDetailsDTO = await (0, validateDTO_1.validateDTO)(adminDTO_1.IndividualDetailsDTO, req.body);
+            console.log(req.body);
             const role = req.query.role;
             if (!id || typeof id !== 'string') {
                 res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: "Id not a string" });

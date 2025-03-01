@@ -15,9 +15,9 @@ import { chatRoutes } from "./routes/chatRoutes";
 import { errorHandler } from "./middleware/errorMiddleware";
 import morganMiddleware from "./utils/morgan";
 import { SocketHandler } from "./utils/socketConfig";
+import './utils/cronjobs/premiumChecker'
 import { TYPES } from "./types/types";
 import { container } from "./utils/inversifyContainer";
-
 const app = express();
 dbConnection();
 
@@ -26,7 +26,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS 
 const allowedOrigins = [
   'http://localhost:5173', 
   'https://nextstepbyhari.online', 

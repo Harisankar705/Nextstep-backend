@@ -29,6 +29,7 @@ export interface IUser extends Document {
     jobApplicantionCount:number,
     premiumExpiry:Date,
     status: "Active" | "Inactive"
+    currentPlan?:Types.ObjectId
 }
 export type Reason='spam'|'inappropirate'|'offensive'|'misinformation'|'sexual content'|'other'
 export interface CustomError extends Error
@@ -151,6 +152,7 @@ export interface ISubscription {
     status:string,
     plan?:string
     createdAt?:Date
+    users:Types.ObjectId[]
 }
 export interface ISubscriptionDocument extends ISubscription,Document{
     _id:Types.ObjectId
@@ -324,6 +326,7 @@ export interface IChatMessage extends Document{
     status:'sent'|'delivered'|'read',
     seenAt?:Date,
     deliveredAt?:Date
+    role?:string,
 }
 
 export interface IUploadedFile {

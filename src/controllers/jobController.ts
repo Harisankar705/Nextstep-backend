@@ -1,4 +1,3 @@
-import { ChangeApplicationStatusDTO, CreateJobDTO, ScheduleInterviewDTO, UpdateJobDTO,  } from './../dtos/userDTO';
 import { NextFunction, Request, Response } from "express";
 import { ApplicationStatus, JobData } from "../types/authTypes";
 import { jobRepository } from '../repositories/jobRepository';
@@ -11,8 +10,7 @@ import { inject } from "inversify";
 import { TYPES } from "../types/types";
 import { JobService } from "../services/jobService";
 import { validateDTO } from "../dtos/validateDTO";
-import { ApplyJobDTO, FetchJobsDTO, PaymentStripeDTO } from "../dtos/userDTO";
-import { validate } from 'node-cron';
+import {  FetchJobsDTO } from "../dtos/userDTO";
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
@@ -124,7 +122,8 @@ export class JobController implements IJobController {
     async paymentStripe(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user?.userId;
-            const { amount } = req.body;
+            const { amount,planId } = req.body;
+            console.log(amount,planId)
             const convertedAmount=Math.round(amount*100)
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
@@ -142,7 +141,7 @@ export class JobController implements IJobController {
                     },
                 ],
                 mode: 'payment',
-                success_url: `${process.env.FRONTEND_URL}/payment-success?userId=${userId}`,
+                success_url: `${process.env.FRONTEND_URL}/payment-success?userId=${userId}&planId=${planId}`,
                 cancel_url: `${process.env.FRONTEND_URL}/payment-failed`,
             });
             res.json({ url: session.url });
@@ -215,11 +214,17 @@ export class JobController implements IJobController {
     }
     async changePremiumStatus(req: Request, res: Response) {
         try {
-            let { userId } = req.body;
+            console.log('in change to premum',req.body)
+            let { userId,planId } = req.body;
             if (!userId) {
                 userId = req.user?.userId;
             }
-            const updatedUser = await this. jobService.changeToPremium(userId);
+            if(!planId)
+            {
+                res.status(STATUS_CODES.BAD_REQUEST).json({message:"Plan Id is required!"})
+                return
+            }
+            const updatedUser = await this. jobService.changeToPremium(userId,planId);
             res.status(STATUS_CODES.OK).json({ message: "Status changed" });
         } catch (error) {
             res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: error });

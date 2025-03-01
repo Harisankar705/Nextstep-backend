@@ -21,6 +21,8 @@ const applicant_1 = __importDefault(require("../models/applicant"));
 const User_1 = __importDefault(require("../models/User"));
 const inversify_1 = require("inversify");
 const types_1 = require("../types/types");
+const subscription_1 = require("../models/subscription");
+const mongoose_1 = require("mongoose");
 let JobService = class JobService {
     constructor(jobRepository) {
         this.jobRepository = jobRepository;
@@ -104,8 +106,16 @@ let JobService = class JobService {
         const { applicants, totalApplicants } = await this.jobRepository.findApplicantsByJobId(jobId);
         return { applicants, totalApplicants };
     }
-    async changeToPremium(userId) {
-        const updatedUser = await User_1.default.findByIdAndUpdate(userId, { isPremium: true }, { new: true });
+    async changeToPremium(userId, planId) {
+        const selectedPlan = await subscription_1.SubscriptionModel.findById(planId);
+        if (!selectedPlan) {
+            throw new Error("selected subscription not found! ");
+        }
+        if (!selectedPlan.users.includes(new mongoose_1.Types.ObjectId(planId))) {
+            selectedPlan.users.push(new mongoose_1.Types.ObjectId(planId));
+            await selectedPlan.save();
+        }
+        const updatedUser = await User_1.default.findByIdAndUpdate(userId, { isPremium: true, subscription: selectedPlan._id }, { new: true });
         if (!updatedUser) {
             throw new Error('No user found');
         }

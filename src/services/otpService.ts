@@ -51,6 +51,11 @@ class otpService implements IOtpService{
         }
         const { otp: storedOtp, expiry } = otpData
         console.log('stored otp',{storedOtp,expiry})
+        console.log('Stored OTP:', { storedOtp, expiry });
+    console.log('Provided OTP:', otp);
+    console.log('Current Time:', new Date());
+    console.log('Expiry Time:', expiry);
+
         const isValidOtp = storedOtp === otp && expiry > new Date()
         if (isValidOtp) {
             otpStore[email] = { otp: "", expiry: new Date(0) }

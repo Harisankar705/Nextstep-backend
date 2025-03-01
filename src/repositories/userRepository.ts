@@ -114,7 +114,7 @@ export class UserRepository extends BaseRepository<IUser> {
             {
                 throw new Error("user not found in createpost")
             }
-            const newPost={...postData,userId:userId,createdAt:new Date(),userType:role==='employer'?'employer':'user'}
+            const newPost={...postData,userId:userId,createdAt:new Date(),userType:role==='employer'?'Employer':'User'}
             const savedPost=await this.postModel.create(newPost)
             if(savedPost)
             {

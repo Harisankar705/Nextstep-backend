@@ -11,12 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatRepository = void 0;
 const mongoose_1 = require("mongoose");
 const baseRepository_1 = require("./baseRepository");
 const inversify_1 = require("inversify");
 const types_1 = require("../types/types");
+const mongoose_2 = __importDefault(require("mongoose"));
 let ChatRepository = class ChatRepository extends baseRepository_1.BaseRepository {
     constructor(ChatModel) {
         super(ChatModel);
@@ -43,9 +47,10 @@ let ChatRepository = class ChatRepository extends baseRepository_1.BaseRepositor
     async getMessagesForUser(userId) {
         return await this.model.find({
             $or: [
-                { sender: userId }, { receiver: userId },
-            ],
-        }).sort({ timeStamp: -1 });
+                { senderId: new mongoose_2.default.Types.ObjectId(userId) },
+                { receiverId: new mongoose_2.default.Types.ObjectId(userId) }
+            ]
+        }).sort({ timestamp: -1 });
     }
     async deleteMessageById(messageId) {
         try {

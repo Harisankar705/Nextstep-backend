@@ -6,7 +6,7 @@ import { BaseRepository } from "./baseRepository";
 import { FilterQuery, Model } from 'mongoose';
 export class ConnectionRepository extends BaseRepository<IConnection> implements IConnectionRepository {
     constructor(  model:Model<IConnection>) {
-        super(model); 
+        super(ConnectionModel); 
     }
     async findExisitingConnection(followerId: string, followingId: string): Promise<IConnection | null> {
         return await this.findOne({

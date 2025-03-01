@@ -109,10 +109,13 @@ let InteractionService = class InteractionService {
     // }
     async getPosts(userId) {
         const connections = await connection_1.default.find({ followerId: userId });
+        console.log("CONNECTIONS", connections);
         const followingIds = connections.map(connection => connection.followingId);
+        console.log(followingIds);
         const posts = await post_1.PostModel.find({ userId: { $in: followingIds } })
             .populate('userId', 'firstName secondName profilePicture')
             .sort({ createdAt: 1 });
+        console.log("POSTS", posts);
         return posts;
     }
     async getComments(postId) {

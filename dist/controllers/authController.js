@@ -34,7 +34,7 @@ let AuthController = class AuthController {
         this.signup = async (req, res, next) => {
             try {
                 const { userData } = req.body;
-                const signupData = await (0, validateDTO_1.validateDTO)(userDTO_1.SignupDTO, { email: userData.email, password: userData.password, role: userData.role });
+                const signupData = await (0, validateDTO_1.validateDTO)(userDTO_1.SignupDTO, { email: userData.email, password: userData.password, role: userData.role, firstName: userData.firstName, secondName: userData.secondName });
                 const roleValidation = (0, roleValidate_1.validateRole)(signupData.role);
                 if (!roleValidation.valid) {
                     res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
@@ -262,8 +262,10 @@ let AuthController = class AuthController {
                     res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: roleValidation.message });
                     return;
                 }
+                console.log("VERIFY OTP DTO", verifyOTPDTO);
                 const isVerified = await this.otpServiceInstance.verifyOtp(verifyOTPDTO.email, verifyOTPDTO.otp, verifyOTPDTO.role);
-                if (isVerified) {
+                console.log("IS VERIFIED", isVerified);
+                if (isVerified === true) {
                     res.status(statusCode_1.STATUS_CODES.OK).json({ message: "OTP verification successful!" });
                 }
                 else {
@@ -271,6 +273,7 @@ let AuthController = class AuthController {
                 }
             }
             catch (error) {
+                console.log("ERROR IN OTP VERIFICATION", error);
                 next(error);
             }
         };
@@ -278,15 +281,19 @@ let AuthController = class AuthController {
             try {
                 const emailOrPhoneNumberDTO = await (0, validateDTO_1.validateDTO)(userDTO_1.EmailOrPhoneDTO, req.body);
                 const { email, phoneNumber } = emailOrPhoneNumberDTO;
+                console.log(email);
+                console.log(phoneNumber);
                 const userByEmail = await User_1.default.findOne({ email });
                 if (userByEmail) {
                     res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ isTaken: true, message: "Email already exists" });
                     return;
                 }
-                const userByPhoneNumber = await User_1.default.findOne({ phoneNumber });
-                if (userByPhoneNumber) {
-                    res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ isTaken: true, message: "Phone number already exists" });
-                    return;
+                if (phoneNumber) {
+                    const userByPhoneNumber = await User_1.default.findOne({ phoneNumber });
+                    if (userByPhoneNumber) {
+                        res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ isTaken: true, message: "Phone number already exists" });
+                        return;
+                    }
                 }
                 res.json({ isTaken: false });
             }

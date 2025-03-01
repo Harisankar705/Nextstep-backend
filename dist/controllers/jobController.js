@@ -144,7 +144,8 @@ let JobController = class JobController {
     async paymentStripe(req, res, next) {
         try {
             const userId = req.user?.userId;
-            const { amount } = req.body;
+            const { amount, planId } = req.body;
+            console.log(amount, planId);
             const convertedAmount = Math.round(amount * 100);
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
@@ -162,7 +163,7 @@ let JobController = class JobController {
                     },
                 ],
                 mode: 'payment',
-                success_url: `${process.env.FRONTEND_URL}/payment-success?userId=${userId}`,
+                success_url: `${process.env.FRONTEND_URL}/payment-success?userId=${userId}&planId=${planId}`,
                 cancel_url: `${process.env.FRONTEND_URL}/payment-failed`,
             });
             res.json({ url: session.url });
@@ -241,11 +242,16 @@ let JobController = class JobController {
     }
     async changePremiumStatus(req, res) {
         try {
-            let { userId } = req.body;
+            console.log('in change to premum', req.body);
+            let { userId, planId } = req.body;
             if (!userId) {
                 userId = req.user?.userId;
             }
-            const updatedUser = await this.jobService.changeToPremium(userId);
+            if (!planId) {
+                res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: "Plan Id is required!" });
+                return;
+            }
+            const updatedUser = await this.jobService.changeToPremium(userId, planId);
             res.status(statusCode_1.STATUS_CODES.OK).json({ message: "Status changed" });
         }
         catch (error) {

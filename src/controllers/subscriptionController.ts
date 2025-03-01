@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongoose';
 import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { validateDTO } from "../dtos/validateDTO";
@@ -6,6 +7,7 @@ import { STATUS_CODES } from "../utils/statusCode";
 import { TYPES } from "../types/types";
 import { SubscriptionService } from "../services/subscriptionService";
 import { ISubscriptionController } from "../types/controllerinterface";
+import { Types } from "mongoose";
 
 @injectable()
 export class SubscriptionController implements ISubscriptionController
@@ -18,7 +20,10 @@ export class SubscriptionController implements ISubscriptionController
         try {
             console.log(req.body)
             const subscriptionData=await validateDTO(CreateSubscriptionDTO,req.body)
-            const subscription=await this.subscriptionService.createSubscription(subscriptionData)
+            const usersObjectId=subscriptionData.users.map(id=>new Types.ObjectId(id))
+            const subscription=await this.subscriptionService.createSubscription({
+                ...subscriptionData,users:usersObjectId
+            })
             res.status(STATUS_CODES.OK).json(subscription)
         } catch (error) {
             next(error)

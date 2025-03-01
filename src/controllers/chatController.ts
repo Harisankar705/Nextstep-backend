@@ -19,6 +19,7 @@ export class ChatController implements IChatController {
       const { id } = req.params;
       const userId = req.user?.userId;
       const messages = await this.chatService.getChat(id, userId);
+      console.log("MESSAGES",messages)
       res.status(STATUS_CODES.OK).json({ messages, userId });
     } catch (error) {
       next(error);
@@ -28,12 +29,15 @@ export class ChatController implements IChatController {
   public getMessages = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.userId;
+      console.log("USERID",userId)
       if (!userId) {
         res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized user" });
         return;
     }
       const messages = await this.chatService.getMessagesForUser(userId);
-      res.status(STATUS_CODES.OK).json(messages);
+      console.log("!!!!!!!",messages)
+       res.status(STATUS_CODES.OK).json({ messages });
+       return
     } catch (error) {
       next(error);
     }
