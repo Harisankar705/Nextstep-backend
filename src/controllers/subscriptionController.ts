@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose';
 import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { validateDTO } from "../dtos/validateDTO";
@@ -10,64 +9,67 @@ import { ISubscriptionController } from "../types/controllerinterface";
 import { Types } from "mongoose";
 
 @injectable()
-export class SubscriptionController implements ISubscriptionController
-{
-    constructor(@inject(TYPES.SubscriptionService)private subscriptionService:SubscriptionService)
-    {
-
+export class SubscriptionController implements ISubscriptionController {
+  constructor(
+    @inject(TYPES.SubscriptionService)
+    private subscriptionService: SubscriptionService
+  ) {}
+  async createSubscription(req: Request, res: Response, next: NextFunction) {
+    try {
+      console.log(req.body);
+      const subscriptionData = await validateDTO(
+        CreateSubscriptionDTO,
+        req.body
+      );
+      const usersObjectId =
+        subscriptionData.users && subscriptionData.users.length > 0
+          ? subscriptionData.users.map((id) => new Types.ObjectId(id))
+          : [];
+      const subscription = await this.subscriptionService.createSubscription({
+        ...subscriptionData,
+        users: usersObjectId,
+      });
+      res.status(STATUS_CODES.OK).json(subscription);
+    } catch (error) {
+      next(error);
     }
-    async createSubscription(req:Request,res:Response,next:NextFunction){
-        try {
-            console.log(req.body)
-            const subscriptionData=await validateDTO(CreateSubscriptionDTO,req.body)
-            const subscription=await this.subscriptionService.createSubscription({
-                ...subscriptionData,users:subscriptionData.users.map(id=>new Types.ObjectId(id))
-            })
-            res.status(STATUS_CODES.OK).json(subscription)
-        } catch (error) {
-            next(error)
-        }
+  }
+  async getSubscriptions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const subscriptions = await this.subscriptionService.getSubscriptions();
+      res.status(STATUS_CODES.OK).json(subscriptions);
+    } catch (error) {
+      next(error);
     }
-    async getSubscriptions(req:Request,res:Response,next:NextFunction)
-    {
-        try {   
-            const subscriptions=await this.subscriptionService.getSubscriptions()
-            res.status(STATUS_CODES.OK).json(subscriptions)
-        } catch (error) {
-            next(error)
-        }
-       
+  }
+  async getSubscriptionsById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const subscriptions = await this.subscriptionService.getSubscriptionById(
+        id
+      );
+      res.status(STATUS_CODES.OK).json(subscriptions);
+    } catch (error) {
+      next(error);
     }
-    async getSubscriptionsById(req:Request,res:Response,next:NextFunction)
-    {
-        try {   
-            const {id}=req.params
-            const subscriptions=await this.subscriptionService.getSubscriptionById(id)
-            res.status(STATUS_CODES.OK).json(subscriptions)
-        } catch (error) {
-            next(error)
-        }
-       
+  }
+  async editSubscription(req: Request, res: Response, next: NextFunction) {
+    try {
+      console.log("IN EDIT SUBSCRIPTION");
+      const { id } = req.params;
+      const { _id, toggleStatus, ...plan } = req.body;
+      console.log("TOGGLESTATUS", plan);
+      if (toggleStatus) {
+        await this.subscriptionService.changeSubscriptionStatus(id);
+      }
+      if (Object.keys(plan).length > 0) {
+        await this.subscriptionService.editSubscriptionPlan(id, plan);
+      }
+      res
+        .status(STATUS_CODES.CREATED)
+        .send({ message: "Subscription updated successfully!" });
+    } catch (error) {
+      next(error);
     }
-    async editSubscription(req:Request,res:Response,next:NextFunction)
-    {
-        try {
-            console.log("IN EDIT SUBSCRIPTION")
-            const {id}=req.params
-            const {_id,toggleStatus,...plan}=req.body    
-            console.log("TOGGLESTATUS",plan)
-            if(toggleStatus)
-            {
-                await this.subscriptionService.changeSubscriptionStatus(id)
-            }
-            if(Object.keys(plan).length>0)
-            {
-                await this.subscriptionService.editSubscriptionPlan(id,plan)
-            }
-            res.status(STATUS_CODES.CREATED).send({message:"Subscription updated successfully!"})
-        } catch (error) {
-            next(error)
-
-        }
-    }
+  }
 }

@@ -61,7 +61,7 @@ export class CreateSubscriptionDTO
     status!:string
     @IsArray()
     @IsMongoId({ each: true }) 
-    users!:string[]
+    users?:string[]
 }
 
 export class ReportStatusDTO{
