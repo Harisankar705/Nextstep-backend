@@ -20,9 +20,8 @@ export class SubscriptionController implements ISubscriptionController
         try {
             console.log(req.body)
             const subscriptionData=await validateDTO(CreateSubscriptionDTO,req.body)
-            const usersObjectId=subscriptionData.users.map(id=>new Types.ObjectId(id))
             const subscription=await this.subscriptionService.createSubscription({
-                ...subscriptionData,users:usersObjectId
+                ...subscriptionData,users:subscriptionData.users.map(id=>new Types.ObjectId(id))
             })
             res.status(STATUS_CODES.OK).json(subscription)
         } catch (error) {
