@@ -21,10 +21,8 @@ export class SubscriptionController implements ISubscriptionController {
         CreateSubscriptionDTO,
         req.body
       );
-      const usersObjectId =
-        subscriptionData.users && subscriptionData.users.length > 0
-          ? subscriptionData.users.map((id) => new Types.ObjectId(id))
-          : [];
+      const usersObjectId: Types.ObjectId[] = [];
+
       const subscription = await this.subscriptionService.createSubscription({
         ...subscriptionData,
         users: usersObjectId,

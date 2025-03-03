@@ -59,9 +59,7 @@ export class CreateSubscriptionDTO
     targetRole!:string
     @IsString()
     status!:string
-    @IsArray()
-    @IsMongoId({ each: true }) 
-    users?:string[]
+    
 }
 
 export class ReportStatusDTO{
