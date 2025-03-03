@@ -85,6 +85,8 @@ export class AuthService implements IAuthService {
             if (!user) {
                 throw new Error('User not found! Try Signup!');
             }
+            console.log("LOGIN EMAIL",email)
+            console.log("LOGIN ROLE",role)
             const isMatch = await comparePassword(password, user.password || "");
             if (!isMatch) {
                 throw new Error("invalid email or password")
