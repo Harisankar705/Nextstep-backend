@@ -205,7 +205,7 @@ import { TYPES } from '../types/types';
           secure: isProduction, 
           sameSite: isProduction ? 'none' : 'lax', 
           path: '/',    
-          maxAge: 40 * 60 * 1000,
+          maxAge: 60 * 60 * 1000,
         });
         res.cookie(`${tokenPrefix}RefreshToken`, refreshToken, {
           httpOnly: true,
