@@ -12,6 +12,7 @@ export class UserRepository extends BaseRepository<IUser> {
     async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
         try {
             const model = getModel(role);
+            console.log("MODEL",model)
             
             if (role === 'employer') {
                 return (model as Model<IEmployer & Document>).findOne({ email }).exec();
