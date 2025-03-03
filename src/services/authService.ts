@@ -82,6 +82,7 @@ export class AuthService implements IAuthService {
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
         try {
             const user = await this.userRepository.findByEmail(email, role);
+            console.log("USER",user)
             if (!user) {
                 throw new Error('User not found! Try Signup!');
             }
