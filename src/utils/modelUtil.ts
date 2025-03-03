@@ -8,7 +8,7 @@ export function getModel(role: string): Model<IUser & Document> | Model<IEmploye
         if (role === 'employer') {
             return EmployerModel as Model<IEmployer & Document>
         }
-        if (role === 'user') {
+        if (role === 'user'||"User") {
             return UserModel as Model<IUser & Document>
         }
         if (role === 'admin') {
