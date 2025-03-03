@@ -10,24 +10,23 @@ export class UserRepository extends BaseRepository<IUser> {
         super(userModel)
     }
     async findByEmail(email: string, role: string): Promise<IUser | IEmployer | IAdmin | null> {
-        if (!["user", "employer", "admin"].includes(role)) {
-            throw new Error(`Invalid role: ${role}`);
-        }
-    
         try {
-            console.log("FIND BY EMAIL:", email);
-            console.log("FIND BY EMAIL ROLE:", role);
-    
-            const model = getModel(role) as Model<IUser | IEmployer | IAdmin>;
-            const user= await model.findOne({ email }).exec();
-            return user
-
+            const model = getModel(role);
+            
+            if (role === 'employer') {
+                return (model as Model<IEmployer & Document>).findOne({ email }).exec();
+            }
+            if (role === 'user') {
+                return (model as Model<IUser & Document>).findOne({ email }).exec();
+            }
+            if (role === 'admin') {
+                return (model as Model<IAdmin & Document>).findOne({ email }).exec()
+            }
+            throw new Error(`Invalid role: ${role}`);
         } catch (error) {
-            console.error("Error finding user by email:", error);
-            throw new Error("Error occurred while finding user by email");
+            throw new Error('Error occurred while finding by email');
         }
     }
-    
     async search(query:string):Promise<{users:IUser[] ; posts:IPosts[]; employers:IEmployer[] }> {
         try
         {

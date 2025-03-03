@@ -82,12 +82,9 @@ export class AuthService implements IAuthService {
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
         try {
             const user = await this.userRepository.findByEmail(email, role);
-            console.log("USER",user)
             if (!user) {
                 throw new Error('User not found! Try Signup!');
             }
-            console.log("LOGIN EMAIL",email)
-            console.log("LOGIN ROLE",role)
             const isMatch = await comparePassword(password, user.password || "");
             if (!isMatch) {
                 throw new Error("invalid email or password")
@@ -98,6 +95,7 @@ export class AuthService implements IAuthService {
             return { accessToken, refreshToken, user, isProfileComplete };
         } 
         catch (error: unknown) {
+            console.log("ERROR WHILE LOGIN",error)
             if (error instanceof Error) {
                 throw new Error(`Error login: ${error.message}`);
             } else {
