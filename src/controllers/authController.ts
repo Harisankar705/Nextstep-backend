@@ -1,4 +1,4 @@
-import {  SearchDTO, SendOTPDTO, SignupDTO, EmailOrPhoneDTO, VerifyOTPDTO } from './../dtos/userDTO';
+import {  SearchDTO, SendOTPDTO, SignupDTO, EmailOrPhoneDTO, VerifyOTPDTO, RequestPasswordResetDTO, ResetPasswordDTO } from './../dtos/userDTO';
   import { NextFunction, Request, Response } from "express";
   import otpService from "../services/otpService";
   import UserModel from "../models/User";
@@ -41,6 +41,27 @@ import { TYPES } from '../types/types';
         next(error);
       }
     };
+    public requestPasswordReset=async(req:Request,res:Response,next:NextFunction)=>{
+      try {
+        console.log('in request password reset')
+        const dto=await validateDTO(RequestPasswordResetDTO,req.body)
+        const result=await this.authService.requestPasswordReset(dto.email,dto.role)
+        res.json(result)
+
+      } catch (error) {
+        next(error)
+      }
+    }
+    public resetPassword=async(req:Request,res:Response,next:NextFunction)=>{
+      try {
+        const dto=await validateDTO(ResetPasswordDTO,req.body)
+        console.log("REQ.body",req.body)
+        const result=await this.authService.resetPassword(dto.password,dto.token,dto.role)
+        res.json(result)
+      } catch (error) {
+        next(error)
+      }
+    }
     public candidateDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         const uploadResponse = await handleFileUpload(req);

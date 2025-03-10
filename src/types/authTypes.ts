@@ -1,6 +1,8 @@
 import mongoose, { Document, ObjectId, Types } from "mongoose";
 export interface IUser extends Document {
     _id: string | mongoose.Types.ObjectId;
+    resetPasswordExpires?:Date,
+    resetPasswordToken?:string,
     username?: string;
     isProfileComplete?: boolean,
     firstName?: string;
@@ -81,6 +83,8 @@ export interface IConnection extends Document
 export interface IEmployer extends Document {
     _id: string | mongoose.Types.ObjectId,
     email: string
+    resetPasswordExpires?:Date,
+    resetPasswordToken?:string,
     password: string
     role: "employer"
     document:string,

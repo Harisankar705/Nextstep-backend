@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsBoolean, IsEmail, IsEnum, IsNotEmpty, isNotEmpty, IsNumber, IsObject, IsOptional, isString, IsString, IsUrl, ValidateNested } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsEmail, IsEnum, IsNotEmpty, isNotEmpty, IsNumber, IsObject, IsOptional, isString, IsString, IsUrl, MinLength, ValidateNested } from "class-validator";
 import { ApplicationStatus, ConnectionStatus } from "../types/authTypes";
 import { Type } from "class-transformer";
 import { Types } from "mongoose";
@@ -18,6 +18,22 @@ export class SignupDTO
    firstName!:string
    @IsString()
    secondName!:string
+}
+export class RequestPasswordResetDTO{
+    @IsEmail()
+    email!:string
+    @IsString()
+    @IsNotEmpty()
+    role!:string
+}
+export class ResetPasswordDTO{
+    @IsString()
+    token!:string
+    @IsString()
+    @MinLength(6)
+    password!:string
+    @IsString()
+    role!:string
 }
 export class SendOTPDTO
 {

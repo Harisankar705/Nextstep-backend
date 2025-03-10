@@ -21,6 +21,8 @@ export interface IAuthService {
     login(email: string, password: string, role: string): Promise<ILoginResponse>;
     updateUser(userId: string, userData: Partial<IUser>, profilePicturePath?: string, resume?: string): Promise<IUser | null>;
     createPostService(userId: string, postData: object, role: string): Promise<IPosts>;
+    requestPasswordReset(email:string,role:string):Promise<void>
+    resetPassword(password:string,token:string,role:string):Promise<void>
     editPostService(postId: string, postData: object, role: string,userId:string): Promise<IPosts>;
     searchService(query: string): Promise<{users:IUser[];posts:IPosts[],employers:IEmployer[]}>;
     getUsersPosts(userId: string): Promise<IPosts[]>;

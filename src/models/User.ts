@@ -29,6 +29,8 @@ const userSchema = new Schema<IUser & Document>({
     jobApplicantionCount:{type:Number,default:0},
     isPremium: { type: Boolean, default: false },
     premiumExpiry:{type:Date},
+    resetPasswordExpires:{type:Date},
+    resetPasswordToken:{type:String},
     currentPlan:{type:Schema.Types.ObjectId,ref:"Subscription",default:null}
 });
 const UserModel = mongoose.model<IUser>('User', userSchema);

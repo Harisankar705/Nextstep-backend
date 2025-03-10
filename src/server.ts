@@ -50,9 +50,9 @@ app.options('*', cors());
 
 app.use("/uploads", express.static(path.join(__dirname, "utils/uploads")));
 app.use(candidateRoutes);
+app.use(commonRoutes);
 
 app.use(adminRoutes);
-app.use(commonRoutes);
 app.use(employerRoutes);
 app.use(interactionRoutes);
 app.use(jobRoutes);

@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs'
 import { inject } from 'inversify';
 import { UserRepository } from './../repositories/userRepository';
 import { IEmployer, ILoginResponse, IPosts, IUser } from './../types/authTypes';
@@ -10,33 +11,35 @@ import { IAuthService } from '../types/serviceInterface';
 import { Transporter } from 'nodemailer';
 import { injectable } from 'inversify';
 import { TYPES } from '../types/types';
+import crypto from 'crypto'
+import { getModel } from '../utils/modelUtil';
+import { Model, model } from 'mongoose';
+import { container } from '../utils/inversifyContainer';
+import { EmailService } from '../utils/emailService';
 function isEmployerRole(role: string): role is 'employer' {
     return role === 'employer';
 }
 @injectable()
 export class AuthService implements IAuthService {
 
-    constructor(@inject(TYPES.UserRepository)private userRepository:UserRepository,@inject(TYPES.Transporter) private transporter:Transporter,@inject(TYPES.OtpService) private OtpInstance:otpService)
-    {}
+    constructor(@inject(TYPES.UserRepository) private userRepository: UserRepository, @inject(TYPES.Transporter) private transporter: Transporter, @inject(TYPES.OtpService) private OtpInstance: otpService) { }
     private validateRole(role: string): boolean {
         return ['user', 'employer'].includes(role);
     }
     async createPostService(userId: string, postData: object, role: string) {
-        const response = await this.userRepository.createPost(postData, role,userId)
+        const response = await this.userRepository.createPost(postData, role, userId)
         return response as IPosts
     }
-    async editPostService(postId:string,updatedData:IPosts,role:string,userId:string) {
-        const response = await this.userRepository.editPost(postId,updatedData,role,userId)
+    async editPostService(postId: string, updatedData: IPosts, role: string, userId: string) {
+        const response = await this.userRepository.editPost(postId, updatedData, role, userId)
         return response as IPosts
     }
-    async searchService(query:string)
-    {
+    async searchService(query: string) {
         try {
-            if(!query.trim())
-            {
+            if (!query.trim()) {
                 throw new Error("Query not given for search")
             }
-            const results=await this.userRepository.search(query)
+            const results = await this.userRepository.search(query)
             return results
         } catch (error) {
             throw new Error("Error occured during searching")
@@ -72,13 +75,13 @@ export class AuthService implements IAuthService {
     }
     async getUsersPosts(userId: string): Promise<IPosts[]> {
         try {
-            const posts = await this.userRepository.findUserPosts(userId) 
+            const posts = await this.userRepository.findUserPosts(userId)
             return posts as IPosts[]
         } catch (error) {
             throw error;
         }
     }
-    
+
     async login(email: string, password: string, role: string): Promise<ILoginResponse> {
         try {
             const user = await this.userRepository.findByEmail(email, role);
@@ -93,16 +96,16 @@ export class AuthService implements IAuthService {
             const refreshToken: string = generateRefreshToken({ userId: (user._id as string).toString(), role: user.role });
             const isProfileComplete: boolean = user.isProfileComplete || false
             return { accessToken, refreshToken, user, isProfileComplete };
-        } 
+        }
         catch (error: unknown) {
-            console.log("ERROR WHILE LOGIN",error)
+            console.log("ERROR WHILE LOGIN", error)
             if (error instanceof Error) {
                 throw new Error(`Error login: ${error.message}`);
             } else {
                 throw new Error(`Error login`);
             }
         }
-        
+
     }
     async updateUser(userId: string, userData: Partial<IUser>, profilePicturePath?: string, resume?: string): Promise<IUser | null> {
         try {
@@ -120,6 +123,55 @@ export class AuthService implements IAuthService {
         } catch (error) {
             throw new Error(`Error occurred while updating user:`);
         }
+    }
+    async requestPasswordReset(email: string, role: string) {
+        try {
+            const model = await getModel(role) as Model<IUser | IEmployer>
+            const user = await model.findOne({ email })
+            if (!user) {
+                throw new Error("User not found!")
+            }
+            const resetToken = crypto.randomBytes(32).toString('hex')
+            const resetTokenExpiration = new Date(Date.now() + 3600000); 
+            user.resetPasswordToken = resetToken
+            user.resetPasswordExpires = resetTokenExpiration
+            await user.save()
+            console.log("EMAIL SENDED")
+            const resetLink = `http://${process.env.FRONTEND_URL}/reset-password/${resetToken}`
+
+
+            const subject = "Password Reset Request"
+            const text = `Hello,\n\nYou are receiving this email because you (or someone else) requested a password reset for your account.\n\nPlease click on the following link to reset your password:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request a password reset, please ignore this email.`;
+
+            const emailService = container.get<EmailService>(TYPES.EmailService)
+            await emailService.sendEmail(email, subject, text)
+
+
+        } catch (error) {
+            throw new Error('Error occured while requesting reset password')
+        }
+
+    }
+    async resetPassword(password: string, token: string, role: string) {
+        try {
+            const model = await getModel(role) as Model<IUser | IEmployer>
+            console.log(model)
+            const user = await model.findOne({
+                resetPasswordToken: token,
+                resetPasswordExpires: { $gt: Date.now() }
+            })
+            if (!user) {
+                throw new Error("User not found!")
+            }
+            user.password = await bcrypt.hash(password, 10)
+            user.resetPasswordToken = undefined
+            user.resetPasswordExpires = undefined
+            await user.save()
+            console.log("EMAIL SENDED")
+        } catch (error) {
+            console.log("ERROR",error)
+        }
+
     }
     async getCandidateService(role: string): Promise<(IUser | IEmployer)[]> {
         try {

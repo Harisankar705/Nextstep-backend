@@ -15,6 +15,8 @@ const employerSchema=new Schema<IEmployer>({
     isVerified:{type:String,enum:["PENDING",'APPROVED','REJECTED'],default:"PENDING"},
     documentNumber:{type:String},
     website:{type:String,required:false},
+    resetPasswordExpires:{type:Date},
+    resetPasswordToken:{type:String},
     role:{type:String,default:'employer'},
     isProfileComplete:{type:Boolean,default:false},
     status:{type:String,enum:["Active","Inactive"],default:"Active"},
