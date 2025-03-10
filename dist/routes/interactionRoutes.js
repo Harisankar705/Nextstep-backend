@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.interactionRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+exports.interactionRoutes = express_1.default.Router();
+const inversifyContainer_1 = require("../utils/inversifyContainer");
+const types_1 = require("../types/types");
+const interactionController = inversifyContainer_1.container.get(types_1.TYPES.InteractionController);
+const authMiddleware = inversifyContainer_1.container.get(types_1.TYPES.AuthMiddleware);
+exports.interactionRoutes.use(authMiddleware.verifyToken.bind(authMiddleware));
+exports.interactionRoutes.route('/getComments').get(interactionController.getComments.bind(interactionController));
+exports.interactionRoutes.route('/likepost').post(interactionController.likePost.bind(interactionController));
+exports.interactionRoutes.route('/getPostInteractions').get(interactionController.getPostInteractions.bind(interactionController));
+exports.interactionRoutes.route('/getsavedposts').get(interactionController.getSavedPost.bind(interactionController));
+exports.interactionRoutes.route('/saved-posts/check/:postId').get(interactionController.checkSavedStatus.bind(interactionController));
+exports.interactionRoutes.route('/savepost').post(interactionController.savePost.bind(interactionController));
+exports.interactionRoutes.route('/deletepost').delete(interactionController.deletePost.bind(interactionController));
+exports.interactionRoutes.route('/getpost').get(interactionController.getPost.bind(interactionController));
+exports.interactionRoutes.route('/commentpost').post(interactionController.commentPost.bind(interactionController));

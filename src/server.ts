@@ -20,18 +20,14 @@ import { TYPES } from "./types/types";
 import { container } from "./utils/inversifyContainer";
 const app = express();
 dbConnection();
-
-
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 const allowedOrigins = [
   'http://localhost:5173', 
   'https://nextstepbyhari.online', 
   'https://www.nextstepbyhari.online'
 ];
-
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
@@ -45,25 +41,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-
 app.options('*', cors());
-
 app.use("/uploads", express.static(path.join(__dirname, "utils/uploads")));
 app.use(candidateRoutes);
 app.use(commonRoutes);
-
 app.use(adminRoutes);
 app.use(employerRoutes);
 app.use(interactionRoutes);
 app.use(jobRoutes);
 app.use(chatRoutes);
-
 app.use(errorHandler);
-
 app.use(morganMiddleware);
-
-
-
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -72,10 +60,8 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
-
 const socketHandler = container.get<SocketHandler>(TYPES.SocketHandler);
 socketHandler.configure(io);
-
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

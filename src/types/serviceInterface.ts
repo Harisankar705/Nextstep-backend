@@ -1,5 +1,5 @@
-import { IApplicant, IChatMessage, INotification, IPosts, IReport, IReportData, ISubscription, NotificationData, Reason } from './authTypes';
-import { ConnectionStatus, IConnection, IEmployer, ILoginResponse, IUser } from '../types/authTypes';
+import { IApplicant, IChatMessage, INotification, IPosts, IReport, IReportData, ISubscription, NotificationData, Reason, IUser } from './authTypes';
+import { ConnectionStatus, IConnection, IEmployer, ILoginResponse } from '../types/authTypes';
 export interface IAdminService {
     toggleUser(id: string, role: string): Promise<IUser | IEmployer|IApplicant|null>;
     getIndividualDetails(id: string,role:string): Promise<(IEmployer | IUser)[]>;
@@ -22,6 +22,7 @@ export interface IAuthService {
     updateUser(userId: string, userData: Partial<IUser>, profilePicturePath?: string, resume?: string): Promise<IUser | null>;
     createPostService(userId: string, postData: object, role: string): Promise<IPosts>;
     requestPasswordReset(email:string,role:string):Promise<void>
+    authenticateGoogleUser(token: string, role: string): Promise<{ user: IUser | IEmployer; accessToken: string }>;
     resetPassword(password:string,token:string,role:string):Promise<void>
     editPostService(postId: string, postData: object, role: string,userId:string): Promise<IPosts>;
     searchService(query: string): Promise<{users:IUser[];posts:IPosts[],employers:IEmployer[]}>;

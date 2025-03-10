@@ -32,7 +32,6 @@ export class SocketHandler {
         }
         const cookies = cookie.parse(cookieHeader);
         const token = cookies.employerAccessToken || cookies.userAccessToken;
-        console.log("TOKEN",token)
        
         if (!token) {
           return next(new Error("No token found in cookies"));
@@ -42,7 +41,6 @@ export class SocketHandler {
           process.env.ACCESS_TOKEN as string
         ) as JwtPayload;
         const role = decoded.role;
-        console.log("ROLE",decoded.userId)
         const userData = await this.userRepository.findUserById(
           decoded.userId,
           role

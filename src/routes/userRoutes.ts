@@ -11,6 +11,7 @@ const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware);
 candidateRoutes
   .post('/signup', authController.signup.bind(authController))
   .post('/login', authController.login.bind(authController))
+  .post('/google',authController.googleLogin.bind(authController))
   .post('/send-otp', authController.sendOTPcontroller.bind(authController))
   .post('/verify-otp', authController.verifyOTPController.bind(authController))
   .post('/resend-otp', authController.resendOTPcontroller.bind(authController))

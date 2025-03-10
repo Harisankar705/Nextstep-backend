@@ -4,6 +4,7 @@ export interface IUser extends Document {
     resetPasswordExpires?:Date,
     resetPasswordToken?:string,
     username?: string;
+    googleId?:string
     isProfileComplete?: boolean,
     firstName?: string;
     secondName?: string;
@@ -83,6 +84,7 @@ export interface IConnection extends Document
 export interface IEmployer extends Document {
     _id: string | mongoose.Types.ObjectId,
     email: string
+    googleId?:string,
     resetPasswordExpires?:Date,
     resetPasswordToken?:string,
     password: string

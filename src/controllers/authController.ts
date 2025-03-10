@@ -14,6 +14,8 @@ import {  SearchDTO, SendOTPDTO, SignupDTO, EmailOrPhoneDTO, VerifyOTPDTO, Reque
   import { LoginDTO } from "../dtos/adminDTO";
 import { validateDTO } from '../dtos/validateDTO';
 import { TYPES } from '../types/types';
+import { OAuth2Client } from 'google-auth-library';
+const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
 @injectable()
   export class AuthController implements IAuthController {
     constructor(@inject(TYPES.AuthService) private authService: IAuthService, @inject(TYPES.OtpService) private otpServiceInstance: otpService) {}
@@ -58,6 +60,41 @@ import { TYPES } from '../types/types';
         console.log("REQ.body",req.body)
         const result=await this.authService.resetPassword(dto.password,dto.token,dto.role)
         res.json(result)
+      } catch (error) {
+        next(error)
+      }
+    }
+    public googleLogin=async(req:Request,res:Response,next:NextFunction)=>{
+      try {
+        const {token,role}=req.body
+        console.log("IN GOOGLELOGIN",req.body)
+        if(!token||!role)
+        {
+          res.status(STATUS_CODES.NOT_FOUND).json({success:false,message:"Token and role required!"})
+          return
+        }
+        const ticket=await client.verifyIdToken({
+          idToken:token,
+          audience:process.env.AUTH_GOOGLE_ID
+        })
+        const payload=ticket.getPayload()
+        if(!payload)
+        {
+          res.status(401).json({success:false,message:"Invalid google token!"})
+          return
+        }
+        const {user,accessToken}=await this.authService.authenticateGoogleUser(token,role)
+        const tokenPrefix=role.toLowerCase()
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        res.cookie(`${tokenPrefix}AccessToken`, accessToken, {
+          httpOnly: true,
+          secure: isProduction, 
+          sameSite: isProduction ? 'none' : 'lax',
+          maxAge: 60 * 60 * 1000, 
+        });
+        console.log("USER",res.cookie)
+        res.json({success:true,user})
       } catch (error) {
         next(error)
       }

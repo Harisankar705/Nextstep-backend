@@ -1,3 +1,4 @@
+import  jwt  from 'jsonwebtoken';
 import bcrypt from 'bcryptjs'
 import { inject } from 'inversify';
 import { UserRepository } from './../repositories/userRepository';
@@ -16,9 +17,12 @@ import { getModel } from '../utils/modelUtil';
 import { Model, model } from 'mongoose';
 import { container } from '../utils/inversifyContainer';
 import { EmailService } from '../utils/emailService';
+import { OAuth2Client } from 'google-auth-library';
 function isEmployerRole(role: string): role is 'employer' {
     return role === 'employer';
 }
+const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
+
 @injectable()
 export class AuthService implements IAuthService {
 
@@ -148,10 +152,50 @@ export class AuthService implements IAuthService {
 
 
         } catch (error) {
+            console.log(error)
             throw new Error('Error occured while requesting reset password')
         }
 
     }
+    async verifyGoogleToken(token:string)
+    {
+        const ticket=await client.verifyIdToken({
+            idToken:token,
+            audience:process.env.AUTH_GOOGLE_ID
+        })
+        return ticket.getPayload()
+    }
+    async authenticateGoogleUser(token: string, role: string) {
+        const payload = await this.verifyGoogleToken(token);
+        if (!payload) {
+            throw new Error("Invalid Google token!"); 
+        }
+        const { email, sub: googleId, name, picture } = payload;
+    
+        const model = getModel(role) as Model<IUser | IEmployer>; 
+        if (!model) {
+            throw new Error("Invalid role provided!");
+        }
+    
+        let user = await model.findOne({ email });
+    
+        if (!user) {
+            user = await model.create(
+                role === "user"
+                    ? { email, googleId, firstName: name, profilePicture: picture }
+                    : { email, googleId, companyName: name, logo: picture } 
+            );
+        }
+    
+        const accessToken = jwt.sign(
+            { userId: user._id, role }, 
+            process.env.JWT_SECRET!,
+            { expiresIn: "7d" }
+        );
+    
+        return { user, accessToken };
+    }
+    
     async resetPassword(password: string, token: string, role: string) {
         try {
             const model = await getModel(role) as Model<IUser | IEmployer>
