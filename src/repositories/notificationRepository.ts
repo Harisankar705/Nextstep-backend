@@ -12,6 +12,7 @@ export class NotificationRepository extends BaseRepository<INotification> implem
     }
     async createNotification(notificationData:NotificationData)
     {
+        console.log("IN CREATER NOTIFICATIOn")
         
         try {
             const newNotification=new Notification(notificationData)
@@ -45,6 +46,7 @@ export class NotificationRepository extends BaseRepository<INotification> implem
                     }
     
                     return {
+                        _id:notification._id instanceof Object? notification._id.toString():(notification._id as string),
                         recipientId: notification.recipientId.toString(),
                         senderId,
                         senderInfo, 

@@ -89,10 +89,6 @@ export class ChatService implements IChatService {
     }
     async getMessagesForUser(userId:string)
     {
-        if(!userId)
-        {
-            throw new Error("UserId is required!")
-        }
         return await this.chatRepository.getMessagesForUser(userId)
     }
 }

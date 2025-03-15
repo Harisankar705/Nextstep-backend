@@ -73,8 +73,8 @@ async createLike(userId: string, postId: string): Promise<ILike | null> {
         comment: string,
         commentorModel: string
       ): Promise<IComments> {
-        const commentDoc = await commentModel.create({ userId, postId, comment, commentorModel });
-        return commentDoc.toObject<IComments>(); // Ensures TypeScript compatibility
+        const commentDoc = await commentModel.create({ userId, postId, comment,commentorModel });
+        return commentDoc.toObject<IComments>(); 
       }
       
       

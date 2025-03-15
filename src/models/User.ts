@@ -8,7 +8,7 @@ const userSchema = new Schema<IUser & Document>({
     role: { type: String, enum: ["user", "employer"] },
     isProfileComplete:{type:Boolean,default:false},
     location: { type: String },
-    googleId:{type:String,required:true},
+    googleId:{type:String},
     experience: { type: String },
     skills: { type: [String], default: [] },
     resume: { type: [String], default: [] },

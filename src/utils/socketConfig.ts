@@ -5,24 +5,22 @@ import { inject, injectable } from "inversify";
 import cookie from "cookie";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { UserRepository } from "../repositories/userRepository";
-import { InteractionService } from "../services/interactionService";
 const connectedUsers: { [userId: string]: string } = {};
 @injectable()
 export class SocketHandler {
   private chatService: ChatService;
   private userRepository: UserRepository;
-  private interactionService: InteractionService;
+  private io:Server|null=null
   constructor(
     @inject(TYPES.ChatService) chatService: ChatService,
     @inject(TYPES.UserRepository) userRepository: UserRepository,
-    @inject(TYPES.InteractionService)
-    interactionService: InteractionService
+    
   ) {
     this.chatService = chatService;
     this.userRepository = userRepository;
-    this.interactionService = interactionService;
   }
   public configure(io: Server) {
+    this.io=io
     io.use(async (socket: Socket, next) => {
       try {
         const cookieHeader = socket.handshake.headers.cookie;
@@ -264,29 +262,23 @@ export class SocketHandler {
         });
       }
     });
-    socket.on('likePost',async({userId,recipient,postId,content,link})=>{
+   
+    socket.on('sendFollowNotification',async({followerId,followingId})=>{
+      console.log('sendFollowNotification')
       try {
-        console.log("IN likepost")
-        const updatedPost=await this.interactionService.likePost(userId,postId)
-        io.to(recipient).emit('newNotification',{
-          content,
-          link,
-          postId,
-          userId
-        })
+        if(connectedUsers[followingId])
+        {
+          io.to(connectedUsers[followingId]).emit('newNotification',{
+            content:`${followerId}has followed you`,
+            userId:followerId,
+            link:`/profile/${followerId}`
+          })
+        }
       } catch (error) {
         throw new Error
       }
     })
-    socket.on('commentPost',async({userId,postId,comment})=>{
-      try {
-        const newComment=await this.interactionService.commentOnPost(userId,postId,comment)
-        const userIdString = newComment.userId.toString();
-        io.to(userIdString).emit('postCommented',{postId,userId,newComment})
-      } catch (error) {
-        throw new Error
-      }
-    })
+   
     socket.on("disconnect", () => {
       delete connectedUsers[userId]
       try {
@@ -299,4 +291,15 @@ export class SocketHandler {
     });
   });
 };
+public emitNotification(userId:string,notification:any){
+  const socketId=connectedUsers[userId]
+  if(this.io && socketId)
+  {
+    this.io.to(socketId).emit('newNotification',notification)
+    return true
+  }
+  return false
+  
+}
+
 }

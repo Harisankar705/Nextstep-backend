@@ -9,7 +9,10 @@ const authMiddleware = container.get<AuthMiddleware>(TYPES.AuthMiddleware);
 jobRoutes.use(authMiddleware.verifyToken.bind(authMiddleware))
 jobRoutes.route('/createjob').post(jobController.createJob.bind(jobController))
 jobRoutes.route('/getjobs').get(jobController.getAllJobs.bind(jobController))
+jobRoutes.route('/applicantDetails/:id').get(jobController.applicantStatus.bind(jobController))
+jobRoutes.route('/appliedjobs').get(jobController.getAppliedJobs.bind(jobController))
 jobRoutes.route('/getjob/:jobId').get(jobController.getJobById.bind(jobController))
+
 jobRoutes.route('/updatejob/:jobId').put(jobController.updateJob.bind(jobController))
 jobRoutes.route('/deletejob/:jobId').delete(authMiddleware.verifyToken.bind(authMiddleware),jobController.deleteJob.bind(jobController))
 jobRoutes.route('/fetch-jobs').post(jobController.fetchJobs.bind(jobController))

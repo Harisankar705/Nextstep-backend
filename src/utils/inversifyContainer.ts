@@ -91,7 +91,7 @@ container.bind<EmployerRepository>(TYPES.EmployerRepository).to(EmployerReposito
 container.bind<InteractionRepository>(TYPES.InteractionRepository).to(InteractionRepository)
 container.bind<JobRepository>(TYPES.JobRepository).to(JobRepository)
 container.bind<NotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository)
-container.bind<SocketHandler>(TYPES.SocketHandler).to(SocketHandler)
+container.bind<SocketHandler>(TYPES.SocketHandler).to(SocketHandler).inSingletonScope()
 container.bind<EmployerController>(TYPES.EmployerController).to(EmployerController)
 container.bind<InteractionController>(TYPES.InteractionController).to(InteractionController)
 container.bind<JobController>(TYPES.JobController).to(JobController)

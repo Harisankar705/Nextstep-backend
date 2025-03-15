@@ -104,7 +104,7 @@ export class AuthService implements IAuthService {
         catch (error: unknown) {
             console.log("ERROR WHILE LOGIN", error)
             if (error instanceof Error) {
-                throw new Error(`Error login: ${error.message}`);
+                throw new Error(`${error.message}`);
             } else {
                 throw new Error(`Error login`);
             }

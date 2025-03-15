@@ -19,10 +19,7 @@ export class InteractionController implements IInteractionController {
             console.log("in likepost")
             const likePostDTO=await validateDTO(LikeSavePostDTO,req.body)
             const userId = req.user?.userId;
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
-                return;
-            }
+            
             const isLiked = await this.interactionService.likePost(userId, likePostDTO.postId);
             res.status(STATUS_CODES.OK).json({ success: true, isLiked, message: isLiked ? "Post liked" : "Post unliked" });
         } catch (error) {
@@ -34,10 +31,7 @@ export class InteractionController implements IInteractionController {
             const userId = req.user?.userId;
             console.log('in Commentpost')
             const commentPostDTO=await validateDTO(CommentPostDTO,req.body)
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
-                return;
-            }
+            
             const comments = await this.interactionService.commentOnPost(userId, commentPostDTO.postId,commentPostDTO.comment);
             const populatedComment = await commentModel.findById(comments._id).populate('userId');
             res.status(STATUS_CODES.CREATED).json({ success: true, comment: populatedComment, message: "Comment added successfully" });
@@ -49,10 +43,7 @@ export class InteractionController implements IInteractionController {
         try {
             const userId = req.user?.userId;
             console.log("USERID",userId)
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
-                return;
-            }
+           
             const posts = await this.interactionService.getPosts(userId);
             console.log("POST",posts)
             res.status(STATUS_CODES.OK).json({ posts });
@@ -78,10 +69,7 @@ export class InteractionController implements IInteractionController {
         try {
             const userId = req.user?.userId;
             const savePostDTO=await validateDTO(LikeSavePostDTO,req.body)
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
-                return;
-            }
+            
             const response = await this.interactionService.savePost(userId, savePostDTO.postId);
             if(!response?.postIds)
             {
@@ -133,10 +121,7 @@ export class InteractionController implements IInteractionController {
     public async getSavedPost(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user?.userId;
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
-                return;
-            }
+           
             const savedPosts = await this.interactionService.getSavedPost(userId);
             const posts = await PostModel.find({ '_id': { $in: savedPosts?.postIds } });
             res.status(STATUS_CODES.OK).json(posts);
@@ -148,10 +133,7 @@ export class InteractionController implements IInteractionController {
         try {
             const { postId } = req.params;
             const userId = req.user?.userId;
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized" });
-                return;
-            }
+            
             if (!postId) {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Post ID missing" });
                 return;
@@ -165,10 +147,7 @@ export class InteractionController implements IInteractionController {
     public async getComments(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user?.userId;
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "unauthorized" });
-                return;
-            }
+            
             const postId = req.query.postId as string;
             if (!postId) {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Post ID not provided" });

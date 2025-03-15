@@ -17,7 +17,6 @@ export class AuthMiddleware{
     const adminToken = req.cookies.adminAccessToken;
     const token = employerToken || candidateToken || adminToken;
 
-    console.log(token)
     if (!token) {
          res.status(STATUS_CODES.FORBIDDEN).json({ message: "Token not found" });
          return
@@ -36,6 +35,11 @@ export class AuthMiddleware{
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN as string) as JwtPayload;
         req.user = decoded;
+        if(!decoded.userId)
+        {
+            res.status(STATUS_CODES.UNAUTHORIZED).json({message:"Userid is required!"})
+            return
+        }
         const userData = await this.userRespository.findUserById(decoded.userId, role);
         if (!userData || userData.status === 'Inactive') {
             const cookieName = employerToken ? "employerAccessToken" : candidateToken ? "userAccessToken" : "adminAccessToken";

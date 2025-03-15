@@ -103,10 +103,7 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
       try {
         const uploadResponse = await handleFileUpload(req);
         const userId = req.user?.userId;
-        if (!userId) {
-          res.status(STATUS_CODES.CREATED).json({ message: "Authentication required" });
-          return
-          }
+        
         const { profilePicture, resumeFile } = uploadResponse.fileNames;
         const userData:CandidateDetailsDTO = uploadResponse.fields || {};
         if (!userData.data) {
@@ -224,10 +221,7 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
         if (background) updatedData.background = background[0];
   
         const userId = req.user?.userId;
-        if (!userId) {
-           res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "User not authenticated" });
-           return
-        }
+       
   
         const response = await this.authService.editPostService(postId, updatedData, role[0], userId);
         

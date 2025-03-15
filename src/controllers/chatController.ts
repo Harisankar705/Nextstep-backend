@@ -17,10 +17,11 @@ export class ChatController implements IChatController {
   public getChat = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.userId;
-      const messages = await this.chatService.getChat(id, userId);
-      console.log("MESSAGES",messages)
-      res.status(STATUS_CODES.OK).json({ messages, userId });
+      const currentUserId = req.user?.userId;
+      console.log('in get chat')
+      const messages = await this.chatService.getChat(id, currentUserId);
+      console.log("currentUserId",currentUserId)
+      res.status(STATUS_CODES.OK).json({ messages, currentUserId });
     } catch (error) {
       next(error);
     }
@@ -28,15 +29,12 @@ export class ChatController implements IChatController {
 
   public getMessages = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.userId;
-      console.log("USERID",userId)
-      if (!userId) {
-        res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized user" });
-        return;
-    }
-      const messages = await this.chatService.getMessagesForUser(userId);
+      const currentUserId = req.user?.userId;
+      console.log("USERID",currentUserId)
+      
+      const messages = await this.chatService.getMessagesForUser(currentUserId);
       console.log("!!!!!!!",messages)
-       res.status(STATUS_CODES.OK).json({ messages });
+       res.status(STATUS_CODES.OK).json({ messages, currentUserId});
        return
     } catch (error) {
       next(error);

@@ -13,10 +13,7 @@ export class NotificationController implements INotificationController {
     async getNotification(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user?.userId; 
-            if (!userId) {
-                 res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "User ID is required" });
-                 return
-            }
+
             const notifications = await this.notificationService.getNotification(userId); 
              res.status(STATUS_CODES.OK).json(notifications); 
              return
@@ -26,7 +23,7 @@ export class NotificationController implements INotificationController {
     }
     async markNotificationAsRead(req: Request, res: Response, next: NextFunction) {
         try {
-            const notificationId = req.params.notificationId; 
+            const notificationId = req.body.notificationId; 
             if (!notificationId) {
                  res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Notification ID is required" });
                  return

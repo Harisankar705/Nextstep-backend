@@ -14,8 +14,6 @@ import {  FetchJobsDTO } from "../dtos/userDTO";
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
-
-
 export class JobController implements IJobController {
     constructor(@inject(TYPES.JobService)private jobService:JobService){}
     async fetchJobs(req: Request, res: Response, next: NextFunction) {
@@ -192,7 +190,7 @@ export class JobController implements IJobController {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: 'Status and userId are required' });
                 return;
             }
-            const allowedStatuses: ApplicationStatus[] = ['pending', 'accepted', 'in-review', 'shortlisted', 'rejected', 'interview', 'interviewScheduled', 'interviewCompleted'];
+            const allowedStatuses: ApplicationStatus[] = ['Pending', 'Accepted', 'In-review', 'Shortlisted', 'Rejected', 'Interview', 'Interview Scheduled', 'Interview Completed'];
             if (!allowedStatuses.includes(status as ApplicationStatus)) {
                 res.status(STATUS_CODES.BAD_REQUEST).json({ message: 'Invalid status provided' });
                 return;
@@ -245,4 +243,14 @@ export class JobController implements IJobController {
             res.status(STATUS_CODES.BAD_REQUEST).json({ message: err.message });
         }
     }
+    async getAppliedJobs(req:Request,res:Response,next:NextFunction){
+        try {
+            const userId = req.user?.userId;
+                const applications=await this.jobService.getAppliedJobs(userId)
+                console.log("APPLICATIONS",applications)
+                res.status(STATUS_CODES.OK).json(applications)
+        } catch (error) {
+            next(error)
+        }
+}
 }

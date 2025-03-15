@@ -71,7 +71,7 @@ export interface INotification extends Document
     read:boolean,
     createdAt:Date
 }
-export type ApplicationStatus = 'pending' | 'accepted' |'in-review'|'shortlisted'| 'rejected' |'interview'| 'interviewScheduled' | 'interviewCompleted';
+export type ApplicationStatus = 'Pending' | 'Accepted' | 'In-review' | 'Shortlisted' | 'Rejected' | 'Interview' | 'Interview Scheduled' | 'Interview Completed';
 export interface IConnection extends Document
 {
     followerId:mongoose.Schema.Types.ObjectId|string;
@@ -82,7 +82,7 @@ export interface IConnection extends Document
     status:ConnectionStatus
 }
 export interface IEmployer extends Document {
-    _id: string | mongoose.Types.ObjectId,
+    _id: Types.ObjectId; 
     email: string
     googleId?:string,
     resetPasswordExpires?:Date,
@@ -296,7 +296,7 @@ export interface IJob extends Document {
     _id: string;
     jobTitle: string;
     description: string;
-    employerId: ObjectId;
+    employerId: Types.ObjectId | IEmployer
     employmentTypes: string[];
     applicantsCount: number;
     applicationDeadline: Date;

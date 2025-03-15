@@ -11,7 +11,7 @@ const notificationSchema=new Schema<INotification>({
     },
     senderModel:{
         type:String,
-        required:true,
+        default:"User",
         enum: ['User', 'Employer']
     },
     type:{
@@ -24,6 +24,7 @@ const notificationSchema=new Schema<INotification>({
             'friend_request_accepted',
             'new_message',
             'job_application',
+            "Connection_request",
             'job_application_update'
         ]
     },

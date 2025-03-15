@@ -16,6 +16,7 @@ import { SubscriptionRepository } from "../repositories/subscriptionRepository"
         EmployerService:Symbol.for('EmployerService'),
         InteractionService:Symbol.for('InteractionService'),
         JobService:Symbol.for('JobService'),
+        SocketEventService:Symbol.for('SocketEventService'),
         NotificationService:Symbol.for('NotificationService'),
         ChatRepository:Symbol.for('ChatRepository'),
         ConnectionRepository:Symbol.for('ConnectionRepository'),

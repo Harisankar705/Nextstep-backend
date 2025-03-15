@@ -5,10 +5,13 @@ import notificationModel from '../models/notification';
 import { IConnectionService } from "../types/serviceInterface";
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types/types';
+import UserModel from '../models/User';
+import { SocketHandler } from '../utils/socketConfig';
 @injectable()
 export class ConnectionService implements IConnectionService
     {
-    constructor(@inject(TYPES.ConnectionRepository)private connectionRepository:ConnectionRepository)
+    constructor(@inject(TYPES.ConnectionRepository)private connectionRepository:ConnectionRepository,
+                @inject(TYPES.SocketHandler)private socketHandler:SocketHandler)
     {}
     async followUser(followerId: string, followingId: string): Promise<boolean>
      {  
@@ -21,17 +24,28 @@ export class ConnectionService implements IConnectionService
             await ConnectionModel.findByIdAndDelete(existingConnection._id);
             return false;
         }
+        const sender=await UserModel.findById(followerId)
         await ConnectionModel.create({
             followerId: followerId,
             followingId: followingId,
             isFollowBack: false,
             status: ConnectionStatus.NOTFOLLOWINGBACK
         });
-        const notificaton=new notificationModel({
-            userId:followingId,
-            message:`${followerId} has followed you!`
+        const notification=await notificationModel.create({
+            sender:followerId,
+            recipientId:followingId,
+            content:`${sender?.firstName} send you a connection request!`,
+            link:`/followrequests`,
+            type:"Connection_request",
+            read:false,
+            createdAt:new Date()
         })
-        await notificaton.save( )
+        this.socketHandler.emitNotification(followingId,{
+            content:`${sender?.firstName} send you a connection request!`,
+            userId:followerId,
+            link:'/followrequests'
+        })
+       
         return true
      }
      async getConnections(userId:string):Promise<IConnection[]>{

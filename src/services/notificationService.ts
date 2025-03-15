@@ -53,7 +53,6 @@ import { TYPES } from '../types/types';
                 senderModel: sender.role === 'employer' ? 'Employer' : 'User'
             };
     
-            // Save notification
             const newNotificationDoc = await this.notificationRepository.createNotification(notification);
             const newNotification = newNotificationDoc.toObject() as unknown as NotificationData; 
     

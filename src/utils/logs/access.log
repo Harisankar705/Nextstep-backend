@@ -1,0 +1,13 @@
+2025-03-13T07:48:40.212Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 2.887 ms
+2025-03-13T07:48:40.483Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.459 ms
+2025-03-13T07:48:58.876Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.363 ms
+2025-03-13T07:49:00.969Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.341 ms
+2025-03-13T07:49:01.235Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.328 ms
+2025-03-13T07:49:47.737Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 - - - - ms
+2025-03-13T07:49:48.583Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.997 ms
+2025-03-13T07:49:48.850Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.435 ms
+2025-03-13T07:49:55.695Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.381 ms
+2025-03-13T07:49:57.679Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.352 ms
+2025-03-13T07:50:02.740Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.267 ms
+2025-03-13T07:50:03.780Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.369 ms
+2025-03-13T07:50:04.045Z GET /applicantDetails/67c2bebe529af9431e0a87a2?jobId=67d286fcb2bf23b9fec509f8 404 180 - 0.408 ms

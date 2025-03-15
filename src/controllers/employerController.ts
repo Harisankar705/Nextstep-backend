@@ -11,10 +11,7 @@ export class EmployerController implements IEmployerController {
     public employerDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = req.user?.userId;
-            if (!userId) {
-                res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized. UserId is required!" });
-                return;
-            }
+           
     
             const isEdit = req.query.isEdit === 'true';
     

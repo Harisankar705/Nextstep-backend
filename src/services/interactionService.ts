@@ -4,11 +4,15 @@ import { InteractionRepository } from "../repositories/interactionRepository";
 import { NotificationService } from "./notificationService";
 import { getSenderData } from "../utils/modelUtil";
 import ConnectionModel from "../models/connection";
-import { inject } from "inversify";
+import { inject, LazyServiceIdentifier } from "inversify";
+import notificationModel from '../models/notification';
 import { TYPES } from "../types/types";
+import { SocketHandler } from "../utils/socketConfig";
+import UserModel from "../models/User";
 export class InteractionService  {
     private io:Server
-    constructor(@inject(TYPES.InteractionRepository)private interactionRepository:InteractionRepository,@inject(TYPES.NotificationService)private notificationService:NotificationService,@inject(TYPES.SocketServer)private socketServer:Server)
+    constructor(@inject(TYPES.InteractionRepository)private interactionRepository:InteractionRepository,@inject(TYPES.NotificationService)private notificationService:NotificationService,@inject(TYPES.SocketServer)private socketServer:Server,
+    @inject(new LazyServiceIdentifier(()=> TYPES.SocketHandler))private socketHandler:SocketHandler)
     {
         this.io=socketServer
     }
@@ -17,34 +21,34 @@ export class InteractionService  {
             console.log('in createlike')
             const existingLike = await this.interactionRepository.checkUserLiked(userId, postId);
             const post=await this.interactionRepository.getPostById(postId)
+            const sender=await UserModel.findById(userId)
+            if(!post)throw new Error("Post not found!")
+            if(!sender)throw new Error("User not found!")
+            if(existingLike)
+            {
+                await this.interactionRepository.removeLike(userId,postId)
+                return false
+            }
+            await this.interactionRepository.createLike(userId,postId)
             if(post?.userId.toString()!==userId.toString())
             {
                 const recipientId=post?.userId.toString()
                 const notificationData={
                     recipientId,
-                    senderId:userId,
+                    sender:userId,
                     type:'post_like',   
-                    content:'liked your post',
-                    link:`/posts/${postId}`
+                    content:`${sender.firstName} liked your post!`,
+                    link:`/candidate-profile/${recipientId}`
                 }
-                await this.notificationService.createNotification(notificationData)
+                await notificationModel.create(notificationData)
+                this.socketHandler.emitNotification(post.userId.toString(),{
+                    sender:sender.firstName,
+                    receipientId:post?.userId,
+                    content:`${sender?.firstName} send you a connection request!`,
+                    link:'/posts/${postId}'
+                })
             }
-            if (existingLike) {
-                await this.interactionRepository.removeLike(userId, postId);
-                await PostModel.findByIdAndUpdate(postId, {
-                    $inc: { likeCount: -1 },
-                    $pull: { likes: existingLike._id }  
-                });
-                return false;
-            } else {
-                const like = await this.interactionRepository.createLike(userId, postId);
-                await PostModel.findByIdAndUpdate(postId, {
-                    $inc: { likeCount: 1 },
-                    $push: { likes: like?._id }  
-                });
-                this.io.to(postId).emit('likePost',{postId,userId,like})
-                return true;
-            }
+           return true
         } catch (error) {
             throw error;
         }
@@ -60,28 +64,48 @@ export class InteractionService  {
             throw new Error("Comment cannot be empty!")
         }
         const sender=await getSenderData(userId)
-                    const commentorModel = sender?.role === 'employer' ? 'Employer' : 'User';
+        if(!sender)
+        {
+            throw new Error("User not found!")
+        }
+        const commentorModel = sender?.role === 'employer' ? 'Employer' : 'User';
+        if(!commentorModel )
+        {
+            throw new Error("Commentor Model not found")
+        }
         const comments = await this.interactionRepository.createComment(userId, postId,comment, commentorModel)
         const updatedPost=await PostModel.findByIdAndUpdate(postId,{
             $inc:{commentCount:1},
             $push:{comments:comments._id}
         },{new:true})
         const post=await PostModel.findById(postId)
+        if(!post)
+        {
+            throw new Error("Post not found")
+        }
+        const senderName=sender.role==='employer'?sender.companyName:`${sender.firstName}`
+        const content=`${senderName} commented on your post!`
         if(post?.userId.toString()!==userId.toString())
         {
             const recipientId=post?.userId.toString()
                 const notificationData={
                     recipientId,
-                    senderId:userId,
+                    sender:userId,
                     comment:comment,
                     type:'post_comment',
-                    content:'commented on your post',
-                    link:`/posts/${postId}`
+                    content,
+                    link:`/candidate-profile/${recipientId}`
                 }
-                await this.notificationService.createNotification(notificationData)
-        }
-        this.io.to(postId).emit('newComment',{postId,comment:comments})
-        return comments
+                await notificationModel.create(notificationData)
+                this.socketHandler.emitNotification(post.userId.toString(),{
+                    sender:sender,
+                    recipientId:post?.userId,
+                    content,
+                    link:`/candidate-profile/${recipientId}`
+                })        
+            }
+            return comments
+        
     }
     // async sharePost(userId:string,postId:string)
     // {
