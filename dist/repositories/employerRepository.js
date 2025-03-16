@@ -33,7 +33,7 @@ class EmployerRepository extends baseRepository_1.BaseRepository {
     }
     async isVerified(employerId) {
         const employer = await this.findById(employerId);
-        return employer?.isVerified === 'VERIFIED';
+        return employer?.isVerified === 'APPROVED';
     }
 }
 exports.EmployerRepository = EmployerRepository;
