@@ -22,9 +22,12 @@ const connection_1 = __importDefault(require("../models/connection"));
 const notification_1 = __importDefault(require("../models/notification"));
 const inversify_1 = require("inversify");
 const types_1 = require("../types/types");
+const User_1 = __importDefault(require("../models/User"));
+const socketConfig_1 = require("../utils/socketConfig");
 let ConnectionService = class ConnectionService {
-    constructor(connectionRepository) {
+    constructor(connectionRepository, socketHandler) {
         this.connectionRepository = connectionRepository;
+        this.socketHandler = socketHandler;
     }
     async followUser(followerId, followingId) {
         if (followerId === followingId) {
@@ -35,17 +38,27 @@ let ConnectionService = class ConnectionService {
             await connection_1.default.findByIdAndDelete(existingConnection._id);
             return false;
         }
+        const sender = await User_1.default.findById(followerId);
         await connection_1.default.create({
             followerId: followerId,
             followingId: followingId,
             isFollowBack: false,
             status: authTypes_1.ConnectionStatus.NOTFOLLOWINGBACK
         });
-        const notificaton = new notification_1.default({
-            userId: followingId,
-            message: `${followerId} has followed you!`
+        const notification = await notification_1.default.create({
+            sender: followerId,
+            recipientId: followingId,
+            content: `${sender?.firstName} send you a connection request!`,
+            link: `/followrequests`,
+            type: "Connection_request",
+            read: false,
+            createdAt: new Date()
         });
-        await notificaton.save();
+        this.socketHandler.emitNotification(followingId, {
+            content: `${sender?.firstName} send you a connection request!`,
+            userId: followerId,
+            link: '/followrequests'
+        });
         return true;
     }
     async getConnections(userId) {
@@ -79,5 +92,7 @@ exports.ConnectionService = ConnectionService;
 exports.ConnectionService = ConnectionService = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.TYPES.ConnectionRepository)),
-    __metadata("design:paramtypes", [connectionRepository_1.ConnectionRepository])
+    __param(1, (0, inversify_1.inject)(types_1.TYPES.SocketHandler)),
+    __metadata("design:paramtypes", [connectionRepository_1.ConnectionRepository,
+        socketConfig_1.SocketHandler])
 ], ConnectionService);

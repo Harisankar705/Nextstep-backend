@@ -28,7 +28,7 @@ export class AdminService implements IAdminService
     async getIndividualDetails(id: string,role:string): Promise<(IEmployer|IUser)[]> {
         return this.adminRepository.getIndividualDetails(id,role)
     }
-    async verifyUser(id: string, status: "VERIFIED" | 'DENIED') {
+    async verifyUser(id: string, status: "APPROVED" | 'DENIED') {
         if (!id || !status) {
             throw new Error("invalid role or status provided")
             

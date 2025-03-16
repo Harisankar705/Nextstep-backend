@@ -37,7 +37,7 @@ exports.commentModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const commentSchema = new mongoose_1.Schema({
     postId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Post", required: true },
-    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "commenterModel", required: true },
+    userId: { type: mongoose_1.Schema.Types.ObjectId, refPath: "commenterModel", required: true },
     commentorModel: { type: String, required: true, enum: ["User", "Employer"] },
     comment: { type: String, required: true },
     likes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],

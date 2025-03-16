@@ -133,6 +133,7 @@ export class AuthService implements IAuthService {
             const model = await getModel(role) as Model<IUser | IEmployer>
             const user = await model.findOne({ email })
             if (!user) {
+                console.log("USER NOT FOUND")
                 throw new Error("User not found!")
             }
             const resetToken = crypto.randomBytes(32).toString('hex')

@@ -17,11 +17,11 @@ export class ChatController implements IChatController {
   public getChat = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const currentUserId = req.user?.userId;
+      const userId = req.user?.userId;
       console.log('in get chat')
-      const messages = await this.chatService.getChat(id, currentUserId);
-      console.log("currentUserId",currentUserId)
-      res.status(STATUS_CODES.OK).json({ messages, currentUserId });
+      const messages = await this.chatService.getChat(id, userId);
+      console.log("currentUserId",userId)
+      res.status(STATUS_CODES.OK).json({ messages, userId });
     } catch (error) {
       next(error);
     }

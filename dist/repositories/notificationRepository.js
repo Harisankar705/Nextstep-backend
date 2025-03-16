@@ -13,6 +13,7 @@ class NotificationRepository extends baseRepository_1.BaseRepository {
         super(notification_1.default);
     }
     async createNotification(notificationData) {
+        console.log("IN CREATER NOTIFICATIOn");
         try {
             const newNotification = new notification_1.default(notificationData);
             return await newNotification.save();
@@ -43,6 +44,7 @@ class NotificationRepository extends baseRepository_1.BaseRepository {
                     senderInfo = sender ? { firstName: sender.firstName, secondName: sender.secondName, profilePicture: sender.profilePicture } : null;
                 }
                 return {
+                    _id: notification._id instanceof Object ? notification._id.toString() : notification._id,
                     recipientId: notification.recipientId.toString(),
                     senderId,
                     senderInfo,

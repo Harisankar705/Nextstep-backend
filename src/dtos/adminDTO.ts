@@ -4,7 +4,7 @@ import { IReport, Reason } from "../types/authTypes";
 export class VerifyUserDTO
 {
     id!:string;
-    status!:"VERIFIED"|"DENIED";
+    status!:"APPROVED"|"DENIED";
     
 }
 export class LoginDTO

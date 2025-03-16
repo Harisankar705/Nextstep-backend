@@ -22,15 +22,15 @@ const inversify_1 = require("inversify");
 const cookie_1 = __importDefault(require("cookie"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userRepository_1 = require("../repositories/userRepository");
-const interactionService_1 = require("../services/interactionService");
 const connectedUsers = {};
 let SocketHandler = class SocketHandler {
-    constructor(chatService, userRepository, interactionService) {
+    constructor(chatService, userRepository) {
+        this.io = null;
         this.chatService = chatService;
         this.userRepository = userRepository;
-        this.interactionService = interactionService;
     }
     configure(io) {
+        this.io = io;
         io.use(async (socket, next) => {
             try {
                 const cookieHeader = socket.handshake.headers.cookie;
@@ -39,13 +39,11 @@ let SocketHandler = class SocketHandler {
                 }
                 const cookies = cookie_1.default.parse(cookieHeader);
                 const token = cookies.employerAccessToken || cookies.userAccessToken;
-                console.log("TOKEN", token);
                 if (!token) {
                     return next(new Error("No token found in cookies"));
                 }
                 const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN);
                 const role = decoded.role;
-                console.log("ROLE", decoded.userId);
                 const userData = await this.userRepository.findUserById(decoded.userId, role);
                 if (!userData || userData.status === "Inactive") {
                     return next(new Error("Authentication restricted"));
@@ -233,26 +231,16 @@ let SocketHandler = class SocketHandler {
                     });
                 }
             });
-            socket.on('likePost', async ({ userId, recipient, postId, content, link }) => {
+            socket.on('sendFollowNotification', async ({ followerId, followingId }) => {
+                console.log('sendFollowNotification');
                 try {
-                    console.log("IN likepost");
-                    const updatedPost = await this.interactionService.likePost(userId, postId);
-                    io.to(recipient).emit('newNotification', {
-                        content,
-                        link,
-                        postId,
-                        userId
-                    });
-                }
-                catch (error) {
-                    throw new Error;
-                }
-            });
-            socket.on('commentPost', async ({ userId, postId, comment }) => {
-                try {
-                    const newComment = await this.interactionService.commentOnPost(userId, postId, comment);
-                    const userIdString = newComment.userId.toString();
-                    io.to(userIdString).emit('postCommented', { postId, userId, newComment });
+                    if (connectedUsers[followingId]) {
+                        io.to(connectedUsers[followingId]).emit('newNotification', {
+                            content: `${followerId}has followed you`,
+                            userId: followerId,
+                            link: `/profile/${followerId}`
+                        });
+                    }
                 }
                 catch (error) {
                     throw new Error;
@@ -272,14 +260,20 @@ let SocketHandler = class SocketHandler {
         });
     }
     ;
+    emitNotification(userId, notification) {
+        const socketId = connectedUsers[userId];
+        if (this.io && socketId) {
+            this.io.to(socketId).emit('newNotification', notification);
+            return true;
+        }
+        return false;
+    }
 };
 exports.SocketHandler = SocketHandler;
 exports.SocketHandler = SocketHandler = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.TYPES.ChatService)),
     __param(1, (0, inversify_1.inject)(types_1.TYPES.UserRepository)),
-    __param(2, (0, inversify_1.inject)(types_1.TYPES.InteractionService)),
     __metadata("design:paramtypes", [chatService_1.ChatService,
-        userRepository_1.UserRepository,
-        interactionService_1.InteractionService])
+        userRepository_1.UserRepository])
 ], SocketHandler);

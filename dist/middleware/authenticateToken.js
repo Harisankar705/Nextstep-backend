@@ -29,7 +29,6 @@ let AuthMiddleware = class AuthMiddleware {
             const candidateToken = req.cookies.userAccessToken;
             const adminToken = req.cookies.adminAccessToken;
             const token = employerToken || candidateToken || adminToken;
-            console.log(token);
             if (!token) {
                 res.status(statusCode_1.STATUS_CODES.FORBIDDEN).json({ message: "Token not found" });
                 return;
@@ -51,6 +50,10 @@ let AuthMiddleware = class AuthMiddleware {
             try {
                 const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN);
                 req.user = decoded;
+                if (!decoded.userId) {
+                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Userid is required!" });
+                    return;
+                }
                 const userData = await this.userRespository.findUserById(decoded.userId, role);
                 if (!userData || userData.status === 'Inactive') {
                     const cookieName = employerToken ? "employerAccessToken" : candidateToken ? "userAccessToken" : "adminAccessToken";

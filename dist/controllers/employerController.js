@@ -27,10 +27,6 @@ let EmployerController = class EmployerController {
         this.employerDetails = async (req, res, next) => {
             try {
                 const userId = req.user?.userId;
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized. UserId is required!" });
-                    return;
-                }
                 const isEdit = req.query.isEdit === 'true';
                 let uploadResponse;
                 try {

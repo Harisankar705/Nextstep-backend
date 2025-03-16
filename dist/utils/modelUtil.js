@@ -9,7 +9,7 @@ const Employer_1 = __importDefault(require("../models/Employer"));
 const User_1 = __importDefault(require("../models/User"));
 const admin_1 = __importDefault(require("../models/admin"));
 function getModel(role) {
-    if (role === 'employer') {
+    if (role === 'employer' || role === 'Employer') {
         return Employer_1.default;
     }
     if (role === 'user' || role === 'User') {

@@ -3,7 +3,7 @@ import { ConnectionStatus, IConnection, IEmployer, ILoginResponse } from '../typ
 export interface IAdminService {
     toggleUser(id: string, role: string): Promise<IUser | IEmployer|IApplicant|null>;
     getIndividualDetails(id: string,role:string): Promise<(IEmployer | IUser)[]>;
-    verifyUser(id: string, status: "VERIFIED" | 'DENIED'): Promise<IEmployer|null>;
+    verifyUser(id: string, status: "APPROVED" | 'DENIED'): Promise<IEmployer|null>;
 }
 export interface IReportService
 {

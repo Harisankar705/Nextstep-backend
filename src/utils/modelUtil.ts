@@ -5,7 +5,7 @@ import UserModel from "../models/User"
 import AdminModel from "../models/admin"
 
 export function getModel(role: string): Model<IUser & Document> | Model<IEmployer & Document> |Model<IAdmin & Document> {
-        if (role === 'employer') {
+        if (role === 'employer' || role==='Employer') {
             return EmployerModel as Model<IEmployer & Document>
         }
         if (role === 'user' || role === 'User') {

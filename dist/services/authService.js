@@ -121,7 +121,7 @@ let AuthService = class AuthService {
         catch (error) {
             console.log("ERROR WHILE LOGIN", error);
             if (error instanceof Error) {
-                throw new Error(`Error login: ${error.message}`);
+                throw new Error(`${error.message}`);
             }
             else {
                 throw new Error(`Error login`);
@@ -151,6 +151,7 @@ let AuthService = class AuthService {
             const model = await (0, modelUtil_1.getModel)(role);
             const user = await model.findOne({ email });
             if (!user) {
+                console.log("USER NOT FOUND");
                 throw new Error("User not found!");
             }
             const resetToken = crypto_1.default.randomBytes(32).toString('hex');
@@ -166,6 +167,7 @@ let AuthService = class AuthService {
             await emailService.sendEmail(email, subject, text);
         }
         catch (error) {
+            console.log(error);
             throw new Error('Error occured while requesting reset password');
         }
     }

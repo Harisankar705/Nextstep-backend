@@ -61,7 +61,7 @@ class InteractionRepository extends baseRepository_1.BaseRepository {
     }
     async createComment(userId, postId, comment, commentorModel) {
         const commentDoc = await comment_1.commentModel.create({ userId, postId, comment, commentorModel });
-        return commentDoc.toObject(); // Ensures TypeScript compatibility
+        return commentDoc.toObject();
     }
     async getComments(postId) {
         const comments = await comment_1.commentModel.find({ postId }).sort({ createdAt: -1 });

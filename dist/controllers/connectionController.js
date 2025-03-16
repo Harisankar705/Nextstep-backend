@@ -44,10 +44,6 @@ let ConnectionController = class ConnectionController {
             try {
                 const followBackDTO = await (0, validateDTO_1.validateDTO)(userDTO_1.FollowBackDTO, req.body);
                 const userId = req.user?.userId;
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required" });
-                    return;
-                }
                 const connection = await this.connectionService.respondToRequest(userId, followBackDTO.connectionId, authTypes_1.ConnectionStatus.FOLLOWBACK);
                 if (!connection) {
                     res.status(statusCode_1.STATUS_CODES.NOT_FOUND).json({ message: "Connection request not found" });
@@ -65,10 +61,6 @@ let ConnectionController = class ConnectionController {
             try {
                 const respondToRequestDTO = await (0, validateDTO_1.validateDTO)(userDTO_1.RespondToRequestDTO, req.body);
                 const userId = req.user?.userId;
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required" });
-                    return;
-                }
                 const connection = await this.connectionService.respondToRequest(respondToRequestDTO.connectionId, userId, respondToRequestDTO.status);
                 res.status(statusCode_1.STATUS_CODES.OK).json({ success: true, data: connection });
                 return;
@@ -81,11 +73,8 @@ let ConnectionController = class ConnectionController {
         this.getConnections = async (req, res, next) => {
             try {
                 const userId = req.user?.userId;
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required!" });
-                    return;
-                }
                 const connections = await this.connectionService.getConnections(userId);
+                console.log("CONNECTIONS", connections);
                 res.status(statusCode_1.STATUS_CODES.OK).json({ data: connections });
                 return;
             }
@@ -131,10 +120,6 @@ let ConnectionController = class ConnectionController {
         this.pendingRequests = async (req, res, next) => {
             try {
                 const userId = req.user?.userId;
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized" });
-                    return;
-                }
                 const requests = await this.connectionService.getPendingRequest(userId);
                 res.status(statusCode_1.STATUS_CODES.OK).json(requests);
                 return;

@@ -45,7 +45,7 @@ const notificationSchema = new mongoose_1.Schema({
     },
     senderModel: {
         type: String,
-        required: true,
+        default: "User",
         enum: ['User', 'Employer']
     },
     type: {
@@ -58,6 +58,7 @@ const notificationSchema = new mongoose_1.Schema({
             'friend_request_accepted',
             'new_message',
             'job_application',
+            "Connection_request",
             'job_application_update'
         ]
     },

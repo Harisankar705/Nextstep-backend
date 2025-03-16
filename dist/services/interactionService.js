@@ -23,12 +23,16 @@ const notificationService_1 = require("./notificationService");
 const modelUtil_1 = require("../utils/modelUtil");
 const connection_1 = __importDefault(require("../models/connection"));
 const inversify_1 = require("inversify");
+const notification_1 = __importDefault(require("../models/notification"));
 const types_1 = require("../types/types");
+const socketConfig_1 = require("../utils/socketConfig");
+const User_1 = __importDefault(require("../models/User"));
 let InteractionService = class InteractionService {
-    constructor(interactionRepository, notificationService, socketServer) {
+    constructor(interactionRepository, notificationService, socketServer, socketHandler) {
         this.interactionRepository = interactionRepository;
         this.notificationService = notificationService;
         this.socketServer = socketServer;
+        this.socketHandler = socketHandler;
         this.io = socketServer;
     }
     async likePost(userId, postId) {
@@ -36,34 +40,34 @@ let InteractionService = class InteractionService {
             console.log('in createlike');
             const existingLike = await this.interactionRepository.checkUserLiked(userId, postId);
             const post = await this.interactionRepository.getPostById(postId);
+            const sender = await User_1.default.findById(userId);
+            if (!post)
+                throw new Error("Post not found!");
+            if (!sender)
+                throw new Error("User not found!");
+            if (existingLike) {
+                await this.interactionRepository.removeLike(userId, postId);
+                return false;
+            }
+            await this.interactionRepository.createLike(userId, postId);
             if (post?.userId.toString() !== userId.toString()) {
                 const recipientId = post?.userId.toString();
                 const notificationData = {
                     recipientId,
-                    senderId: userId,
+                    sender: userId,
                     type: 'post_like',
-                    content: 'liked your post',
-                    link: `/posts/${postId}`
+                    content: `${sender.firstName} liked your post!`,
+                    link: `/candidate-profile/${recipientId}`
                 };
-                await this.notificationService.createNotification(notificationData);
-            }
-            if (existingLike) {
-                await this.interactionRepository.removeLike(userId, postId);
-                await post_1.PostModel.findByIdAndUpdate(postId, {
-                    $inc: { likeCount: -1 },
-                    $pull: { likes: existingLike._id }
+                await notification_1.default.create(notificationData);
+                this.socketHandler.emitNotification(post.userId.toString(), {
+                    sender: sender.firstName,
+                    receipientId: post?.userId,
+                    content: `${sender?.firstName} send you a connection request!`,
+                    link: '/posts/${postId}'
                 });
-                return false;
             }
-            else {
-                const like = await this.interactionRepository.createLike(userId, postId);
-                await post_1.PostModel.findByIdAndUpdate(postId, {
-                    $inc: { likeCount: 1 },
-                    $push: { likes: like?._id }
-                });
-                this.io.to(postId).emit('likePost', { postId, userId, like });
-                return true;
-            }
+            return true;
         }
         catch (error) {
             throw error;
@@ -77,26 +81,42 @@ let InteractionService = class InteractionService {
             throw new Error("Comment cannot be empty!");
         }
         const sender = await (0, modelUtil_1.getSenderData)(userId);
+        if (!sender) {
+            throw new Error("User not found!");
+        }
         const commentorModel = sender?.role === 'employer' ? 'Employer' : 'User';
+        if (!commentorModel) {
+            throw new Error("Commentor Model not found");
+        }
         const comments = await this.interactionRepository.createComment(userId, postId, comment, commentorModel);
         const updatedPost = await post_1.PostModel.findByIdAndUpdate(postId, {
             $inc: { commentCount: 1 },
             $push: { comments: comments._id }
         }, { new: true });
         const post = await post_1.PostModel.findById(postId);
+        if (!post) {
+            throw new Error("Post not found");
+        }
+        const senderName = sender.role === 'employer' ? sender.companyName : `${sender.firstName}`;
+        const content = `${senderName} commented on your post!`;
         if (post?.userId.toString() !== userId.toString()) {
             const recipientId = post?.userId.toString();
             const notificationData = {
                 recipientId,
-                senderId: userId,
+                sender: userId,
                 comment: comment,
                 type: 'post_comment',
-                content: 'commented on your post',
-                link: `/posts/${postId}`
+                content,
+                link: `/candidate-profile/${recipientId}`
             };
-            await this.notificationService.createNotification(notificationData);
+            await notification_1.default.create(notificationData);
+            this.socketHandler.emitNotification(post.userId.toString(), {
+                sender: sender,
+                recipientId: post?.userId,
+                content,
+                link: `/candidate-profile/${recipientId}`
+            });
         }
-        this.io.to(postId).emit('newComment', { postId, comment: comments });
         return comments;
     }
     // async sharePost(userId:string,postId:string)
@@ -153,5 +173,7 @@ exports.InteractionService = InteractionService = __decorate([
     __param(0, (0, inversify_1.inject)(types_1.TYPES.InteractionRepository)),
     __param(1, (0, inversify_1.inject)(types_1.TYPES.NotificationService)),
     __param(2, (0, inversify_1.inject)(types_1.TYPES.SocketServer)),
-    __metadata("design:paramtypes", [interactionRepository_1.InteractionRepository, notificationService_1.NotificationService, socket_io_1.Server])
+    __param(3, (0, inversify_1.inject)(new inversify_1.LazyServiceIdentifier(() => types_1.TYPES.SocketHandler))),
+    __metadata("design:paramtypes", [interactionRepository_1.InteractionRepository, notificationService_1.NotificationService, socket_io_1.Server,
+        socketConfig_1.SocketHandler])
 ], InteractionService);

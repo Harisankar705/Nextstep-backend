@@ -39,8 +39,8 @@ const applicantSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User', required: true },
     applicationStatus: {
         type: String,
-        enum: ['pending', 'accepted', 'in-review', 'shortlisted', 'rejected', 'interview', 'interviewScheduled', 'interviewCompleted'],
-        default: 'pending',
+        enum: ['Pending', 'Accepted', 'In-review', 'Shortlisted', 'Rejected', 'Interview', 'Interview Scheduled', 'Interview Completed'],
+        default: 'Pending',
     },
     appliedAt: { type: Date, default: Date.now },
     resume: { type: String },

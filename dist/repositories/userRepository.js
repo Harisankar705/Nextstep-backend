@@ -27,10 +27,7 @@ let UserRepository = class UserRepository extends baseRepository_1.BaseRepositor
     }
     async findByEmail(email, role) {
         try {
-            console.log("EMAIL", email);
-            console.log("Role", role);
             const model = (0, modelUtil_1.getModel)(role);
-            console.log("MODEL", model);
             if (role === 'employer') {
                 return model.findOne({ email }).exec();
             }
@@ -91,7 +88,6 @@ let UserRepository = class UserRepository extends baseRepository_1.BaseRepositor
     async findUserById(userId, role) {
         try {
             const model = (0, modelUtil_1.getModel)(role);
-            console.log("MODEL", model);
             if (role === 'employer') {
                 return model.findById(userId).exec();
             }

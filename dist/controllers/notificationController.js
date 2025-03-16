@@ -25,10 +25,6 @@ let NotificationController = class NotificationController {
     async getNotification(req, res, next) {
         try {
             const userId = req.user?.userId;
-            if (!userId) {
-                res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "User ID is required" });
-                return;
-            }
             const notifications = await this.notificationService.getNotification(userId);
             res.status(statusCode_1.STATUS_CODES.OK).json(notifications);
             return;
@@ -39,7 +35,7 @@ let NotificationController = class NotificationController {
     }
     async markNotificationAsRead(req, res, next) {
         try {
-            const notificationId = req.params.notificationId;
+            const notificationId = req.body.notificationId;
             if (!notificationId) {
                 res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: "Notification ID is required" });
                 return;

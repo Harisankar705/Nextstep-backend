@@ -56,7 +56,6 @@ let NotificationService = class NotificationService {
                 senderDetails,
                 senderModel: sender.role === 'employer' ? 'Employer' : 'User'
             };
-            // Save notification
             const newNotificationDoc = await this.notificationRepository.createNotification(notification);
             const newNotification = newNotificationDoc.toObject();
             this.io.to(recipientId.toString()).emit('newNotification', newNotification);

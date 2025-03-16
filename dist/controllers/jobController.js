@@ -218,7 +218,7 @@ let JobController = class JobController {
                 res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: 'Status and userId are required' });
                 return;
             }
-            const allowedStatuses = ['pending', 'accepted', 'in-review', 'shortlisted', 'rejected', 'interview', 'interviewScheduled', 'interviewCompleted'];
+            const allowedStatuses = ['Pending', 'Accepted', 'In-review', 'Shortlisted', 'Rejected', 'Interview', 'Interview Scheduled', 'Interview Completed'];
             if (!allowedStatuses.includes(status)) {
                 res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: 'Invalid status provided' });
                 return;
@@ -272,6 +272,17 @@ let JobController = class JobController {
         catch (error) {
             const err = error;
             res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: err.message });
+        }
+    }
+    async getAppliedJobs(req, res, next) {
+        try {
+            const userId = req.user?.userId;
+            const applications = await this.jobService.getAppliedJobs(userId);
+            console.log("APPLICATIONS", applications);
+            res.status(statusCode_1.STATUS_CODES.OK).json(applications);
+        }
+        catch (error) {
+            next(error);
         }
     }
 };

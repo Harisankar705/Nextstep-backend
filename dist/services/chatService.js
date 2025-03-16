@@ -96,9 +96,6 @@ let ChatService = class ChatService {
         return await this.chatRepository.getMessages(id, userId);
     }
     async getMessagesForUser(userId) {
-        if (!userId) {
-            throw new Error("UserId is required!");
-        }
         return await this.chatRepository.getMessagesForUser(userId);
     }
 };

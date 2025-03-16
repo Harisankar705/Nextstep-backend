@@ -13,6 +13,8 @@ const authMiddleware = inversifyContainer_1.container.get(types_1.TYPES.AuthMidd
 exports.jobRoutes.use(authMiddleware.verifyToken.bind(authMiddleware));
 exports.jobRoutes.route('/createjob').post(jobController.createJob.bind(jobController));
 exports.jobRoutes.route('/getjobs').get(jobController.getAllJobs.bind(jobController));
+exports.jobRoutes.route('/applicantDetails/:id').get(jobController.applicantStatus.bind(jobController));
+exports.jobRoutes.route('/appliedjobs').get(jobController.getAppliedJobs.bind(jobController));
 exports.jobRoutes.route('/getjob/:jobId').get(jobController.getJobById.bind(jobController));
 exports.jobRoutes.route('/updatejob/:jobId').put(jobController.updateJob.bind(jobController));
 exports.jobRoutes.route('/deletejob/:jobId').delete(authMiddleware.verifyToken.bind(authMiddleware), jobController.deleteJob.bind(jobController));

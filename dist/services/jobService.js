@@ -68,6 +68,10 @@ let JobService = class JobService {
             throw new Error("Failed to update job");
         }
     }
+    async getAppliedJobs(userId) {
+        const applications = await this.jobRepository.getAppliedJobs(userId);
+        return applications.filter(app => app.jobId);
+    }
     async changeApplicationStatus(status, userId) {
         const applicant = await this.jobRepository.findCandidateById(userId);
         if (!applicant) {
@@ -90,7 +94,7 @@ let JobService = class JobService {
         if (!updatedCandidate) {
             throw new Error('Failed to update interview schedule');
         }
-        candidate.applicationStatus = 'interviewScheduled';
+        candidate.applicationStatus = 'Interview Scheduled';
         await candidate.save();
         return updatedCandidate;
     }

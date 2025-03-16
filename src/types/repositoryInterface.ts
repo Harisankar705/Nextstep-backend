@@ -61,7 +61,7 @@ export interface IEmployerRepository {
   
     updateVerificationStatus(
       id: string,
-      status: "VERIFIED" | "DENIED"
+      status: "APPROVED" | "DENIED"
     ): Promise<IEmployer|null>;
   }
   export interface IInteractionRepository

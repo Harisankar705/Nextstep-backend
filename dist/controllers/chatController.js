@@ -29,8 +29,9 @@ let ChatController = class ChatController {
             try {
                 const { id } = req.params;
                 const userId = req.user?.userId;
+                console.log('in get chat');
                 const messages = await this.chatService.getChat(id, userId);
-                console.log("MESSAGES", messages);
+                console.log("currentUserId", userId);
                 res.status(statusCode_1.STATUS_CODES.OK).json({ messages, userId });
             }
             catch (error) {
@@ -39,15 +40,11 @@ let ChatController = class ChatController {
         };
         this.getMessages = async (req, res, next) => {
             try {
-                const userId = req.user?.userId;
-                console.log("USERID", userId);
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Unauthorized user" });
-                    return;
-                }
-                const messages = await this.chatService.getMessagesForUser(userId);
+                const currentUserId = req.user?.userId;
+                console.log("USERID", currentUserId);
+                const messages = await this.chatService.getMessagesForUser(currentUserId);
                 console.log("!!!!!!!", messages);
-                res.status(statusCode_1.STATUS_CODES.OK).json({ messages });
+                res.status(statusCode_1.STATUS_CODES.OK).json({ messages, currentUserId });
                 return;
             }
             catch (error) {

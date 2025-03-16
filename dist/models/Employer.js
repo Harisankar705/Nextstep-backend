@@ -48,7 +48,7 @@ const employerSchema = new mongoose_1.Schema({
     documentType: { type: String, enum: ["GST", "PAN", "INCORPORATION", "OTHER"] },
     isVerified: { type: String, enum: ["PENDING", 'APPROVED', 'REJECTED'], default: "PENDING" },
     documentNumber: { type: String },
-    googleId: { type: String, required: true },
+    googleId: { type: String },
     website: { type: String, required: false },
     resetPasswordExpires: { type: Date },
     resetPasswordToken: { type: String },

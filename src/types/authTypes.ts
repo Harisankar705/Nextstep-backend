@@ -91,7 +91,7 @@ export interface IEmployer extends Document {
     role: "employer"
     document:string,
     documentType:"GST"|"PAN"|"INCORPORATION"|"OTHER",
-    isVerified:  "PENDING"|'APPROVED'|'REJECTED'|'VERIFIED',
+    isVerified:  "PENDING"|'APPROVED'|'REJECTED',
     documentNumber:string,
     logo: string,
     website: string,

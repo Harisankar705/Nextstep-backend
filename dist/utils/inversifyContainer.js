@@ -95,7 +95,7 @@ container.bind(types_1.TYPES.EmployerRepository).to(employerRepository_1.Employe
 container.bind(types_1.TYPES.InteractionRepository).to(interactionRepository_1.InteractionRepository);
 container.bind(types_1.TYPES.JobRepository).to(jobRepository_1.JobRepository);
 container.bind(types_1.TYPES.NotificationRepository).to(notificationRepository_1.NotificationRepository);
-container.bind(types_1.TYPES.SocketHandler).to(socketConfig_1.SocketHandler);
+container.bind(types_1.TYPES.SocketHandler).to(socketConfig_1.SocketHandler).inSingletonScope();
 container.bind(types_1.TYPES.EmployerController).to(employerController_1.EmployerController);
 container.bind(types_1.TYPES.InteractionController).to(interactionController_1.InteractionController);
 container.bind(types_1.TYPES.JobController).to(jobController_1.JobController);

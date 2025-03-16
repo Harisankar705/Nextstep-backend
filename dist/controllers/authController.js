@@ -90,14 +90,14 @@ let AuthController = class AuthController {
                 }
                 const { user, accessToken } = await this.authService.authenticateGoogleUser(token, role);
                 const tokenPrefix = role.toLowerCase();
+                const isProduction = process.env.NODE_ENV === 'production';
                 res.cookie(`${tokenPrefix}AccessToken`, accessToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-                    path: "/",
+                    secure: isProduction,
+                    sameSite: isProduction ? 'none' : 'lax',
                     maxAge: 60 * 60 * 1000,
                 });
-                console.log("USER", user);
+                console.log("USER", res.cookie);
                 res.json({ success: true, user });
             }
             catch (error) {
@@ -108,10 +108,6 @@ let AuthController = class AuthController {
             try {
                 const uploadResponse = await (0, formidable_1.handleFileUpload)(req);
                 const userId = req.user?.userId;
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.CREATED).json({ message: "Authentication required" });
-                    return;
-                }
                 const { profilePicture, resumeFile } = uploadResponse.fileNames;
                 const userData = uploadResponse.fields || {};
                 if (!userData.data) {
@@ -229,10 +225,6 @@ let AuthController = class AuthController {
                 if (background)
                     updatedData.background = background[0];
                 const userId = req.user?.userId;
-                if (!userId) {
-                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "User not authenticated" });
-                    return;
-                }
                 const response = await this.authService.editPostService(postId, updatedData, role[0], userId);
                 res.status(statusCode_1.STATUS_CODES.OK).json(response);
             }

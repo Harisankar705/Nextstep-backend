@@ -30,7 +30,7 @@ export class AdminRepository extends BaseRepository<IUser & Document> implements
         }
         return updatedUser;
     }
-    async updateVerificationStatus(id: string, status: "VERIFIED" | "DENIED"):Promise<IEmployer|null> {
+    async updateVerificationStatus(id: string, status: "APPROVED" | "DENIED"):Promise<IEmployer|null> {
         try {
             const employer = await this.employerModel.findById(id)
             const updatedEmployer = await this.employerModel.findByIdAndUpdate(id, { $set: { isVerified: status } }, { new: true })
