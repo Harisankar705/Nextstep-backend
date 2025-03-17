@@ -92,6 +92,8 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
           secure: isProduction, 
           sameSite: isProduction ? 'none' : 'lax',
           maxAge: 60 * 60 * 1000, 
+          path: '/', 
+    signed: true,
         });
         console.log("USER",res.cookie)
         res.json({success:true,user})
