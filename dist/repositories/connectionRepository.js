@@ -52,6 +52,21 @@ class ConnectionRepository extends baseRepository_1.BaseRepository {
             .populate('followerId followingId', 'firstName lastName email profilePicture')
             .exec();
     }
+    async removeRequest(requestId) {
+        const deletedRequest = await this.model.findOneAndDelete({ _id: requestId });
+        return !!deletedRequest;
+    }
+    async removeConnection(followerId, followingId) {
+        const connection = await this.model.findOne({ followerId, followingId });
+        if (!connection) {
+            throw new Error("Connection not found!");
+        }
+        await this.model.deleteOne({ followerId, followingId });
+        const reverseConnection = await this.model.findOne({ followerId: followingId, followingId: followerId });
+        if (reverseConnection) {
+            await this.model.updateOne({ _id: reverseConnection._id }, { $set: { isFollowBack: false, status: authTypes_1.ConnectionStatus.NOTFOLLOWINGBACK } });
+        }
+    }
     async updateConnectionStatus(userId, connectionId, status) {
         const connection = await this.findOne({
             _id: connectionId,

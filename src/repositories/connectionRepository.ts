@@ -48,6 +48,24 @@ export class ConnectionRepository extends BaseRepository<IConnection> implements
             .populate('followerId followingId', 'firstName lastName email profilePicture')
             .exec();
     }
+    async removeRequest(requestId:string): Promise<boolean> {
+        const deletedRequest= await this.model.findOneAndDelete({_id:requestId})
+        return !!deletedRequest
+           
+    }
+    async removeConnection(followerId:string,followingId:string):Promise<void>{
+        const connection=await this.model.findOne({followerId,followingId})
+        if(!connection)
+        {
+            throw new Error("Connection not found!")
+        }
+        await this.model.deleteOne({followerId,followingId})
+        const reverseConnection=await this.model.findOne({followerId:followingId,followingId:followerId})
+        if(reverseConnection)
+        {
+            await this.model.updateOne({_id:reverseConnection._id},{$set:{isFollowBack:false,status:ConnectionStatus.NOTFOLLOWINGBACK}})
+        }
+    }
     async updateConnectionStatus(userId: string, connectionId: string, status: ConnectionStatus): Promise<IConnection | null> {
         const connection = await this.findOne({
             _id: connectionId,

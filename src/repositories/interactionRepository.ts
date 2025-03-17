@@ -17,6 +17,7 @@ async createLike(userId: string, postId: string): Promise<ILike | null> {
     const like = await likeModel.create({ userId, postId });
 
     if (!like) return null;
+    await this.model.findByIdAndUpdate(postId,{$push:{likes:like._id}},{new:true})
 
     return {
         _id: like._id.toString(), 
@@ -26,9 +27,25 @@ async createLike(userId: string, postId: string): Promise<ILike | null> {
     };
 }
 
-    async removeLike(userId: string, postId: string): Promise<ILike | null> {
-        return likeModel.findOneAndDelete({ userId, postId })
-    }
+async removeLike(userId: string, postId: string): Promise<ILike | null> {
+    const like = await likeModel.findOneAndDelete({ userId, postId }).lean();
+
+    if (!like) return null;
+
+    await this.model.findByIdAndUpdate(
+        postId,
+        { $pull: { likes: like._id } },
+        { new: true }
+    );
+
+    return {
+        _id: like._id.toString(), 
+        userId: like.userId.toString(),
+        postId: like.postId.toString(),
+        createdAt: like.createdAt,
+    };
+}
+
     async deletePost( postId: string) {
         const objectId=new mongoose.Types.ObjectId(postId)
         return PostModel.findOneAndDelete({ _id:objectId, })

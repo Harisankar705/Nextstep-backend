@@ -25,6 +25,7 @@ let ConnectionController = class ConnectionController {
         this.connectionService = connectionService;
         this.followUser = async (req, res, next) => {
             try {
+                console.log("IN UNFOLLOW");
                 const followUserDTO = await (0, validateDTO_1.validateDTO)(userDTO_1.FollowUserDTO, req.body);
                 const followerId = req.user?.userId;
                 if (!followerId) {
@@ -33,6 +34,23 @@ let ConnectionController = class ConnectionController {
                 }
                 const connection = await this.connectionService.followUser(followerId, followUserDTO.followingId);
                 res.status(statusCode_1.STATUS_CODES.OK).json({ success: true, data: connection });
+                return;
+            }
+            catch (error) {
+                next(error);
+                return;
+            }
+        };
+        this.unfollow = async (req, res, next) => {
+            try {
+                const followUserDTO = await (0, validateDTO_1.validateDTO)(userDTO_1.FollowUserDTO, req.body);
+                const followerId = req.user?.userId;
+                if (!followerId) {
+                    res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required!" });
+                    return;
+                }
+                const connection = await this.connectionService.followUser(followerId, followUserDTO.followingId);
+                res.status(statusCode_1.STATUS_CODES.OK).json({ success: true, message: "Successfully unfollowed!" });
                 return;
             }
             catch (error) {
@@ -109,7 +127,28 @@ let ConnectionController = class ConnectionController {
             }
             try {
                 const isFollowing = await this.connectionService.checkFollowStatus(currentUser, checkUser);
+                console.log("IS FOLLOWING", isFollowing);
                 res.status(statusCode_1.STATUS_CODES.OK).json({ isFollowing });
+                return;
+            }
+            catch (error) {
+                next(error);
+                return;
+            }
+        };
+        this.removeRequest = async (req, res, next) => {
+            const { requestId } = req.params;
+            if (!requestId) {
+                res.status(statusCode_1.STATUS_CODES.UNAUTHORIZED).json({ message: `${requestId} id is undefined` });
+                return;
+            }
+            try {
+                const deleteRequest = await this.connectionService.deleteRequest(requestId);
+                if (!deleteRequest) {
+                    res.status(statusCode_1.STATUS_CODES.NOT_FOUND).json({ success: false, message: "Request not found" });
+                    return;
+                }
+                res.status(statusCode_1.STATUS_CODES.OK).json({ success: true, message: "Request deleted successfully!" });
                 return;
             }
             catch (error) {

@@ -376,7 +376,9 @@ let AuthController = class AuthController {
         this.getUserPost = async (req, res, next) => {
             try {
                 const authenticatedUserId = req.user?.userId;
+                console.log(authenticatedUserId);
                 const targetUserId = req.query.userId;
+                console.log(targetUserId);
                 if (!authenticatedUserId) {
                     res.status(statusCode_1.STATUS_CODES.BAD_REQUEST).json({ message: "Authorization required" });
                     return;

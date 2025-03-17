@@ -25,7 +25,7 @@ export class InteractionService  {
             if(!post)throw new Error("Post not found!")
             if(!sender)throw new Error("User not found!")
             if(existingLike)
-            {
+            {   
                 await this.interactionRepository.removeLike(userId,postId)
                 return false
             }

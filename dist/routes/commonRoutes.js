@@ -17,11 +17,13 @@ exports.commonRoutes.route('/forgot-password').post(authController.requestPasswo
 exports.commonRoutes.route('/reset-password').post(authController.resetPassword.bind(authController));
 exports.commonRoutes.use(authMiddleware.verifyToken.bind(authMiddleware));
 exports.commonRoutes.route('/followaccount').post(connectionController.followUser.bind(connectionController));
+exports.commonRoutes.route('/unfollowaccount').post(connectionController.unfollow.bind(connectionController));
 exports.commonRoutes.route('/followback').post(connectionController.followBack.bind(connectionController));
 exports.commonRoutes.route('/respond-requests').post(connectionController.respondToRequest.bind(connectionController));
 exports.commonRoutes.route('/connections').get(connectionController.getConnections.bind(connectionController));
 exports.commonRoutes.route('/pendingrequests').get(connectionController.pendingRequests.bind(connectionController));
 exports.commonRoutes.route('/followstatus').get(connectionController.checkFollowStatus.bind(connectionController));
+exports.commonRoutes.route('/rejectrequest/:requestId').delete(connectionController.removeRequest.bind(connectionController));
 exports.commonRoutes.route('/notifications').get(notificationController.getNotification.bind(notificationController));
 exports.commonRoutes.route('/mark-as-read').post(notificationController.markNotificationAsRead.bind(notificationController));
 exports.commonRoutes.route('/mutualconnections').get(connectionController.getMutualConnections.bind(connectionController));

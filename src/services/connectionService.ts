@@ -7,6 +7,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../types/types';
 import UserModel from '../models/User';
 import { SocketHandler } from '../utils/socketConfig';
+import EmployerModel from '../models/Employer';
 @injectable()
 export class ConnectionService implements IConnectionService
     {
@@ -24,7 +25,15 @@ export class ConnectionService implements IConnectionService
             await ConnectionModel.findByIdAndDelete(existingConnection._id);
             return false;
         }
-        const sender=await UserModel.findById(followerId)
+        const [senderUser,senderEmployer]=await Promise.all([
+            UserModel.findById(followerId),
+            EmployerModel.findById(followerId)
+        ])
+        const senderName=senderUser?senderUser.firstName:senderEmployer?.companyName
+        if(!senderName)
+        {
+        throw new Error("User name not found!")
+        }
         await ConnectionModel.create({
             followerId: followerId,
             followingId: followingId,
@@ -34,14 +43,14 @@ export class ConnectionService implements IConnectionService
         const notification=await notificationModel.create({
             sender:followerId,
             recipientId:followingId,
-            content:`${sender?.firstName} send you a connection request!`,
+            content:`${senderName} send you a connection request!`,
             link:`/followrequests`,
             type:"Connection_request",
             read:false,
             createdAt:new Date()
         })
         this.socketHandler.emitNotification(followingId,{
-            content:`${sender?.firstName} send you a connection request!`,
+            content:`${senderName} send you a connection request!`,
             userId:followerId,
             link:'/followrequests'
         })
@@ -72,9 +81,13 @@ export class ConnectionService implements IConnectionService
         {
             throw new Error("no connection exists to follow")
         }
-        // await this.connectionRepository.removeConnection(exisitingConnection._id)
+        await this.connectionRepository.removeConnection(followerId,followingId)
      }
     async getPendingRequest(userId: string): Promise<IConnection[]>{
         return await this.connectionRepository.getPendingRequests(userId)
+     }
+     async deleteRequest(requestId:string):Promise<boolean>{
+        const deletedRequest=await this.connectionRepository.removeRequest(requestId)
+        return deletedRequest
      }
 }

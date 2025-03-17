@@ -371,27 +371,30 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
         next(error);
       }
     };
-    public getUserPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      try {
-        const authenticatedUserId = req.user?.userId;
-        const targetUserId = req.query.userId;
-        if (!authenticatedUserId) {
-          res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Authorization required" });
-          return;
-        }
-        const userIdToFetch = targetUserId ? targetUserId : authenticatedUserId;
-        const posts = await this.authService.getUsersPosts(userIdToFetch);
-        const postsWithLikeStatus = posts.map((post: IPosts) => {
-          const likedByUser = post.likes.some((like:ILike) => {
-            const likeUserId = like.userId ? like.userId.toString() : like.toString();
-            const authUserId = authenticatedUserId ? authenticatedUserId.toString() : String(authenticatedUserId);
-            return likeUserId === authUserId;
+      public getUserPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+          const authenticatedUserId = req.user?.userId;
+          console.log(authenticatedUserId)
+          const targetUserId = req.query.userId;
+          console.log(targetUserId)
+
+          if (!authenticatedUserId) {
+            res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Authorization required" });
+            return;
+          }
+          const userIdToFetch = targetUserId ? targetUserId : authenticatedUserId;
+          const posts = await this.authService.getUsersPosts(userIdToFetch);
+          const postsWithLikeStatus = posts.map((post: IPosts) => {
+            const likedByUser = post.likes.some((like:ILike) => {
+              const likeUserId = like.userId ? like.userId.toString() : like.toString();
+              const authUserId = authenticatedUserId ? authenticatedUserId.toString() : String(authenticatedUserId);
+              return likeUserId === authUserId;
+            });
+            return { ...post, likedByUser };
           });
-          return { ...post, likedByUser };
-        });
-        res.status(STATUS_CODES.OK).json(postsWithLikeStatus);
-      } catch (error) {
-        next(error);
-      }
-    };
+          res.status(STATUS_CODES.OK).json(postsWithLikeStatus);
+        } catch (error) {
+          next(error);
+        }
+      };
   }

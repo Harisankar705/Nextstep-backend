@@ -24,6 +24,7 @@ const inversify_1 = require("inversify");
 const types_1 = require("../types/types");
 const User_1 = __importDefault(require("../models/User"));
 const socketConfig_1 = require("../utils/socketConfig");
+const Employer_1 = __importDefault(require("../models/Employer"));
 let ConnectionService = class ConnectionService {
     constructor(connectionRepository, socketHandler) {
         this.connectionRepository = connectionRepository;
@@ -38,7 +39,14 @@ let ConnectionService = class ConnectionService {
             await connection_1.default.findByIdAndDelete(existingConnection._id);
             return false;
         }
-        const sender = await User_1.default.findById(followerId);
+        const [senderUser, senderEmployer] = await Promise.all([
+            User_1.default.findById(followerId),
+            Employer_1.default.findById(followerId)
+        ]);
+        const senderName = senderUser ? senderUser.firstName : senderEmployer?.companyName;
+        if (!senderName) {
+            throw new Error("User name not found!");
+        }
         await connection_1.default.create({
             followerId: followerId,
             followingId: followingId,
@@ -48,14 +56,14 @@ let ConnectionService = class ConnectionService {
         const notification = await notification_1.default.create({
             sender: followerId,
             recipientId: followingId,
-            content: `${sender?.firstName} send you a connection request!`,
+            content: `${senderName} send you a connection request!`,
             link: `/followrequests`,
             type: "Connection_request",
             read: false,
             createdAt: new Date()
         });
         this.socketHandler.emitNotification(followingId, {
-            content: `${sender?.firstName} send you a connection request!`,
+            content: `${senderName} send you a connection request!`,
             userId: followerId,
             link: '/followrequests'
         });
@@ -82,10 +90,14 @@ let ConnectionService = class ConnectionService {
         if (!exisitingConnection) {
             throw new Error("no connection exists to follow");
         }
-        // await this.connectionRepository.removeConnection(exisitingConnection._id)
+        await this.connectionRepository.removeConnection(followerId, followingId);
     }
     async getPendingRequest(userId) {
         return await this.connectionRepository.getPendingRequests(userId);
+    }
+    async deleteRequest(requestId) {
+        const deletedRequest = await this.connectionRepository.removeRequest(requestId);
+        return deletedRequest;
     }
 };
 exports.ConnectionService = ConnectionService;

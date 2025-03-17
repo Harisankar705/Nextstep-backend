@@ -20,6 +20,7 @@ class InteractionRepository extends baseRepository_1.BaseRepository {
         const like = await like_1.likeModel.create({ userId, postId });
         if (!like)
             return null;
+        await this.model.findByIdAndUpdate(postId, { $push: { likes: like._id } }, { new: true });
         return {
             _id: like._id.toString(),
             userId: like.userId.toString(),
@@ -28,7 +29,16 @@ class InteractionRepository extends baseRepository_1.BaseRepository {
         };
     }
     async removeLike(userId, postId) {
-        return like_1.likeModel.findOneAndDelete({ userId, postId });
+        const like = await like_1.likeModel.findOneAndDelete({ userId, postId }).lean();
+        if (!like)
+            return null;
+        await this.model.findByIdAndUpdate(postId, { $pull: { likes: like._id } }, { new: true });
+        return {
+            _id: like._id.toString(),
+            userId: like.userId.toString(),
+            postId: like.postId.toString(),
+            createdAt: like.createdAt,
+        };
     }
     async deletePost(postId) {
         const objectId = new mongoose_1.default.Types.ObjectId(postId);

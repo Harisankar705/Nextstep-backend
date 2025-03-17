@@ -11,6 +11,7 @@ export class ConnectionController implements IConnectionController {
     constructor(@inject(TYPES.ConnectionService)private connectionService:ConnectionService) {}
     public followUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
+            console.log("IN UNFOLLOW")
             const followUserDTO=await validateDTO(FollowUserDTO,req.body)
             const followerId = req.user?.userId;
             if (!followerId ) {
@@ -19,6 +20,22 @@ export class ConnectionController implements IConnectionController {
             }
             const connection = await this.connectionService.followUser(followerId, followUserDTO.followingId);
             res.status(STATUS_CODES.OK).json({ success: true, data: connection });
+            return; 
+        } catch (error) {
+            next(error); 
+            return; 
+        }
+    };
+    public unfollow = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const followUserDTO=await validateDTO(FollowUserDTO,req.body)
+            const followerId = req.user?.userId;
+            if (!followerId ) {
+                 res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Authentication required!" });
+                 return
+            }
+            const connection = await this.connectionService.followUser(followerId, followUserDTO.followingId);
+            res.status(STATUS_CODES.OK).json({ success: true, message:"Successfully unfollowed!" });
             return; 
         } catch (error) {
             next(error); 
@@ -94,8 +111,29 @@ export class ConnectionController implements IConnectionController {
         }
         try {
             const isFollowing = await this.connectionService.checkFollowStatus(currentUser, checkUser);
+            console.log("IS FOLLOWING",isFollowing)
             res.status(STATUS_CODES.OK).json({ isFollowing });
             return;
+        } catch (error) {
+            next(error);
+            return;
+        }
+    };
+    public removeRequest = async (req: Request, res: Response, next: NextFunction) => {
+        const {requestId}=req.params
+        if (!requestId ) {
+             res.status(STATUS_CODES.UNAUTHORIZED).json({ message: `${requestId} id is undefined` });
+             return
+        }
+        try {
+            const deleteRequest = await this.connectionService.deleteRequest(requestId);
+            if(!deleteRequest)
+            {
+                res.status(STATUS_CODES.NOT_FOUND).json({success:false,message:"Request not found"})
+                return
+            }
+            res.status(STATUS_CODES.OK).json({success:true,message:"Request deleted successfully!"})
+            return
         } catch (error) {
             next(error);
             return;
