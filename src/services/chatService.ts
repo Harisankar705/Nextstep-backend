@@ -37,7 +37,7 @@ export class ChatService implements IChatService {
         if (!sender || !receiverId || !content) {
             throw new Error("Sender, receiverId, and content are required!");
         }
-        let fileDataToSave = null;
+        let fileDataToSave: { name: string; type: string; url: string } | null = null;
         if (file) {
             try {
                 const uniqueFileName = `${uuidv4()}-${file.name}`;

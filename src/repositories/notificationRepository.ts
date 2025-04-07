@@ -33,8 +33,12 @@ export class NotificationRepository extends BaseRepository<INotification> implem
             const formattedNotifications: NotificationData[] = await Promise.all(
                 notifications.map(async (notification) => {
                     let senderId = "";
-                    let senderInfo = null;
-    
+                    
+                    let senderInfo:
+                    | { companyName: string; logo: string }
+                    | { firstName: string; secondName: string; profilePicture: string }
+                    | null = null;
+                        
                     if (notification.senderModel === "Employer") {
                         const sender = await EmployerModel.findById(notification.sender).select("companyName logo");
                         senderId = sender?._id.toString() || "";
@@ -42,8 +46,14 @@ export class NotificationRepository extends BaseRepository<INotification> implem
                     } else {
                         const sender = await UserModel.findById(notification.sender).select("profilePicture firstName secondName");
                         senderId = sender?._id.toString() || "";
-                        senderInfo = sender ? { firstName: sender.firstName, secondName: sender.secondName, profilePicture: sender.profilePicture } : null;
-                    }
+                        senderInfo = sender
+                        ? {
+                            firstName: sender.firstName ?? "",
+                            secondName: sender.secondName ?? "",
+                            profilePicture: sender.profilePicture ?? ""
+                          }
+                        : null;
+                                          }
     
                     return {
                         _id:notification._id instanceof Object? notification._id.toString():(notification._id as string),
