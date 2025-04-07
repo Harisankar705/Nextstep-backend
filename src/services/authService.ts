@@ -193,8 +193,12 @@ export class AuthService implements IAuthService {
             process.env.JWT_SECRET!,
             { expiresIn: "7d" }
         );
+        const refreshToken=jwt.sign({userId:user._id,role},
+            process.env.JWT_REFRESH_SECRET||process.env.JWT_SECRET!,
+            {expiresIn:'7d'}
+        )
     
-        return { user, accessToken };
+        return { user, accessToken,refreshToken};
     }
     
     async resetPassword(password: string, token: string, role: string) {

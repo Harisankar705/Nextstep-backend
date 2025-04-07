@@ -22,7 +22,7 @@ export interface IAuthService {
     updateUser(userId: string, userData: Partial<IUser>, profilePicturePath?: string, resume?: string): Promise<IUser | null>;
     createPostService(userId: string, postData: object, role: string): Promise<IPosts>;
     requestPasswordReset(email:string,role:string):Promise<void>
-    authenticateGoogleUser(token: string, role: string): Promise<{ user: IUser | IEmployer; accessToken: string }>;
+    authenticateGoogleUser(token: string, role: string): Promise<{ user: IUser | IEmployer; accessToken: string ,refreshToken:string}>;
     resetPassword(password:string,token:string,role:string):Promise<void>
     editPostService(postId: string, postData: object, role: string,userId:string): Promise<IPosts>;
     searchService(query: string): Promise<{users:IUser[];posts:IPosts[],employers:IEmployer[]}>;

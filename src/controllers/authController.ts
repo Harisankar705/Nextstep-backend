@@ -83,7 +83,7 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
             res.status(401).json({success:false,message:"Invalid google token!"})
             return
           }
-          const {user,accessToken}=await this.authService.authenticateGoogleUser(token,role)
+          const {user,accessToken,refreshToken}=await this.authService.authenticateGoogleUser(token,role)
           const tokenPrefix=role.toLowerCase()
           const isProduction = process.env.NODE_ENV === 'production';
 
@@ -91,9 +91,16 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
             httpOnly: true,
             secure: isProduction, 
             sameSite: isProduction ? 'none' : 'lax',
+            path:'/',
             maxAge: 60 * 60 * 1000, 
           });
-          console.log("USER",res.cookie)
+          res.cookie(`${tokenPrefix}RefreshToken`, accessToken, {
+            httpOnly: true,
+            secure: isProduction, 
+            sameSite: isProduction ? 'none' : 'lax',
+            path:'/',
+            maxAge: 7*24*60*60*1000 , 
+          });
           res.json({success:true,user})
         } catch (error) {
           next(error)
