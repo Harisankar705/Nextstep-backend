@@ -52,7 +52,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
+    "@types/express": "^5.0.1",
     "@types/fs-extra": "^11.0.4",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.2",
