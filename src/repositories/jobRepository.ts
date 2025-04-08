@@ -197,7 +197,7 @@ Team ${employer.companyName}`;
     const newApplicant = new ApplicantModel({
       jobId,
       userId,
-      applicationStatus: "pending",
+      applicationStatus: "Pending",
       appliedAt: new Date(),
     });
     user.jobApplicantionCount += 1;
