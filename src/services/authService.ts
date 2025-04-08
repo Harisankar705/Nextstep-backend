@@ -190,7 +190,7 @@ export class AuthService implements IAuthService {
     
         const accessToken = jwt.sign(
             { userId: user._id, role }, 
-            process.env.JWT_SECRET!,
+            process.env.ACCESS_TOKEN!,
             { expiresIn: "7d" }
         );
         const refreshToken=jwt.sign({userId:user._id,role},
