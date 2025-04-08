@@ -94,7 +94,7 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
             path:'/',
             maxAge: 60 * 60 * 1000, 
           });
-          res.cookie(`${tokenPrefix}RefreshToken`, accessToken, {
+          res.cookie(`${tokenPrefix}RefreshToken`, refreshToken, {
             httpOnly: true,
             secure: isProduction, 
             sameSite: isProduction ? 'none' : 'lax',
@@ -102,6 +102,7 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
             maxAge: 7*24*60*60*1000 , 
           });
           res.json({success:true,user})
+          console.log({ accessToken, refreshToken })
         } catch (error) {
           next(error)
         }
