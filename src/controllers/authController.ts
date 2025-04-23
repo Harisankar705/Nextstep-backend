@@ -104,8 +104,8 @@ const client=new OAuth2Client(process.env.AUTH_GOOGLE_ID)
           res.json({success:true,user})
           console.log({ accessToken, refreshToken })
         } catch (error) {
-          next(error)
-        }
+          
+          
       }
     public candidateDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
